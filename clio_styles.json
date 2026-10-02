@@ -1,0 +1,170 @@
+{
+  "photo_35mm": {
+    "id": "photo_35mm",
+    "name": "35mm Photography",
+    "category": "Photography",
+    "display": "📸 35mm Photography (Kodak Realism)",
+    "prompt": "A classic film-photography style built on natural grain structure inherent to the smaller film format, a slightly compressed yet intimate depth-of-field character distinct from larger formats, honest, unmanipulated tonal rendering shaped by the chemistry of the film stock itself, unhurried, documentary-adjacent framing suited to spontaneous, handheld capture, and a timeless, tactile authenticity rooted in decades of photographic tradition. Influenced by: 35mm film photography tradition, photojournalism practice, Henri Cartier-Bresson candid-capture method, analog darkroom-development technique."
+  },
+  "photo_surveillance": {
+    "id": "photo_surveillance",
+    "name": "Surveillance Camera Photo",
+    "category": "Photography",
+    "display": "📸 Surveillance Camera Photo (CCTV Mystery)",
+    "prompt": "A detached, utilitarian photographic style built on flat, unflattering illumination typical of fixed automated capture rather than deliberate lighting design, a grainy, low-resolution degradation inherent to compressed continuous recording, a wide, slightly distorted angle characteristic of fixed elevated positioning, a clinical, indifferent framing that feels observed rather than composed, and a cold, detached authenticity that carries an unmistakably impersonal, institutional quality. Influenced by: closed-circuit surveillance-camera technique, low-resolution CCTV footage aesthetic, fixed-angle security-camera practice, found-footage documentary method."
+  },
+  "photo_wes_anderson": {
+    "id": "photo_wes_anderson",
+    "name": "Wes Anderson Photography",
+    "category": "Photography",
+    "display": "📸 Wes Anderson Photography (Pastel Symmetry)",
+    "prompt": "A meticulously symmetrical photographic style built on precise, centered compositional balance where every element is deliberately arranged within a controlled geometric frame, flat, evenly diffused lighting that minimizes dramatic shadow in favor of clean, storybook clarity, a deadpan, static stillness carried through careful, unhurried framing, a restrained, deliberate formality where visual order itself becomes the mood, and a whimsical, meticulously curated precision that feels theatrical yet perfectly controlled. Influenced by: Wes Anderson cinematography tradition, symmetrical composition technique, deadpan visual-comedy framing practice, meticulous production-design photography."
+  },
+  "render_unreal": {
+    "id": "render_unreal",
+    "name": "Unreal Engine",
+    "category": "3D Render",
+    "display": "🧊 Unreal Engine 5 (Raytraced Lumen)",
+    "prompt": "A dimensionally precise real-time rendering style built on smooth, volumetric modeling calculated through simulated physical light and geometry, meticulously computed illumination with soft ambient occlusion settling naturally into every contour, polished specular response giving forms convincing physical depth and weight, confident dynamic reflection and atmospheric scattering rendered in real time, and a technically precise, computer-generated intensity built for cinematic, game-ready visual fidelity. Influenced by: Unreal Engine 5 real-time rendering technique, physically based rendering (PBR) method, contemporary game-cinematic rendering practice, real-time ray-tracing technology."
+  },
+  "render_spiderverse": {
+    "id": "render_spiderverse",
+    "name": "Spider-Verse Style",
+    "category": "3D Render",
+    "display": "🧊 Spider-Verse Style (Halftone Kinetic)",
+    "prompt": "A kinetic mixed-media animation-illustration style built on visible halftone dot patterning and offset-print texture layered directly into character rendering, deliberate chromatic-fringe misregistration echoing vintage comic-printing imperfection, bold graphic linework,  animation intensity that feels handmade, glitchy, and alive. Influenced by: Sony Pictures Animation, Kris Anka, halftone comic-printing technique, mixed-media collage-animation practice."
+  },
+  "render_coraline": {
+    "id": "render_coraline",
+    "name": "Coraline Stop-Motion Style",
+    "category": "3D Render",
+    "display": "🧊 Coraline Stop-Motion (Tactile Macro)",
+    "prompt": "A meticulously crafted stop-motion illustration style built on precise, doll-like proportion carrying an uncanny, porcelain-smooth finish, subtle handcrafted imperfection visible in gentle asymmetry rather than digital uniformity, moody, controlled lighting establishing a quietly unsettling, dreamlike atmosphere, meticulous attention to fine detail rendered with obsessive miniature-scale patience, and a whimsical yet faintly eerie handcrafted intensity that feels intimate, meticulous, and gently uncanny. Influenced by: Henry Selick, LAIKA Studios stop-motion tradition, meticulous puppet-fabrication technique, gothic-whimsical animation practice."
+  },
+  "design_butcher_billy": {
+    "id": "design_butcher_billy",
+    "name": "Butcher Billy Style",
+    "category": "Design",
+    "display": "🎨 Butcher Billy Style (Punk Pop Halftone)",
+    "prompt": "A bold, graphic retro-pop illustration style built on flat, punchy color-block construction separated by crisp confident outline, a deliberate mash-up sensibility blending mid-century advertising polish with pop-culture iconography, sharp geometric simplification replacing painterly nuance entirely, confident, graphic silhouette design calibrated for instant recognizability, and a witty, nostalgic commercial-art punch that feels both retro and unmistakably contemporary. Influenced by: Butcher Billy, retro-pop graphic-design tradition, mid-century advertising illustration technique, pop-culture mash-up illustration practice."
+  },
+  "design_lego_hybrid": {
+    "id": "design_lego_hybrid",
+    "name": "LEGO Minifigure & Set Style",
+    "category": "Design",
+    "display": "🎨 LEGO Minifigure & Set Style (Studs & Plastic)",
+    "prompt": "A blocky, modular LEGO plastic construction style where any characters or living subjects are rendered as classic LEGO Minifigures with cylindrical joint anatomy, glossy smooth plastic finish, and printed facial expressions, while all scenery, architecture, liquids, and environmental objects are built entirely from interlocking cylindrical stud-and-brick modular construction pieces. Clean graphic separation between individually distinguishable brick components, macro tilt-shift toy depth of field, authentic plastic injection molds, and cheerful systematized toy design precision."
+  },
+  "design_minecraft": {
+    "id": "design_minecraft",
+    "name": "Minecraft Style",
+    "category": "Design",
+    "display": "🎨 Minecraft Style (Voxel Grid Physics)",
+    "prompt": "A blocky, voxel-constrained illustration style built on hard-edged cubic geometry standing in for all organic and structural form, a deliberately low-resolution texture logic that reduces surface detail to flat, pixelated approximation, rigid right-angle construction replacing curved or naturalistic silhouette entirely, a charmingly crude, procedurally consistent simplicity carried through uniform block-unit scale, and a nostalgic, technically constrained charm rooted in early sandbox-game visual limitation. Influenced by: voxel-based game-design tradition, Markus Persson procedural-generation practice, low-poly/blocky 3D-rendering technique, sandbox-game visual-design method."
+  },
+  "comic_franco_belgian": {
+    "id": "comic_franco_belgian",
+    "name": "Franco-Belgian Ultradetailed Comics",
+    "category": "Comics",
+    "display": "💥 Franco-Belgian Ultradetailed (Ligne Claire)",
+    "prompt": "A meticulously rendered bande dessinée illustration style built on dense, obsessively fine linework and layered crosshatching that constructs every texture with architectural patience, richly detailed surface rendering across fabric, skin, and structure that rewards close inspection, a measured, cinematic pacing carried through carefully composed, deliberate framing, subtle atmospheric depth achieved through fine tonal gradation rather than bold contrast, and a sophisticated, painstakingly crafted graphic-novel gravitas. Influenced by: Jean \"Mœbius\" Giraud, François Schuiten, Franco-Belgian bande dessinée tradition, ligne claire and hatching technique."
+  },
+  "comic_hellboy": {
+    "id": "comic_hellboy",
+    "name": "Hellboy Style",
+    "category": "Comics",
+    "display": "💥 Hellboy Style (Mignola Monolithic Shadow)",
+    "prompt": "A gritty, high-contrast comic-illustration style built on bold, confident inking with heavy spotted blacks that carve dramatic graphic shadow across every form, chunky, weighty linework rendering musculature and stonework with sculptural bluntness, muted, moody washes applied loosely beneath stark ink structure, a folkloric, pulp-horror gravitas charged with brooding atmosphere, and a bold, hand-inked graphic-novel intensity that feels ancient, weathered, and unmistakably hand-crafted. Influenced by: Mike Mignola, noir-inspired comic-inking technique, folk-horror illustration tradition, spotted-black ink-rendering method."
+  },
+  "comic_vintage": {
+    "id": "comic_vintage",
+    "name": "Vintage Comics",
+    "category": "Comics",
+    "display": "💥 Vintage Comics (1950s Newsprint CMYK)",
+    "prompt": "A bold, graphic illustration style built on confident inked linework holding clearly defined, dynamic proportions, coarse halftone-dot patterning standing in for smooth shading, a slightly imperfect, offset-print texture giving the whole composition a worn, mass-produced charm, dynamic, energetic posing designed for instant visual impact within a small panel, and a nostalgic, unmistakably golden-age graphic-storytelling sincerity that feels handcrafted, punchy, and timeworn. Influenced by: Golden Age American comic-illustration tradition, halftone offset-printing technique, mid-century pulp-comic practice, classic newsstand comic-book method."
+  },
+  "digital_xray": {
+    "id": "digital_xray",
+    "name": "X-Ray Style",
+    "category": "Digital Painting",
+    "display": "🖌️ X-Ray Style (Internal Skeletal Glow)",
+    "prompt": "A translucent anatomical rendering style built on layered internal visibility beneath an otherwise solid exterior, soft luminous glow radiating from within rather than reflecting off the outer plane, precise structural linework revealing underlying form with clinical exactness, a stark, high-contrast tonal separation between dense and translucent areas, and an eerie, revelatory clarity that treats the body as both solid and see-through simultaneously. Influenced by: medical radiography technique, scientific illustration tradition, digital x-ray rendering effects, anatomical cross-section illustration."
+  },
+  "digital_blacklight": {
+    "id": "digital_blacklight",
+    "name": "Blacklight Style",
+    "category": "Digital Painting",
+    "display": "🖌️ Blacklight Style (Fluorescent Bioluminescence)",
+    "prompt": "A luminous glow-reactive illustration style built on stark contrast between an inert, absorbed base surface and intensely radiant fluorescing accents, an otherworldly internal luminosity that appears to emit rather than reflect, sharp separation between glowing and non-glowing regions with almost no transitional gradation, a surreal, electric intensity charged with nightclub-adjacent energy, and a hypnotic, ultraviolet-reactive vibrancy that feels alive in the dark. Influenced by: blacklight poster art tradition, fluorescent pigment illustration technique, psychedelic 1960s-70s poster design, UV-reactive body-art photography."
+  },
+  "digital_gris_grimly": {
+    "id": "digital_gris_grimly",
+    "name": "Gris Grimly-Inspired Hyperrealism",
+    "category": "Digital Painting",
+    "display": "🖌️ Gris Grimly Inspired (Dark Macabre Storybook)",
+    "prompt": "A hyperrealistic gothic-macabre illustration style built on gnarled, spindly proportion rendered with obsessive photographic precision rather than loose sketch energy, meticulously detailed texture giving twisted, elongated form an uncanny, tangible weight, dramatic isolated lighting carving stark contrast between richly rendered detail and enveloping shadow, a hushed, eerie theatricality heightened rather than softened by the hyperreal finish, and a darkly whimsical yet unsettling intensity that feels both storybook and disturbingly convincing. Influenced by: Gris Grimly, hyperrealist digital-painting technique, gothic macabre-illustration tradition, dark-fantasy character-design practice."
+  },
+  "cover_gta_v": {
+    "id": "cover_gta_v",
+    "name": "GTA V Polished Cover Art",
+    "category": "Cover Art",
+    "display": "🖼️ GTA V Polished Cover Art (Punchy Cel-Shading)",
+    "prompt": "A bold, stylized illustration style built on crisp airbrushed rendering with confident graphic outline separating the subject into clean, poster-ready silhouette, saturated high-contrast lighting that punches the subject  forward against a dynamic collage-style arrangement, exaggerated attitude-driven posing charged with kinetic swagger, meticulous costume and prop detail rendered with commercial illustration polish, and a slick, larger-than-life pop-culture cover intensity built for instant, iconic recognition. Influenced by: Stephen Bliss, Rockstar Games box-art tradition, contemporary commercial illustration practice, pop-culture collage cover-design method."
+  },
+  "cover_interplay_shadow": {
+    "id": "cover_interplay_shadow",
+    "name": "Interplay of Shadow and Light",
+    "category": "Cover Art",
+    "display": "🖼️ Interplay of Shadow and Light (Dramatic Focus)",
+    "prompt": "A dramatically balanced illustration style built entirely on the tension between two forces, with sharply divided planes of illumination and darkness meeting along crisp, deliberate boundaries rather than gradual transition, form constructed almost sculpturally through the push and pull of what is revealed versus what is withheld, a rhythmic alternation of exposed and concealed detail that guides the eye across the composition like a visual heartbeat, a quiet, contemplative gravity carried through the deliberate restraint of full illumination, and a masterful, chiaroscuro-driven intensity where absence carries as much weight as presence. Influenced by: Caravaggio, chiaroscuro painting tradition, dramatic studio-lighting technique, classical tenebrist illustration practice."
+  },
+  "cover_glossy": {
+    "id": "cover_glossy",
+    "name": "Glossy Semi-Realistic",
+    "category": "Cover Art",
+    "display": "🖼️ Glossy Semi-Realistic (Liquid & Tech Sheen)",
+    "prompt": "A striking digital-illustration style built on confident, clean digital-gradient-linework combined with extremely smooth airbrushed shading, very glassy specular highlights for immediate emotional focus, meticulous attention to soft luminous rendering contrasted against crisp, decisive contour, a hushed, moody intimacy carried through close, direct framing, and a polished, contemporary illustration intensity that feels both delicate and graphically sharp. Influenced by: Sakimichan,  Ilya Kuvshinov, WLOP, semi-realistic anime rendering technique, contemporary gacha-adjacent illustration practice.  ray-tracing-adjacent aesthetics,"
+  },
+  "paint_tenebrism": {
+    "id": "paint_tenebrism",
+    "name": "Tenebrism",
+    "category": "Painting",
+    "display": "🏛️ Tenebrism (Caravaggio Pitch-Black Spotlight)",
+    "prompt": "A dramatically shadowed painting style built on an extreme, exaggerated contrast between deep, engulfing darkness and a single sharp pool of illumination, form emerging abruptly from near-total shadow rather than through gradual tonal transition, meticulous, controlled brushwork concentrated entirely within the illuminated passages while shadow remains deliberately unresolved, a theatrical, almost violent immediacy carried through the stark light-dark confrontation, and a haunting, intensely focused gravitas rooted in the most extreme tradition of chiaroscuro painting. Influenced by: Caravaggio, tenebrist painting tradition, Baroque chiaroscuro technique, dramatic single-source oil-painting method."
+  },
+  "paint_hyperrealism": {
+    "id": "paint_hyperrealism",
+    "name": "Hyperrealism",
+    "category": "Painting",
+    "display": "🏛️ Hyperrealism (Microscopic Texture Shock)",
+    "prompt": "A meticulously rendered painting style built on obsessive photographic precision that reproduces every subtle tonal shift and textural nuance with painstaking accuracy, dramatic, controlled lighting establishing convincing sculptural dimensionality throughout, countless layered passes building convincing depth and translucency beneath the outermost extent, a disciplined, patient rendering approach that prioritizes photographic conviction over visible brushwork, and a technically virtuosic intensity that treats absolute fidelity itself as the compositional achievement. Influenced by: Chuck Close, hyperrealist oil-painting tradition, photorealism painting technique, contemporary hyperreal-portraiture practice."
+  },
+  "paint_chiaroscuro": {
+    "id": "paint_chiaroscuro",
+    "name": "Chiaroscuro",
+    "category": "Painting",
+    "display": "🏛️ Chiaroscuro (Golden Master Oil Glazes)",
+    "prompt": "A dramatically balanced painting style built on strong contrast between illuminated and shadowed passages that sculpts form with three-dimensional conviction, a single dominant light source establishing clear hierarchy between what is revealed and what recedes into darkness, meticulous, gradual tonal transition bridging highlight and shadow rather than abrupt separation, a controlled, deliberate modeling that gives every plane convincing volumetric weight, and a masterful, timeless painterly gravitas rooted in centuries of classical oil-painting tradition. Influenced by: Caravaggio, Rembrandt van Rijn, Baroque tonal-painting technique, classical chiaroscuro method."
+  },
+  "toon_rick_and_morty": {
+    "id": "toon_rick_and_morty",
+    "name": "Rick and Morty Style",
+    "category": "Cartoon",
+    "display": "📺 Rick and Morty Style (Chaotic Multiverse)",
+    "prompt": "A loose, deliberately imperfect cartoon illustration style built on wobbly, slightly rubbery linework that embraces visible inconsistency over polished precision, flat, simple fill with minimal rendering complexity, exaggerated elastic proportions carrying manic, unpredictable expressiveness, a scrappy, DIY animation looseness that favors comedic energy over visual refinement, and an irreverent, chaotic indie-animation charm that feels intentionally rough around the edges. Influenced by: Justin Roiland, adult-swim animation tradition, flat cel-shading technique, indie sitcom-cartoon character design."
+  },
+  "toon_gravity_falls": {
+    "id": "toon_gravity_falls",
+    "name": "Gravity Falls Style",
+    "category": "Cartoon",
+    "display": "📺 Gravity Falls Style (Supernatural Mystery)",
+    "prompt": "A bold, flat cartoon illustration style built on confident, evenly weighted outline holding simplified, slightly angular proportions, bright, evenly applied flat color with minimal shading beyond basic form-defining contact shadow, a quirky, endearing character-design language balancing comedic exaggeration with grounded charm, cheerful yet mysterious compositional tone favoring instant readability, and a nostalgic, small-town animated warmth that feels playful, whimsical, and quietly adventurous. Influenced by: Alex Hirsch, Disney Television Animation tradition, flat-color cartoon technique, contemporary mystery-adventure cartoon practice."
+  },
+  "toon_bruce_timm": {
+    "id": "toon_bruce_timm",
+    "name": "Bruce Timm Noir",
+    "category": "Cartoon",
+    "display": "📺 Bruce Timm Noir (90s Deco Shadows)",
+    "prompt": "stylish noir-inspired illustration aesthetics characterized by confident silhouette design, elegant simplification, clean geometric construction, dramatic shadow composition, strong graphic readability, and cinematic visual storytelling, blending classic animation principles with crime-fiction atmosphere through disciplined linework, refined staging, and timeless visual sophistication, reminiscent of Bruce Timm and Darwyn Cooke, inspired by Batman: The Animated Series and DC: The New Frontier."
+  }
+}

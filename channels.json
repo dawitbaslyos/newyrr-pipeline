@@ -1,0 +1,134 @@
+{
+  "active_channel": {
+    "id": "uc_1790910376",
+    "name": "InternetChill",
+    "handle": "@internetChill",
+    "subscribers": "0",
+    "videos": 0,
+    "avatar_url": "https://yt3.googleusercontent.com/z4FeD5Mv0WE2vuFOVrY0za3l-ojDwSe00i-EUVqUFQiXZ83iGycGQxptsd5hklOhUoPCfbCKUA4=s900-c-k-c0x00ffffff-no-rj",
+    "top_video": "1.5K",
+    "niche": "Shorts"
+  },
+  "user_channels": [
+    {
+      "id": "uc_1790834721",
+      "name": "Newyr",
+      "handle": "@Newyrr",
+      "subscribers": "8",
+      "videos": 3,
+      "avatar_url": "https://yt3.googleusercontent.com/fxbHrw7VvwAnMS7zjaemboLgEbOuWXa99MeUcYzdj5LPp2FHd4r6skSqf8cN-lFbeZNU-XjLig=s900-c-k-c0x00ffffff-no-rj",
+      "top_video": "1.5K",
+      "niche": "Shorts"
+    },
+    {
+      "id": "uc_1790910184",
+      "name": "MainQuest",
+      "handle": "@MainQuestCC",
+      "subscribers": "7",
+      "videos": 3,
+      "avatar_url": "https://yt3.googleusercontent.com/68W-HbYgayCMsJmGeADVCv4KvNzvMkKKdFUvOTzE92vk5PEd_yO_s20Zsx4lrzBKZf7rNeMVCg=s900-c-k-c0x00ffffff-no-rj",
+      "top_video": "1.5K",
+      "niche": "Shorts"
+    },
+    {
+      "id": "uc_1790910376",
+      "name": "InternetChill",
+      "handle": "@internetChill",
+      "subscribers": "0",
+      "videos": 0,
+      "avatar_url": "https://yt3.googleusercontent.com/z4FeD5Mv0WE2vuFOVrY0za3l-ojDwSe00i-EUVqUFQiXZ83iGycGQxptsd5hklOhUoPCfbCKUA4=s900-c-k-c0x00ffffff-no-rj",
+      "top_video": "1.5K",
+      "niche": "Shorts"
+    }
+  ],
+  "tracked_channels": [
+    {
+      "handle": "@zackdfilms",
+      "name": "zackdfilms",
+      "focus": "Tactile Mise-en-sc\u00e8ne & How Things Work"
+    },
+    {
+      "handle": "@Veritasium",
+      "name": "Veritasium",
+      "focus": "Counter-intuitive science & physics"
+    },
+    {
+      "handle": "@TheActionLab",
+      "name": "The Action Lab",
+      "focus": "Hands-on material science & weird substances"
+    },
+    {
+      "handle": "@Kurzgesagt",
+      "name": "Kurzgesagt",
+      "focus": "Microscopic biology & existential questions"
+    }
+  ],
+  "tracked_by_channel": {
+    "@mainquestcc": [
+      {
+        "handle": "@TheGamer",
+        "name": "TheGamer",
+        "focus": "Secret game details & easter eggs"
+      },
+      {
+        "handle": "@VaryingGamer",
+        "name": "Varying Gaming",
+        "focus": "Gaming physics & what-if experiments"
+      },
+      {
+        "handle": "@GameTheorists",
+        "name": "The Game Theorists",
+        "focus": "Hidden gaming lore & mysteries"
+      },
+      {
+        "handle": "@Oddheader",
+        "name": "oddheader",
+        "focus": "Unseen gaming glitches & mystery rooms"
+      }
+    ],
+    "@internetchill": [
+      {
+        "handle": "@Fireship",
+        "name": "Fireship",
+        "focus": "High-velocity tech code & AI news"
+      },
+      {
+        "handle": "@ColdFusion",
+        "name": "ColdFusion",
+        "focus": "Cutting edge technology & engineering breakthroughs"
+      },
+      {
+        "handle": "@cleoabram",
+        "name": "Cleo Abram",
+        "focus": "Huge Ideas & Optimistic Tech"
+      },
+      {
+        "handle": "@TheVerge",
+        "name": "The Verge",
+        "focus": "Silicon, gadgets, and tech culture"
+      }
+    ],
+    "@newyrr": [
+      {
+        "handle": "@zackdfilms",
+        "name": "zackdfilms",
+        "focus": "Tactile Mise-en-sc\u00e8ne & How Things Work"
+      },
+      {
+        "handle": "@Veritasium",
+        "name": "Veritasium",
+        "focus": "Counter-intuitive science & physics"
+      },
+      {
+        "handle": "@TheActionLab",
+        "name": "The Action Lab",
+        "focus": "Hands-on material science & weird substances"
+      },
+      {
+        "handle": "@Kurzgesagt",
+        "name": "Kurzgesagt",
+        "focus": "Microscopic biology & existential questions"
+      }
+    ]
+  }
+}

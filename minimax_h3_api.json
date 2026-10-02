@@ -1,0 +1,138 @@
+{
+  "2": {
+    "inputs": {
+      "video": ["24", 0],
+      "filename_prefix": "video/video/MiniMax_H3_Max_turbo_i2v_768P",
+      "format": "auto",
+      "format.codec": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "SaveVideo"
+    }
+  },
+  "7": {
+    "inputs": {
+      "first_frame": ["25", 0],
+      "model.prompt": ["14", 0],
+      "model": "MiniMax H3",
+      "model.duration": 5,
+      "model.ratio": "adaptive"
+    },
+    "class_type": "MinimaxHailuo03ContextIRNode",
+    "_meta": {
+      "title": "MinimaxHailuo03ContextIRNode"
+    }
+  },
+  "8": {
+    "inputs": {
+      "text": ["12", 0],
+      "filename_prefix": "txt",
+      "format": "txt"
+    },
+    "class_type": "SaveText",
+    "_meta": {
+      "title": "SaveText"
+    }
+  },
+  "10": {
+    "inputs": {
+      "video": ["2", 0],
+      "first_frame": ["25", 0],
+      "model.prompt": ["8", 0],
+      "model": "MiniMax H3",
+      "model.resolution": "2K",
+      "model.reference_images": false,
+      "watermark": false
+    },
+    "class_type": "MinimaxHailuo03RegenerateNode",
+    "_meta": {
+      "title": "MinimaxHailuo03RegenerateNode"
+    }
+  },
+  "11": {
+    "inputs": {
+      "video": ["13", 0],
+      "filename_prefix": "video/Minimax_h3_max",
+      "format": "auto",
+      "format.codec": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "SaveVideo"
+    }
+  },
+  "12": {
+    "inputs": {
+      "on_false": ["14", 0],
+      "on_true": ["7", 0],
+      "switch": ["18", 0]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "ComfySwitchNode"
+    }
+  },
+  "13": {
+    "inputs": {
+      "on_false": ["24", 0],
+      "on_true": ["10", 0],
+      "switch": ["19", 0]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "ComfySwitchNode"
+    }
+  },
+  "14": {
+    "inputs": {
+      "value": "At 0.00 seconds, cinematic live-action arc shot with slow push-in..."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Text (Prompt)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean (Prompt Enhance)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Boolean (Upscale to 2K)"
+    }
+  },
+  "24": {
+    "inputs": {
+      "first_frame": ["25", 0],
+      "model.prompt": ["12", 0],
+      "model": "MiniMax H3 Max Turbo",
+      "seed": "",
+      "watermark": "768P"
+    },
+    "class_type": "MinimaxHailuo03FirstLastFrameNode",
+    "_meta": {
+      "title": "MinimaxHailuo03FirstLastFrameNode"
+    }
+  },
+  "25": {
+    "inputs": {
+      "image": "teal_hypercar_seaside.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "LoadImage"
+    }
+  }
+}

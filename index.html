@@ -1,0 +1,3065 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#08090d] text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Newyrr Studio — Cinematic Mobile Suite</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            void: '#08090d',
+            surface: '#0f131c',
+            'surface-light': '#161c28',
+            border: '#1b2332',
+            accent: '#06b6d4',
+            'accent-muted': 'rgba(6, 182, 212, 0.12)'
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            display: ['Impact', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #08090d; }
+    ::-webkit-scrollbar-thumb { background: #1b2332; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+    .touch-pan-y { -webkit-overflow-scrolling: touch; }
+    
+    .caption-box {
+      touch-action: none;
+      user-select: none;
+      cursor: ns-resize;
+      transition: all 0.15s ease;
+    }
+    .caption-box:active, .caption-box:hover {
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.4);
+      border-color: rgba(6, 182, 212, 0.6);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, #0f131c 25%, #1b2332 50%, #0f131c 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .capcut-text {
+      font-family: 'Impact', 'Inter Display', sans-serif;
+      text-shadow: 
+        2.5px 2.5px 0 #000, 
+        -2.5px -2.5px 0 #000, 
+        2.5px -2.5px 0 #000, 
+        -2.5px 2.5px 0 #000,
+        0 4px 10px rgba(0,0,0,0.85);
+    }
+
+    /* Inline Foldable Property Drawer Animation */
+    .foldable-drawer {
+      transition: width 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                  max-width 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                  padding 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                  opacity 0.25s ease;
+    }
+    .foldable-drawer.folded {
+      width: 0 !important;
+      min-width: 0 !important;
+      max-width: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      border-left-width: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      overflow: hidden !important;
+    }
+
+    @media (max-width: 767px) {
+      .foldable-drawer {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        width: 100% !important;
+        max-height: 85vh;
+        border-radius: 1.5rem 1.5rem 0 0;
+        z-index: 50;
+        transform: translateY(0);
+        transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      .foldable-drawer.folded {
+        transform: translateY(105%) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        opacity: 1 !important;
+      }
+    }
+
+    /* Slide-over Drawer Animation */
+    .slide-over {
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .slide-over.closed {
+      transform: translateX(105%);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans selection:bg-cyan-500 selection:text-black overflow-hidden antialiased">
+
+  <!-- =========================================================================
+       MAIN APP HEADER (HIDDEN IN STUDIO MODE)
+       ========================================================================= -->
+  <!-- =========================================================================
+       MAIN APP HEADER (HIDDEN IN STUDIO MODE)
+       ========================================================================= -->
+  <header id="main-app-header" class="h-14 border-b border-border bg-void/90 backdrop-blur-md px-4 flex items-center justify-between shrink-0 z-30">
+    <div class="flex items-center gap-3">
+      <!-- MODE SELECTOR (SMOOTHUI PILL DROPDOWN) -->
+      <div class="relative" id="mode-selector-wrapper">
+        <button onclick="toggleModeMenu(event)" class="flex items-center gap-2 bg-surface hover:bg-surface-light border border-border hover:border-accent/60 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-200 transition active:scale-95 shadow-sm">
+          <span id="active-mode-icon" class="text-xs">✨</span>
+          <span id="active-mode-label" class="font-bold text-slate-100">Create</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+
+        <div id="mode-menu" class="hidden absolute top-full left-0 mt-2 w-72 bg-[#0c0f18] border border-slate-700/80 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1.5 font-sans">
+          <div class="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Studio Generation Mode</div>
+          
+          <div onclick="selectStudioMode('create')" class="p-2.5 rounded-xl border border-accent/40 bg-accent-muted/30 hover:bg-accent-muted/50 cursor-pointer transition flex items-start gap-2.5" id="mode-opt-create">
+            <div class="w-7 h-7 rounded-lg bg-accent text-black font-black flex items-center justify-center text-xs shrink-0 mt-0.5">✨</div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-100">Create (From Scratch)</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-accent/20 text-accent" id="badge-mode-create">Active</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5 leading-snug">Screenplay ➔ Stills (Krea) ➔ Motion (Seedance) ➔ CapCut Subtitles</p>
+            </div>
+          </div>
+
+          <div onclick="selectStudioMode('repurpose')" class="p-2.5 rounded-xl border border-border hover:border-slate-600 hover:bg-surface-light cursor-pointer transition flex items-start gap-2.5" id="mode-opt-repurpose">
+            <div class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 font-black flex items-center justify-center text-xs shrink-0 mt-0.5">🔄</div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-200">Repurpose (Video-as-Code)</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40" id="badge-mode-repurpose">HyperFrames</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5 leading-snug">Recreate viral shorts with Motion Canvas, SVG-ORA & HyperFrames</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Header Controls: Active Engine Indicator (moved here) + Settings Trigger -->
+    <div class="flex items-center gap-2">
+      <!-- Active AI Engine Pill Indicator (Kibo UI / SmoothUI style) -->
+      <button onclick="toggleSettingsPopover()" title="Active AI Engines • Click to configure" class="flex items-center gap-2 bg-surface hover:bg-surface-light border border-border hover:border-accent/50 px-3 py-1.5 rounded-full text-xs text-slate-300 hover:text-white transition active:scale-95 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+        <span id="active-engine-badge" class="font-semibold text-[11px] truncate max-w-[170px] sm:max-w-none">Krea Turbo + Seedance 2.0</span>
+      </button>
+
+      <!-- Settings Icon Button -->
+      <button id="btn-settings-trigger" onclick="toggleSettingsPopover()" title="Pipeline Engine & Model Settings" class="w-8 h-8 rounded-full bg-surface hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent flex items-center justify-center transition active:scale-95 shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- =========================================================================
+       MAIN CONTENT TABS (CHANNELS, ANALYTICS, PROJECTS)
+       ========================================================================= -->
+  <main class="flex-1 overflow-hidden relative flex flex-col">
+
+    <!-- 1. CHANNELS TAB -->
+    <div id="tab-channels" class="app-tab h-full overflow-y-auto touch-pan-y p-4 sm:p-6 pb-24 max-w-5xl mx-auto w-full flex flex-col gap-6">
+      
+      <!-- Multi-Channel Hub Card (Your Channels) -->
+      <div class="bg-surface border border-border rounded-2xl p-5 flex flex-col gap-4 shadow-sm" id="my-channel-card">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          
+          <div class="flex items-center gap-3.5">
+            <!-- Kibo UI Circular Avatar with Ring -->
+            <div class="w-13 h-13 rounded-full bg-accent/20 border-2 border-accent/40 p-0.5 shrink-0 flex items-center justify-center">
+              <div id="my-channel-avatar" class="w-11 h-11 rounded-full bg-accent text-black font-black text-lg flex items-center justify-center">N</div>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 id="my-channel-name" class="text-base font-bold text-slate-100">Newyr (@Newyrr)</h2>
+                <span id="my-channel-niche-badge" class="text-[10px] bg-accent-muted text-accent font-semibold px-2.5 py-0.5 rounded-full border border-accent/30">Science Shorts</span>
+              </div>
+              <p id="my-channel-bio" class="text-xs text-slate-400 mt-0.5">Shorts science. How and what if moments.</p>
+            </div>
+          </div>
+
+          <!-- Channel Stats & Switcher Controls -->
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:border-l border-border sm:pl-5">
+            <div class="flex gap-4 text-center sm:text-left">
+              <div><div class="text-[10px] uppercase font-bold text-slate-400">Subscribers</div><div id="my-channel-subs" class="text-base font-bold text-slate-100">8</div></div>
+              <div><div class="text-[10px] uppercase font-bold text-slate-400">Videos</div><div id="my-channel-vids" class="text-base font-bold text-slate-100">3</div></div>
+              <div><div class="text-[10px] uppercase font-bold text-slate-400">Top Video</div><div id="my-channel-top" class="text-base font-bold text-emerald-400">1.5K</div></div>
+            </div>
+
+            <!-- Switcher & Add Channel Buttons -->
+            <div class="flex items-center gap-2 ml-auto sm:ml-2">
+              <div class="relative">
+                <button onclick="toggleMyChannelsDropdown(event)" class="bg-void hover:bg-surface-light border border-border hover:border-slate-500 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 active:scale-95 shadow-sm">
+                  <span>Switch</span>
+                  <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                <div id="my-channels-dropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-[#0c0f18] border border-slate-700/80 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+
+              <button onclick="openAddUserChannelModal()" class="bg-accent/15 hover:bg-accent/25 border border-accent/40 text-accent text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1 active:scale-95 shadow-sm">
+                <span>+ Add Channel</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AI Recommended Topics (HORIZONTAL SCROLL REEL TO SAVE SPACE) -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">AI Viral Topic Suggestions</h3>
+            <!-- HISTORY ICON BUTTON -->
+            <button onclick="openTopicHistoryDrawer()" title="View Generated Topics History" class="p-1 rounded-md bg-surface hover:bg-surface-light border border-border text-slate-300 hover:text-accent transition flex items-center gap-1 px-2 text-[11px]">
+              <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>History</span>
+            </button>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <!-- SmoothUI Horizontal Scroll Arrows -->
+            <button onclick="scrollTopicsHoriz(-320)" title="Scroll left" class="w-6 h-6 rounded-lg bg-surface hover:bg-surface-light border border-border text-slate-300 hover:text-white flex items-center justify-center text-xs transition active:scale-95">‹</button>
+            <button onclick="scrollTopicsHoriz(320)" title="Scroll right" class="w-6 h-6 rounded-lg bg-surface hover:bg-surface-light border border-border text-slate-300 hover:text-white flex items-center justify-center text-xs transition active:scale-95">›</button>
+            <button onclick="loadTopicSuggestions()" class="text-xs text-accent hover:underline flex items-center gap-1 font-semibold ml-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        
+        <!-- Horizontal Scrollable Container (Saves screen space!) -->
+        <div class="flex items-stretch gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth" id="topics-list"></div>
+      </div>
+
+      <!-- Tracked Inspiration Channels (HORIZONTAL SCROLL REEL TO SAVE SPACE) -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tracked Inspiration Channels</h3>
+            <span class="text-[10px] text-slate-500 font-mono" id="tracked-channels-count">0 tracked</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="scrollTrackedHoriz(-260)" title="Scroll left" class="w-6 h-6 rounded-lg bg-surface hover:bg-surface-light border border-border text-slate-300 hover:text-white flex items-center justify-center text-xs transition active:scale-95">‹</button>
+            <button onclick="scrollTrackedHoriz(260)" title="Scroll right" class="w-6 h-6 rounded-lg bg-surface hover:bg-surface-light border border-border text-slate-300 hover:text-white flex items-center justify-center text-xs transition active:scale-95">›</button>
+            <button onclick="openAddChannelModal()" class="text-xs text-accent hover:underline font-semibold ml-1">+ Add Channel</button>
+          </div>
+        </div>
+        
+        <!-- Horizontal Scrollable Container (Saves screen space!) -->
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory scroll-smooth" id="tracked-channels-list"></div>
+      </div>
+    </div>
+
+
+    <!-- 2. ANALYTICS TAB -->
+    <div id="tab-analytics" class="app-tab hidden h-full overflow-y-auto touch-pan-y p-4 sm:p-6 pb-24 max-w-5xl mx-auto w-full flex flex-col gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-surface border border-border p-4 rounded-xl">
+          <div class="text-xs text-slate-400">Total Views</div>
+          <div class="text-xl font-bold mt-1">~3,114</div>
+          <div class="text-[11px] text-emerald-400 mt-1">↑ Cold Audience Pickups</div>
+        </div>
+        <div class="bg-surface border border-border p-4 rounded-xl">
+          <div class="text-xs text-slate-400">Retention Score</div>
+          <div class="text-xl font-bold text-accent mt-1">94.2%</div>
+          <div class="text-[11px] text-slate-400 mt-1">Seamless loop loops</div>
+        </div>
+        <div class="bg-surface border border-border p-4 rounded-xl">
+          <div class="text-xs text-slate-400">Top Niche</div>
+          <div class="text-xl font-bold mt-1">Tactile Biology</div>
+          <div class="text-[11px] text-slate-400 mt-1">Microscopic physics</div>
+        </div>
+        <div class="bg-surface border border-border p-4 rounded-xl">
+          <div class="text-xs text-slate-400">Optimal Length</div>
+          <div class="text-xl font-bold text-amber-400 mt-1">25 - 30s</div>
+          <div class="text-[11px] text-slate-400 mt-1">5 scenes @ 5s each</div>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-border rounded-2xl overflow-hidden">
+        <div class="p-4 border-b border-border flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Published Shorts Leaderboard</h3>
+          <span class="text-xs text-slate-500">YouTube Data API</span>
+        </div>
+        <div class="divide-y divide-border/60" id="analytics-videos-list"></div>
+      </div>
+    </div>
+
+
+    <!-- 3. PROJECTS TAB -->
+    <div id="tab-projects" class="app-tab hidden h-full overflow-y-auto touch-pan-y p-4 sm:p-6 pb-24 max-w-5xl mx-auto w-full flex flex-col gap-6">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Create New Blank Project</div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div onclick="openNewProjectModal('9:16')" class="bg-surface hover:bg-surface-light border border-border hover:border-accent p-4 sm:p-5 rounded-2xl cursor-pointer transition flex items-center gap-3.5 group">
+            <div class="w-10 h-16 border-2 border-dashed border-slate-500 group-hover:border-accent rounded-lg flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-accent shrink-0">9:16</div>
+            <div>
+              <div class="font-bold text-sm text-slate-100 group-hover:text-accent">Blank 9:16 Short</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Vertical 9:16 (768×1344)</div>
+            </div>
+          </div>
+          <div onclick="openNewProjectModal('16:9')" class="bg-surface hover:bg-surface-light border border-border hover:border-accent p-4 sm:p-5 rounded-2xl cursor-pointer transition flex items-center gap-3.5 group opacity-85">
+            <div class="w-16 h-10 border-2 border-dashed border-slate-500 group-hover:border-accent rounded-lg flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-accent shrink-0">16:9</div>
+            <div>
+              <div class="font-bold text-sm text-slate-100 group-hover:text-accent">Blank 16:9 Video</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Landscape (1344×768)</div>
+            </div>
+          </div>
+          <div onclick="openTrashBinModal()" class="bg-surface hover:bg-surface-light border border-border hover:border-rose-500/50 p-4 sm:p-5 rounded-2xl cursor-pointer transition flex items-center gap-3.5 group">
+            <div class="w-12 h-12 rounded-xl bg-void border border-border group-hover:border-rose-500/40 text-slate-400 group-hover:text-rose-400 flex items-center justify-center text-xl transition shrink-0">
+              🗑
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-sm text-slate-100 group-hover:text-rose-400">Recently Deleted</span>
+                <span id="trash-count-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">0</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Auto-purged after 7 days</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Previously Created Videos & Drafts</h3>
+          <span class="text-xs text-slate-500" id="projects-count">0 projects</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" id="projects-feed"></div>
+      </div>
+    </div>
+
+
+    <!-- =======================================================================
+         STUDIO EDITOR (FULL-SCREEN MODE — RED SECTIONS REMOVED!)
+         ======================================================================= -->
+    <div id="view-editor" class="hidden fixed inset-0 z-50 bg-void flex flex-col">
+      
+      <!-- Studio Editor ONLY Top Bar (No duplicate app header!) -->
+      <div class="h-14 border-b border-border bg-surface px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <button onclick="closeEditor()" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-void border border-border px-3 py-1.5 rounded-lg transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span>Projects</span>
+          </button>
+          <span class="text-xs font-bold truncate max-w-[140px] sm:max-w-xs md:max-w-md" id="editor-title">Project Title</span>
+        </div>
+
+        <!-- Staged Execution Buttons -->
+        <div class="flex items-center gap-2">
+          <button id="btn-frames-first" onclick="runFramesFirst()" class="bg-surface hover:bg-surface-light border border-border hover:border-accent text-accent text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+            <span>⚡ 1. Frames First</span>
+          </button>
+          <button id="btn-animate-video" onclick="runAnimateVideos()" class="bg-surface hover:bg-surface-light border border-border hover:border-accent text-slate-300 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+            <span>🎬 2. Animate (MiniMax)</span>
+          </button>
+          <button onclick="openExportModal()" class="bg-accent hover:bg-cyan-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
+            Export →
+          </button>
+          <button id="btn-settings-trigger-editor" onclick="toggleSettingsPopover()" title="Pipeline Engine & Model Settings" class="w-8 h-8 rounded-full bg-void hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent flex items-center justify-center transition active:scale-95 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Editor Body -->
+      <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left/Center Canvas Viewport -->
+        <div class="flex-1 flex flex-col items-center justify-between p-3 sm:p-4 bg-void/60 overflow-hidden relative">
+          
+          <!-- Floating Unfold Trigger Pill (Appears when inspector is folded) -->
+          <button id="btn-unfold-inspector" onclick="toggleInspectorFold(false)" title="Open Element Properties" class="hidden absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-surface/90 hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg transition active:scale-95">
+            <span>⚙ Properties</span>
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          
+          <!-- Controls Above Phone: Stop [⏹] & Play [▶] (Directly from User Wireframe) -->
+          <div class="flex items-center gap-2.5 mb-1.5 z-20 bg-surface/90 backdrop-blur-md border border-border px-3.5 py-1.5 rounded-full shadow-lg">
+            <button id="btn-player-stop" onclick="stopSlideshow()" title="Stop & Reset to Scene 1" class="w-7 h-7 rounded-full bg-void hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95 border border-border">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+            </button>
+            <button id="btn-player-play" onclick="togglePlaySlideshow()" title="Play All Scenes with Audio & Subtitles (Space)" class="w-8 h-8 rounded-full bg-accent hover:bg-cyan-400 text-black flex items-center justify-center transition active:scale-95 shadow">
+              <svg id="icon-play" class="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="icon-pause" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <div class="text-[11px] font-mono text-slate-300 border-l border-border pl-2.5 flex items-center gap-1.5">
+              <span id="player-scene-badge" class="font-bold text-accent">Scene 1/5</span>
+              <span class="text-slate-500">•</span>
+              <span id="player-time-badge" class="text-slate-400">0:00</span>
+            </div>
+          </div>
+
+          <!-- 9:16 Canvas Phone Frame + Vertical Tool Stack Beside It -->
+          <div class="flex-1 w-full flex items-center justify-center min-h-0 relative">
+            <div class="relative flex items-center gap-3 h-full max-h-[520px]">
+              
+              <!-- 9:16 Canvas Phone Frame with Draggable Captions -->
+              <div id="canvas-container" class="relative w-auto h-full aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-border shadow-2xl flex items-center justify-center select-none">
+                <img id="canvas-image" class="w-full h-full object-cover hidden" />
+                <video id="canvas-video" class="w-full h-full object-cover hidden" loop playsinline></video>
+                
+                <!-- In-Canvas Shimmer / Skeleton Loading State -->
+                <div id="canvas-shimmer" class="absolute inset-0 skeleton-shimmer hidden flex-col items-center justify-center p-6 text-center z-10">
+                  <div class="w-10 h-10 rounded-full border-2 border-accent border-t-transparent animate-spin mb-3"></div>
+                  <span id="canvas-shimmer-text" class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Generating Keyframe...</span>
+                  <span class="text-[10px] text-slate-400 mt-1">OpenRouter Pure Cloud</span>
+                </div>
+
+                <div id="canvas-empty-state" class="text-center p-6 text-slate-500 text-xs flex flex-col items-center gap-2">
+                  <svg class="w-8 h-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>Click "1. Frames First" above to render stills</span>
+                </div>
+
+                <!-- On-Canvas Viral Top Hook/Title Banner (Toggled by Tt) -->
+                <div id="canvas-top-title-banner" class="hidden absolute top-4 left-3 right-3 bg-black/80 backdrop-blur-sm border border-amber-400/40 rounded-xl p-2 text-center shadow-lg transition z-20">
+                  <input id="canvas-top-title-input" oninput="updateTopTitle(this.value)" placeholder="HOOK HEADLINE..." class="w-full bg-transparent text-amber-300 font-display text-xs font-black uppercase text-center outline-none tracking-wide" />
+                </div>
+
+                <!-- Draggable CapCut-Style Subtitle Box (NO UGLY DRAG HEADER!) -->
+                <div id="draggable-caption" class="caption-box absolute left-[6%] w-[88%] text-center p-2 rounded-xl transition-all cursor-ns-resize group z-20" style="top: 72%;">
+                  <div class="opacity-0 group-hover:opacity-100 transition text-[9px] font-mono text-cyan-400 mb-0.5 tracking-wider uppercase select-none">↕ Drag position</div>
+                  <div id="caption-preview-text" class="capcut-text text-white text-xl sm:text-2xl font-black uppercase leading-tight tracking-wide drop-shadow-md select-none">
+                    CAPTION PREVIEW
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fast Canvas Tool Stack (Directly beside phone frame as drawn by user) -->
+              <div class="flex flex-col gap-2 bg-surface/90 backdrop-blur-md border border-border p-1.5 rounded-2xl shadow-xl z-20">
+                <button onclick="focusTool('image')" title="Frame Visual Prompt (IMG)" class="w-9 h-9 rounded-xl bg-void hover:bg-surface-light border border-border hover:border-accent text-accent flex flex-col items-center justify-center transition active:scale-95 group">
+                  <span class="text-[10px] font-black tracking-tighter">IMG</span>
+                </button>
+                <button onclick="focusTool('video')" title="Motion Guidance Prompt (VID)" class="w-9 h-9 rounded-xl bg-void hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent flex flex-col items-center justify-center transition active:scale-95 group">
+                  <span class="text-[10px] font-black tracking-tighter">VID</span>
+                </button>
+                <button onclick="focusTool('caption')" title="Subtitle Styling & Bounce (CC)" class="w-9 h-9 rounded-xl bg-void hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent flex flex-col items-center justify-center transition active:scale-95 group">
+                  <span class="text-[10px] font-black tracking-tighter">CC</span>
+                </button>
+                <button onclick="focusTool('title')" title="Toggle On-Canvas Hook Title (Tt)" class="w-9 h-9 rounded-xl bg-void hover:bg-surface-light border border-border hover:border-accent text-slate-300 hover:text-accent flex flex-col items-center justify-center transition active:scale-95 group">
+                  <span class="text-[11px] font-black">Tt</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Position Height Hint & Mobile Drawer Trigger Button -->
+          <div class="w-full max-w-xl flex items-center justify-between text-[11px] text-slate-400 py-1.5 shrink-0 px-1">
+            <div>
+              <span>Subtitle Height: <strong class="text-accent" id="caption-y-indicator">72%</strong></span>
+              <span class="text-slate-600 hidden sm:inline">• Drag box up/down</span>
+            </div>
+            
+            <!-- Mobile Drawer Button -->
+            <button onclick="toggleInspectorFold()" class="md:hidden flex items-center gap-1.5 bg-surface hover:bg-surface-light border border-accent text-accent font-semibold px-2.5 py-1 rounded-lg text-xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <span>Properties ▲</span>
+            </button>
+          </div>
+
+          <!-- Horizontal Scene Filmstrip Reel -->
+          <div class="w-full max-w-xl overflow-x-auto touch-pan-x flex gap-2 py-1.5 shrink-0" id="editor-filmstrip"></div>
+        </div>
+
+        <!-- ===================================================================
+             FOLDABLE PROPERTY INSPECTOR DRAWER
+             Appears when elements are clicked; foldable with zero dead space
+             =================================================================== -->
+        <div id="scene-inspector-panel" class="foldable-drawer folded w-80 sm:w-96 shrink-0 h-full border-l border-border bg-surface/95 backdrop-blur-md z-30 p-4 sm:p-5 overflow-y-auto flex flex-col gap-3.5 shadow-2xl">
+          
+          <!-- Header: Context Label, Save & Fold Button -->
+          <div class="flex items-center justify-between pb-2.5 border-b border-border shrink-0">
+            <!-- Mobile Pull Indicator -->
+            <div class="md:hidden w-12 h-1 bg-slate-600 rounded-full mx-auto absolute top-2 left-1/2 -translate-x-1/2"></div>
+            
+            <div class="flex items-center gap-2">
+              <span id="inspector-tab-badge" class="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-accent/20 text-accent">STILL</span>
+              <span class="text-xs font-bold uppercase text-slate-200" id="inspector-scene-label">Scene 1 Properties</span>
+            </div>
+            
+            <div class="flex items-center gap-1.5">
+              <button onclick="saveCurrentSceneEdits()" title="Save edits to project" class="text-xs bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-700/50 px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition active:scale-95">
+                <span>💾 Save</span>
+              </button>
+              <button onclick="toggleInspectorFold(true)" title="Fold Properties Drawer" class="w-7 h-7 rounded-lg bg-void hover:bg-surface-light border border-border text-slate-400 hover:text-white flex items-center justify-center text-xs font-bold transition active:scale-95">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- 5 Element Property Tabs (Icon-first Minimal Primitives) -->
+          <div class="grid grid-cols-5 gap-1 p-1 bg-void rounded-xl border border-border shrink-0">
+            <button id="itab-btn-voice" onclick="switchInspectorTab('voice')" title="Narration & Audio" class="itab-btn py-1.5 text-[11px] font-bold rounded-lg text-slate-400 hover:text-white transition flex flex-col items-center gap-0.5">
+              <span class="text-xs">🎙</span>
+              <span class="text-[9px] tracking-tight">Script</span>
+            </button>
+            <button id="itab-btn-image" onclick="switchInspectorTab('image')" title="Visual Keyframe & Clio Art Style" class="itab-btn py-1.5 text-[11px] font-bold rounded-lg text-accent bg-surface-light border border-accent/40 transition flex flex-col items-center gap-0.5">
+              <span class="text-xs">🖼</span>
+              <span class="text-[9px] tracking-tight">Still</span>
+            </button>
+            <button id="itab-btn-video" onclick="switchInspectorTab('video')" title="Motion Guidance & Camera" class="itab-btn py-1.5 text-[11px] font-bold rounded-lg text-slate-400 hover:text-white transition flex flex-col items-center gap-0.5">
+              <span class="text-xs">🎬</span>
+              <span class="text-[9px] tracking-tight">Video</span>
+            </button>
+            <button id="itab-btn-caption" onclick="switchInspectorTab('caption')" title="CapCut Subtitle Height & Glow" class="itab-btn py-1.5 text-[11px] font-bold rounded-lg text-slate-400 hover:text-white transition flex flex-col items-center gap-0.5">
+              <span class="text-xs">💬</span>
+              <span class="text-[9px] tracking-tight">Subs</span>
+            </button>
+            <button id="itab-btn-title" onclick="switchInspectorTab('title')" title="On-Canvas Hook Headline & Title" class="itab-btn py-1.5 text-[11px] font-bold rounded-lg text-slate-400 hover:text-white transition flex flex-col items-center gap-0.5">
+              <span class="text-xs">🏷</span>
+              <span class="text-[9px] tracking-tight">Hook</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: SCRIPT (VOICEOVER & AUDIO) -->
+          <div id="itab-content-voice" class="itab-content hidden flex-col gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Spoken Narration</label>
+                <span id="inspector-audio-status" class="text-[9px] text-accent font-semibold">Charon TTS</span>
+              </div>
+              <textarea id="inspector-narration" oninput="onNarrationChange(this.value)" placeholder="Enter narration script for this scene..." class="w-full bg-void border border-border rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-accent h-28 resize-none leading-relaxed"></textarea>
+            </div>
+            
+            <div class="bg-void/80 border border-border rounded-xl p-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🔊</span>
+                <div>
+                  <div class="text-[11px] font-bold text-slate-300">Voice Audio Track</div>
+                  <div class="text-[9px] text-slate-500" id="inspector-audio-meta">Duration: ~4.5s</div>
+                </div>
+              </div>
+              <button type="button" onclick="previewCurrentSceneAudio()" class="text-[10px] font-semibold bg-surface hover:bg-surface-light border border-border hover:border-accent text-accent px-2.5 py-1 rounded-lg transition">
+                ▶ Listen
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 2: STILL (KEYFRAME & CLIO ART STYLE) -->
+          <div id="itab-content-image" class="itab-content flex flex-col gap-3">
+            <!-- Style Quick Switcher -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Clio Art Style</label>
+                <span class="text-[9px] text-emerald-400 font-semibold" id="inspector-image-model-label">Krea Turbo</span>
+              </div>
+              <select id="inspector-art-style" onchange="onInspectorStyleChange(this.value)" class="w-full bg-void border border-border rounded-xl px-2.5 py-2 text-xs text-slate-200 outline-none focus:border-accent">
+                <option value="photo_35mm">📸 35mm Photography (Kodak Realism)</option>
+                <option value="photo_surveillance">📸 Surveillance Camera Photo (CCTV Mystery)</option>
+                <option value="photo_wes_anderson">📸 Wes Anderson Photography (Pastel Symmetry)</option>
+                <option value="render_unreal">🧊 Unreal Engine 5 (Raytraced Lumen)</option>
+                <option value="render_spiderverse">🧊 Spider-Verse Style (Halftone Kinetic)</option>
+                <option value="render_coraline">🧊 Coraline Stop-Motion (Handmade Clay)</option>
+                <option value="design_lego_hybrid">🧱 LEGO Minifigure & Set Style</option>
+                <option value="design_minecraft">🧱 Minecraft Voxel 8-Bit</option>
+                <option value="design_butcher_billy">🎨 Butcher Billy Pop-Art</option>
+                <option value="comic_franco_belgian">📚 Franco-Belgian Ultradetailed</option>
+                <option value="comic_hellboy">📚 Hellboy Mignola Style</option>
+                <option value="comic_vintage">📚 Vintage 1960s Comics</option>
+                <option value="digital_xray">🌌 X-Ray Aesthetic</option>
+                <option value="digital_blacklight">🌌 Blacklight Fluorescent</option>
+                <option value="digital_gris_grimly">🌌 Gris Grimly Dark Macabre</option>
+                <option value="cover_gta_v">🎮 GTA V Polished Cover Art</option>
+                <option value="cover_interplay_shadow">🎮 Interplay of Shadow & Light</option>
+                <option value="cover_glossy">🎮 Glossy Semi-Realistic</option>
+              </select>
+            </div>
+
+            <!-- Visual Prompt -->
+            <div>
+              <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Cinematic Visual Prompt</label>
+              <textarea id="inspector-flux-prompt" placeholder="Visual prompt for image generation..." class="w-full bg-void border border-border rounded-xl p-3 text-xs text-slate-300 outline-none focus:border-accent h-28 resize-none leading-relaxed font-mono text-[11px]"></textarea>
+            </div>
+
+            <button type="button" onclick="rerollCurrentScene()" class="w-full bg-surface-light hover:bg-void border border-border hover:border-accent text-accent text-xs font-semibold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-98 shadow-sm">
+              <span>⚡ Re-roll Keyframe (IMG)</span>
+            </button>
+          </div>
+
+          <!-- TAB 3: VIDEO (MOTION GUIDANCE & CAMERA PRESETS) -->
+          <div id="itab-content-video" class="itab-content hidden flex-col gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Motion Guidance</label>
+                <span class="text-[9px] text-cyan-400 font-semibold" id="inspector-video-provider-label">Seedance 2.0 / MiniMax</span>
+              </div>
+              <textarea id="inspector-motion-prompt" placeholder="Camera directions, speed, kinetic subject motion..." class="w-full bg-void border border-border rounded-xl p-3 text-xs text-slate-300 outline-none focus:border-accent h-24 resize-none leading-relaxed font-mono text-[11px]"></textarea>
+            </div>
+
+            <!-- Quick Camera Direction Chips -->
+            <div>
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Camera Motion Presets</label>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" onclick="insertMotionChip('Slow cinematic push-in zoom into subject with subtle parallax depth')" class="text-[10px] bg-void hover:bg-surface-light border border-border hover:border-cyan-400 text-slate-300 px-2 py-1 rounded-lg transition">🔍 Push-in Zoom</button>
+                <button type="button" onclick="insertMotionChip('Smooth 15-degree orbital camera rotation around subject')" class="text-[10px] bg-void hover:bg-surface-light border border-border hover:border-cyan-400 text-slate-300 px-2 py-1 rounded-lg transition">🔭 Orbit 15°</button>
+                <button type="button" onclick="insertMotionChip('Steady horizontal pan from left to right capturing scale')" class="text-[10px] bg-void hover:bg-surface-light border border-border hover:border-cyan-400 text-slate-300 px-2 py-1 rounded-lg transition">↔ Pan Right</button>
+                <button type="button" onclick="insertMotionChip('Macro lens shallow focus pull with floating atmospheric particles')" class="text-[10px] bg-void hover:bg-surface-light border border-border hover:border-cyan-400 text-slate-300 px-2 py-1 rounded-lg transition">🎯 Macro Focus</button>
+                <button type="button" onclick="insertMotionChip('Dynamic kinetic acceleration, high-impact motion blur')" class="text-[10px] bg-void hover:bg-surface-light border border-border hover:border-cyan-400 text-slate-300 px-2 py-1 rounded-lg transition">⚡ Kinetic Blur</button>
+              </div>
+            </div>
+
+            <button type="button" onclick="rerollVideoCurrentScene()" class="w-full bg-surface-light hover:bg-void border border-border hover:border-cyan-400 text-cyan-400 text-xs font-semibold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-98 shadow-sm">
+              <span>🎬 Re-roll Video Animation (VID)</span>
+            </button>
+          </div>
+
+          <!-- TAB 4: SUBS (CAPCUT CAPTIONS) -->
+          <div id="itab-content-caption" class="itab-content hidden flex-col gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Vertical Height (Y%)</label>
+                <span class="text-xs font-mono font-bold text-accent" id="inspector-caption-y-val">72%</span>
+              </div>
+              <input type="range" min="8" max="88" value="72" id="slider-caption-y" oninput="onCaptionSliderChange(this.value)" class="w-full accent-cyan-400 cursor-pointer" />
+              <div class="flex justify-between text-[9px] text-slate-500 mt-1">
+                <span>Top (8%)</span>
+                <span>Center (50%)</span>
+                <span>Bottom (88%)</span>
+              </div>
+            </div>
+
+            <!-- Active Word Highlight Glow Palette -->
+            <div>
+              <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Active Word Glow Color</label>
+              <div class="grid grid-cols-4 gap-2">
+                <button type="button" onclick="setCaptionColorTheme('yellow')" class="flex flex-col items-center gap-1 p-2 bg-void hover:bg-surface-light border border-yellow-400/50 rounded-xl transition">
+                  <div class="w-5 h-5 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.8)]"></div>
+                  <span class="text-[9px] text-yellow-300 font-semibold">CapCut</span>
+                </button>
+                <button type="button" onclick="setCaptionColorTheme('cyan')" class="flex flex-col items-center gap-1 p-2 bg-void hover:bg-surface-light border border-cyan-400/50 rounded-xl transition">
+                  <div class="w-5 h-5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
+                  <span class="text-[9px] text-cyan-300 font-semibold">Neon Cyan</span>
+                </button>
+                <button type="button" onclick="setCaptionColorTheme('emerald')" class="flex flex-col items-center gap-1 p-2 bg-void hover:bg-surface-light border border-emerald-400/50 rounded-xl transition">
+                  <div class="w-5 h-5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+                  <span class="text-[9px] text-emerald-300 font-semibold">Green</span>
+                </button>
+                <button type="button" onclick="setCaptionColorTheme('white')" class="flex flex-col items-center gap-1 p-2 bg-void hover:bg-surface-light border border-white/40 rounded-xl transition">
+                  <div class="w-5 h-5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"></div>
+                  <span class="text-[9px] text-slate-200 font-semibold">Clean White</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-void/80 border border-border rounded-xl p-3 text-[11px] text-slate-400 leading-relaxed">
+              <span class="text-accent font-semibold">💡 Interactive Tip:</span> You can also directly drag the subtitle box up and down on the phone screen! It syncs in real time with the video exporter.
+            </div>
+          </div>
+
+          <!-- TAB 5: HOOK & TITLE -->
+          <div id="itab-content-title" class="itab-content hidden flex-col gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Viral Hook Headline</label>
+                <button type="button" onclick="toggleCanvasTitleBanner()" class="text-[10px] text-accent hover:underline font-semibold" id="btn-toggle-hook-banner">Toggle On Canvas</button>
+              </div>
+              <input type="text" id="inspector-hook-input" oninput="onHookInputChange(this.value)" placeholder="e.g. WHY YOUR SKIN NEVER..." class="w-full bg-void border border-border rounded-xl p-2.5 text-xs text-amber-300 font-bold tracking-wide outline-none focus:border-accent" />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">YouTube Short Title</label>
+              <input type="text" id="inspector-title-input" oninput="onShortTitleChange(this.value)" placeholder="Short title..." class="w-full bg-void border border-border rounded-xl p-2.5 text-xs text-slate-200 outline-none focus:border-accent" />
+            </div>
+
+            <button type="button" onclick="generateHookThumbnail()" class="w-full bg-surface-light hover:bg-void border border-border hover:border-amber-400 text-amber-300 text-xs font-semibold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-98 shadow-sm">
+              <span>📸 Generate CapCut Thumbnail</span>
+            </button>
+          </div>
+
+          <!-- Bottom Footer Quick Actions -->
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-border mt-auto shrink-0">
+            <button onclick="rerollCurrentScene()" title="Re-roll Still Keyframe" class="bg-surface-light hover:bg-void border border-border hover:border-accent text-accent text-xs font-semibold py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-0.5 transition active:scale-95">
+              <span class="text-[11px] font-black">IMG</span>
+              <span class="text-[9px] text-slate-400">⚡ Re-roll</span>
+            </button>
+            <button onclick="rerollVideoCurrentScene()" title="Re-roll Video Animation" class="bg-surface-light hover:bg-void border border-border hover:border-cyan-400 text-cyan-400 text-xs font-semibold py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-0.5 transition active:scale-95">
+              <span class="text-[11px] font-black">VID</span>
+              <span class="text-[9px] text-slate-400">🎬 Animate</span>
+            </button>
+            <button onclick="saveCurrentSceneEdits()" title="Save Prompt & Text Edits" class="bg-surface-light hover:bg-void border border-border hover:border-emerald-400 text-emerald-400 text-xs font-semibold py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-0.5 transition active:scale-95">
+              <span class="text-[11px] font-black">Tt</span>
+              <span class="text-[9px] text-slate-400">💾 Save</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================================
+       MAIN APP BOTTOM NAVIGATION (HIDDEN IN STUDIO MODE)
+       ========================================================================= -->
+  <nav id="main-app-nav" class="h-16 border-t border-border bg-void/95 backdrop-blur-md px-6 flex items-center justify-around shrink-0 z-30 max-w-lg mx-auto w-full">
+    <button onclick="switchTab('channels')" id="nav-btn-channels" class="nav-tab-btn flex flex-col items-center gap-1 text-accent font-semibold transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
+      <span class="text-[10px]">Channels</span>
+    </button>
+    <button onclick="switchTab('analytics')" id="nav-btn-analytics" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span class="text-[10px]">Analytics</span>
+    </button>
+    <button onclick="switchTab('projects')" id="nav-btn-projects" class="nav-tab-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+      <span class="text-[10px]">Projects</span>
+    </button>
+  </nav>
+
+
+  <!-- =========================================================================
+       TOPIC HISTORY SLIDE-OVER DRAWER
+       ========================================================================= -->
+  <div id="topic-history-drawer" class="slide-over closed fixed inset-y-0 right-0 w-full max-w-md bg-surface border-l border-border z-50 p-6 flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between pb-4 border-b border-border shrink-0">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <h3 class="font-bold text-sm">Topic Suggestions History</h3>
+      </div>
+      <button onclick="closeTopicHistoryDrawer()" class="text-slate-400 hover:text-white p-1 text-sm font-bold">✕</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto touch-pan-y py-4 flex flex-col gap-3" id="topic-history-feed">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       CAPCUT STYLE EXPORT MODAL (PERIMETER PROGRESS + CENTER LOADER)
+       ========================================================================= -->
+  <div id="modal-export" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#0c0f18] border border-slate-700/80 rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto p-5 sm:p-6 flex flex-col gap-4 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-border pb-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent text-xs">⚡</div>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-slate-100">Export & Publishing</h3>
+        </div>
+        <button onclick="closeExportModal()" class="w-7 h-7 rounded-lg hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center text-xs transition">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-4 items-start">
+        <!-- 9:16 Video Preview with CapCut Perimeter SVG Progress Bar -->
+        <div class="relative aspect-[9/16] w-full max-w-[160px] mx-auto bg-black rounded-2xl overflow-hidden border border-border/80 shadow-2xl flex items-center justify-center group" id="export-preview-box">
+          <img id="export-thumb-preview" class="w-full h-full object-cover hidden" />
+          <video id="export-video-preview" class="w-full h-full object-cover hidden" controls loop autoplay muted playsinline></video>
+
+          <!-- Perimeter SVG Progress Bar (Traces directly around the video border!) -->
+          <svg class="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 178" preserveAspectRatio="none">
+            <rect x="2" y="2" width="96" height="174" rx="8" ry="8" fill="none" stroke="#06b6d4" stroke-width="4" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="export-perimeter-progress" class="transition-all duration-300" />
+          </svg>
+
+          <!-- In-Center Loading Spinner & Percentage (CapCut Center Loader) -->
+          <div id="export-center-loader" class="hidden absolute inset-0 bg-black/75 backdrop-blur-xs z-20 flex flex-col items-center justify-center p-2 text-center select-none">
+            <div class="relative w-14 h-14 flex items-center justify-center mb-1.5">
+              <div class="w-14 h-14 rounded-full border-2 border-slate-700"></div>
+              <div class="absolute inset-0 w-14 h-14 rounded-full border-2 border-accent border-t-transparent animate-spin"></div>
+              <span id="export-center-pct" class="text-xs font-black text-cyan-300 font-mono">0%</span>
+            </div>
+            <span id="export-center-label" class="text-[10px] font-bold text-slate-200 tracking-wider uppercase">Processing...</span>
+            <span id="export-center-sub" class="text-[8px] text-slate-400 mt-0.5">Merging Clips & Audio</span>
+          </div>
+        </div>
+
+        <!-- Export Metadata & CapCut Quality Settings -->
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Video Title</label>
+            <input id="export-title-input" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-accent" />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Description & Hashtags</label>
+            <textarea id="export-desc-input" class="w-full bg-void border border-border rounded-xl p-2.5 text-xs text-slate-300 outline-none focus:border-accent h-16 resize-none leading-relaxed"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <!-- Quality Dropdown (CapCut Style) -->
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Quality Resolution</label>
+              <select id="export-quality-select" class="w-full bg-void border border-border rounded-xl px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-accent cursor-pointer">
+                <option value="1080p">1080p • 60 FPS (Recommended)</option>
+                <option value="4k">4K Ultra HD • 60 FPS</option>
+                <option value="720p">720p • 30 FPS (Draft)</option>
+              </select>
+            </div>
+
+            <!-- YouTube Audio Library Background Music Selector -->
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Background Audio</label>
+              <select id="export-bgm-select" class="w-full bg-void border border-border rounded-xl px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-accent cursor-pointer">
+                <option value="">None (Voice Only)</option>
+                <option value="cinematic">Ambient Suspense</option>
+                <option value="synthwave">Tech Synthwave</option>
+                <option value="lofi">Chill Lo-Fi Focus</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Thumbnail Box -->
+          <div class="bg-void/70 border border-border rounded-xl p-2.5 flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Thumbnail Hook</span>
+              <button type="button" onclick="triggerThumbnailGen()" id="btn-thumb-gen" class="text-[10px] bg-surface hover:bg-surface-light border border-border hover:border-accent text-accent px-2 py-0.5 rounded-lg transition font-semibold">
+                Generate Thumbnail!
+              </button>
+            </div>
+            <input id="export-thumb-headline" placeholder="Headline text overlay..." class="bg-surface border border-border rounded-lg px-2.5 py-1 text-xs text-slate-200 outline-none focus:border-accent" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Footer (Clean Simple Words: Process & Download) -->
+      <div class="flex items-center justify-between gap-3 border-t border-border pt-3.5 mt-1 shrink-0">
+        <button type="button" onclick="closeExportModal()" class="text-xs font-semibold text-slate-400 hover:text-white px-3 py-2 transition">
+          Cancel
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="executeFinalExport()" id="btn-render-final" class="bg-accent hover:bg-cyan-400 text-black font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-1.5">
+            <span>⚡ Process</span>
+          </button>
+          <a id="btn-download-final" href="#" download class="hidden bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Download</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       ADD MY YOUTUBE CHANNEL MODAL (MULTI-CHANNEL HUB)
+       ========================================================================= -->
+  <div id="modal-add-user-channel" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#0c0f18] border border-slate-700/80 rounded-2xl w-full max-w-md p-5 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-border pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent text-sm font-bold">
+            📺
+          </div>
+          <div>
+            <h3 class="font-bold text-xs text-slate-100 uppercase tracking-wider">Add Your YouTube Channel</h3>
+            <p class="text-[10px] text-slate-400">Generate targeted Shorts for multiple channels of your own</p>
+          </div>
+        </div>
+        <button onclick="closeAddUserChannelModal()" class="w-7 h-7 rounded-lg hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center text-xs transition">✕</button>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Channel Name</label>
+          <input id="input-user-channel-name" placeholder="e.g. Internet Chill" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent" />
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Channel Handle</label>
+          <input id="input-user-channel-handle" placeholder="e.g. @internetchill" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent font-mono" />
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Niche / Content Style</label>
+          <input id="input-user-channel-niche" placeholder="e.g. Tech & AI Documentaries, Science Trivia" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Subscribers (optional)</label>
+            <input id="input-user-channel-subs" placeholder="e.g. 1.2K" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent" />
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Videos Count</label>
+            <input id="input-user-channel-vids" type="number" placeholder="e.g. 14" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent" />
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-border">
+        <button onclick="closeAddUserChannelModal()" class="px-3.5 py-1.5 text-xs font-semibold text-slate-400 hover:text-white transition">Cancel</button>
+        <button onclick="submitAddUserChannel()" class="bg-accent hover:bg-cyan-400 text-black font-bold text-xs px-4 py-2 rounded-xl transition shadow active:scale-95">
+          Save & Activate Channel
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       REPURPOSE MODE INFO MODAL (VIDEO-AS-CODE)
+       ========================================================================= -->
+  <div id="modal-repurpose-info" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#0c0f18] border border-slate-700/80 rounded-2xl w-full max-w-lg p-5 sm:p-6 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-border pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center text-base">
+            🔄
+          </div>
+          <div>
+            <h3 class="font-bold text-xs text-slate-100 uppercase tracking-wider">Repurpose: Video-as-Code Mode</h3>
+            <p class="text-[10px] text-slate-400">Declarative HTML/SVG video reconstruction</p>
+          </div>
+        </div>
+        <button onclick="closeRepurposeModal()" class="w-7 h-7 rounded-lg hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center text-xs transition">✕</button>
+      </div>
+      <div class="flex flex-col gap-3 text-xs text-slate-300">
+        <div class="p-3 bg-surface border border-border rounded-xl leading-relaxed">
+          <span class="font-bold text-indigo-300">⚡ Next-Gen Code Engine:</span> This mode will let you paste a viral video link, podcast clip, or article to automatically deconstruct the transcript and re-render the short using <strong>HyperFrames</strong>, <strong>Motion Canvas</strong>, and <strong>SVG-ORA</strong>.
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-void p-2.5 rounded-xl border border-border">
+            <div class="font-black text-indigo-400 text-xs">HyperFrames</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">HTML/CSS Video</div>
+          </div>
+          <div class="bg-void p-2.5 rounded-xl border border-border">
+            <div class="font-black text-cyan-400 text-xs">Motion Canvas</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Vector 60fps</div>
+          </div>
+          <div class="bg-void p-2.5 rounded-xl border border-border">
+            <div class="font-black text-emerald-400 text-xs">SVG-ORA</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">AI Vector Shapes</div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-border">
+        <button onclick="closeRepurposeModal()" class="bg-accent hover:bg-cyan-400 text-black font-bold text-xs px-4 py-2 rounded-xl transition shadow active:scale-95">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       ADD TRACKED CHANNEL MODAL (REPLACES BROWSER PROMPT)
+       ========================================================================= -->
+  <div id="modal-add-channel" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#0c0f18] border border-slate-700/80 rounded-2xl w-full max-w-md p-5 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-border pb-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent text-xs">
+            ▶
+          </div>
+          <div>
+            <h3 class="font-bold text-xs text-slate-100 uppercase tracking-wider">Track Inspiration Channel</h3>
+            <p class="text-[10px] text-slate-400">Monitor competitor viral topics & content signals</p>
+          </div>
+        </div>
+        <button onclick="closeAddChannelModal()" class="w-7 h-7 rounded-lg hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center text-xs transition">✕</button>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">YouTube Handle or Channel Name</label>
+          <input id="input-channel-handle" placeholder="e.g. @Veritasium or @BeSmart" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent font-mono" />
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Topic Focus / Niche</label>
+          <input id="input-channel-focus" placeholder="e.g. Physics, Material Science, Biology" class="w-full bg-void border border-border rounded-xl px-3 py-2 text-xs text-slate-100 outline-none focus:border-accent" />
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-border">
+        <button onclick="closeAddChannelModal()" class="px-3.5 py-1.5 text-xs font-semibold text-slate-400 hover:text-white transition">Cancel</button>
+        <button onclick="submitAddChannel()" class="bg-accent hover:bg-cyan-400 text-black font-bold text-xs px-4 py-2 rounded-xl transition shadow active:scale-95">
+          + Track Channel
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       RECENTLY DELETED PROJECTS TRASH BIN MODAL (7-DAY AUTO-PURGE)
+       ========================================================================= -->
+  <div id="modal-trash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#0c0f18] border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[85vh] p-5 sm:p-6 flex flex-col gap-4 shadow-2xl overflow-hidden">
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-border pb-3 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center text-base">
+            🗑
+          </div>
+          <div>
+            <h3 class="font-bold text-xs text-slate-100 uppercase tracking-wider">Recently Deleted Projects</h3>
+            <p class="text-[10px] text-slate-400">Projects remain here for 7 days before permanent automatic purge</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="emptyTrashConfirm()" id="btn-empty-trash" class="text-xs text-rose-400 hover:text-rose-300 font-semibold px-2.5 py-1 rounded-lg border border-rose-500/30 hover:border-rose-500/60 bg-rose-950/30 transition">
+            Empty Trash
+          </button>
+          <button onclick="closeTrashBinModal()" class="w-7 h-7 rounded-lg hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center text-xs transition">✕</button>
+        </div>
+      </div>
+
+      <!-- Trash List Grid -->
+      <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5" id="trash-projects-feed">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Floating Project Action Menu Popover -->
+  <div id="project-action-menu" class="hidden fixed z-[90] bg-[#0c0f18] border border-slate-700/80 rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 w-44 font-sans text-xs">
+    <button onclick="onProjectMenuStudio()" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-surface-light text-slate-200 hover:text-accent font-semibold flex items-center gap-2 transition">
+      <span>⚡</span><span>Open in Studio</span>
+    </button>
+    <button onclick="onProjectMenuTrash()" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-rose-950/40 text-rose-400 font-semibold flex items-center gap-2 transition">
+      <span>🗑</span><span>Move to Trash</span>
+    </button>
+  </div>
+
+
+  <!-- =========================================================================
+       NEW PROJECT MODAL
+       ========================================================================= -->
+  <div id="modal-new" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-surface border border-border rounded-2xl w-full max-w-md p-5 flex flex-col gap-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-border pb-2.5">
+        <h3 class="font-bold text-sm text-slate-100">Create New Short Draft</h3>
+        <button onclick="closeNewProjectModal()" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+      <div>
+        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Topic or Contradiction</label>
+        <textarea id="new-topic-input" placeholder="e.g. Why glass is secretly a moving liquid..." class="w-full bg-void border border-border rounded-xl p-3 text-xs text-slate-100 outline-none focus:border-accent h-24 resize-none leading-relaxed"></textarea>
+      </div>
+      <input type="hidden" id="new-aspect-ratio" value="9:16" />
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeNewProjectModal()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
+        <button onclick="submitNewDraft()" id="btn-create-draft" class="bg-accent hover:bg-cyan-400 text-black font-bold text-xs px-4 py-2 rounded-xl transition">
+          Create Draft
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       SETTINGS POPOVER (MINIMAL PRIMITIVES UI — FROM USER WIREFRAME SKETCH)
+       ========================================================================= -->
+  <div id="settings-popover" class="hidden fixed top-16 right-4 sm:right-6 w-[340px] sm:w-[380px] border border-slate-700/80 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.98)] p-4 sm:p-5 z-[80] flex flex-col gap-3 font-sans transition-all" style="background-color: #0b0f19 !important;">
+    <!-- Popover Header -->
+    <div class="flex items-center justify-between border-b border-border/70 pb-2.5">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-full bg-accent-muted border border-accent/30 flex items-center justify-center text-accent">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-slate-100 uppercase tracking-wider">Engine Settings</h3>
+          <p class="text-[10px] text-slate-400">Pure Cloud API • Instant Switch</p>
+        </div>
+      </div>
+      <button onclick="toggleSettingsPopover()" class="w-6 h-6 rounded-full hover:bg-surface-light text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
+    </div>
+
+    <!-- Row 1: LLM Model -->
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          LLM Model
+        </span>
+        <span class="text-[9px] font-mono text-slate-400 bg-void px-2 py-0.5 rounded-full border border-border">OpenRouter</span>
+      </div>
+      <div class="relative">
+        <select id="setting-llm" onchange="updateEstimatedCost()" class="w-full bg-void border border-border hover:border-slate-600 focus:border-accent text-slate-200 text-xs rounded-xl px-3 py-2 outline-none appearance-none cursor-pointer transition">
+          <option value="openai/gpt-4o-mini">GPT-4o Mini ($0.0004 / Short)</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet ($0.006 / Short)</option>
+          <option value="deepseek/deepseek-chat">DeepSeek V3 ($0.0003 / Short)</option>
+          <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Image Model -->
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Image Model
+        </span>
+        <span class="text-[9px] font-mono text-cyan-400 bg-accent-muted px-2 py-0.5 rounded-full border border-accent/30">9:16 Stills</span>
+      </div>
+      <div class="relative">
+        <select id="setting-image" onchange="updateEstimatedCost()" class="w-full bg-void border border-border hover:border-slate-600 focus:border-accent text-slate-200 text-xs rounded-xl px-3 py-2 outline-none appearance-none cursor-pointer transition">
+          <option value="krea/krea-2-medium-turbo">Krea 2 Medium Turbo ($0.015/frame • Fast & Aesthetic)</option>
+          <option value="google/gemini-3.1-flash-image">Nano Banana 2 ($0.002/frame • Google Flash)</option>
+          <option value="nano-banana-2-lite">Nano Banana 2 Lite ($0.0008/frame • Ultra Budget)</option>
+          <option value="black-forest-labs/flux-schnell">Flux Schnell ($0.003/frame • Replicate)</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Video Model -->
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          Video Motion Model
+        </span>
+        <span class="text-[9px] font-mono text-emerald-400 bg-void px-2 py-0.5 rounded-full border border-border">RunPod Serverless</span>
+      </div>
+      <div class="relative">
+        <select id="setting-video" onchange="updateEstimatedCost()" class="w-full bg-void border border-border hover:border-slate-600 focus:border-accent text-slate-200 text-xs rounded-xl px-3 py-2 outline-none appearance-none cursor-pointer transition">
+          <option value="openrouter_seedance_mini">ByteDance Seedance 2.0 Mini (OpenRouter • $0.033/s ~ $0.84/Short)</option>
+          <option value="runpod_minimax_turbo">MiniMax H3 Max Turbo (RunPod • ~$0.04/Short)</option>
+          <option value="openrouter_minimax_hailuo">MiniMax Hailuo-3 (OpenRouter • $3.25/Short)</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 4: TTS Voice -->
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
+          Voice / Narration
+        </span>
+        <span class="text-[9px] font-mono text-slate-400 bg-void px-2 py-0.5 rounded-full border border-border">Studio Audio</span>
+      </div>
+      <div class="relative">
+        <select id="setting-tts" onchange="updateEstimatedCost()" class="w-full bg-void border border-border hover:border-slate-600 focus:border-accent text-slate-200 text-xs rounded-xl px-3 py-2 outline-none appearance-none cursor-pointer transition">
+          <option value="Charon">Google Charon (Deep Documentary • $0.0015)</option>
+          <option value="Puck">Google Puck (Crisp Storyteller • $0.0015)</option>
+          <option value="Fenrir">Google Fenrir (Cinematic Movie Narrator • $0.0015)</option>
+          <option value="Kore">Google Kore (Smooth Female Explainer • $0.0015)</option>
+          <option value="flux-cliff-en">Deepgram Flux Cliff (Free • OpenRouter)</option>
+          <option value="flux-alexis-en">Deepgram Flux Alexis (Free • OpenRouter)</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 5: Art Style -->
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center justify-between text-[11px]">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4 5 5 0 013-4.5V5a2 2 0 114 0v7.5A5 5 0 0113 17a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.5"/></svg>
+          Cinematic Art Direction
+        </span>
+        <span class="text-[9px] font-mono text-slate-400 bg-void px-2 py-0.5 rounded-full border border-border">Style Bible</span>
+      </div>
+      <div class="relative">
+        <select id="setting-art" class="w-full bg-void border border-border hover:border-slate-600 focus:border-accent text-slate-200 text-xs rounded-xl px-3 py-2 outline-none appearance-none cursor-pointer transition">
+          <optgroup label="📸 Photography" class="bg-surface text-slate-300 font-bold">
+            <option value="photo_35mm">35mm Photography (Kodak Realism)</option>
+            <option value="photo_surveillance">Surveillance Camera Photo (CCTV Mystery)</option>
+            <option value="photo_wes_anderson">Wes Anderson Photography (Pastel Symmetry)</option>
+          </optgroup>
+          <optgroup label="🧊 3D Render" class="bg-surface text-slate-300 font-bold">
+            <option value="render_unreal">Unreal Engine 5 (Raytraced Lumen)</option>
+            <option value="render_spiderverse">Spider-Verse Style (Halftone Kinetic)</option>
+            <option value="render_coraline">Coraline Stop-Motion (Tactile Macro)</option>
+          </optgroup>
+          <optgroup label="🎨 Design" class="bg-surface text-slate-300 font-bold">
+            <option value="design_butcher_billy">Butcher Billy Style (Punk Pop Halftone)</option>
+            <option value="design_lego_hybrid">LEGO Minifigure & Set Style (Studs & Plastic)</option>
+            <option value="design_minecraft">Minecraft Style (Voxel Grid Physics)</option>
+          </optgroup>
+          <optgroup label="💥 Comics" class="bg-surface text-slate-300 font-bold">
+            <option value="comic_franco_belgian">Franco-Belgian Ultradetailed (Ligne Claire)</option>
+            <option value="comic_hellboy">Hellboy Style (Mignola Monolithic Shadow)</option>
+            <option value="comic_vintage">Vintage Comics (1950s Newsprint CMYK)</option>
+          </optgroup>
+          <optgroup label="🖌️ Digital Painting" class="bg-surface text-slate-300 font-bold">
+            <option value="digital_xray">X-Ray Style (Internal Skeletal Glow)</option>
+            <option value="digital_blacklight">Blacklight Style (Fluorescent UV)</option>
+            <option value="digital_gris_grimly">Gris Grimly Inspired (Dark Macabre Storybook)</option>
+          </optgroup>
+          <optgroup label="🖼️ Cover Art" class="bg-surface text-slate-300 font-bold">
+            <option value="cover_gta_v">GTA V Polished Cover Art (Punchy Cel-Shading)</option>
+            <option value="cover_interplay_shadow">Interplay of Shadow & Light (Dramatic Focus)</option>
+            <option value="cover_glossy">Glossy Semi-Realistic (Liquid & Tech Sheen)</option>
+          </optgroup>
+          <optgroup label="🏛️ Painting" class="bg-surface text-slate-300 font-bold">
+            <option value="paint_tenebrism">Tenebrism (Caravaggio Pitch-Black Spotlight)</option>
+            <option value="paint_hyperrealism">Hyperrealism (Microscopic Texture Shock)</option>
+            <option value="paint_chiaroscuro">Chiaroscuro (Golden Master Oil Glazes)</option>
+          </optgroup>
+          <optgroup label="📺 Cartoon" class="bg-surface text-slate-300 font-bold">
+            <option value="toon_rick_and_morty">Rick and Morty Style (Chaotic Multiverse)</option>
+            <option value="toon_gravity_falls">Gravity Falls Style (Supernatural Mystery)</option>
+            <option value="toon_bruce_timm">Bruce Timm Noir (90s Deco Shadows)</option>
+          </optgroup>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Cost / 30s Badge (Directly from User Wireframe Sketch) -->
+    <div class="flex items-center justify-between bg-void border border-border rounded-xl px-3.5 py-2.5 mt-1">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs text-slate-300 font-semibold">Total Cost / 30s Short:</span>
+      </div>
+      <div class="text-sm font-bold text-emerald-400 font-mono tracking-tight" id="setting-cost-display">
+        $0.12
+      </div>
+    </div>
+
+    <!-- Action Pill Buttons (Directly from User Wireframe Sketch) -->
+    <div class="flex items-center justify-end gap-2 pt-1 border-t border-border/50">
+      <button onclick="toggleSettingsPopover()" class="px-4 py-1.5 rounded-full text-xs font-semibold text-slate-400 hover:text-white hover:bg-surface-light border border-transparent transition active:scale-95">
+        ✕ Cancel
+      </button>
+      <button onclick="applySettings()" id="btn-apply-settings" class="px-5 py-1.5 rounded-full text-xs font-bold bg-accent hover:bg-cyan-400 text-black transition active:scale-95 flex items-center gap-1.5 shadow-sm">
+        <span>✓ Apply</span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       JAVASCRIPT
+       ========================================================================= -->
+  <script>
+    let activeProject = null;
+    let activeSceneIdx = 0;
+    let captionYPercent = 72.0;
+
+    // --- Tabs ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.app-tab').forEach(t => t.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.classList.remove('text-accent');
+        btn.classList.add('text-slate-400');
+      });
+      document.getElementById(`nav-btn-${tabId}`).classList.add('text-accent');
+      document.getElementById(`nav-btn-${tabId}`).classList.remove('text-slate-400');
+    }
+
+    function toggleChannelMenu() {
+      document.getElementById('channel-menu').classList.toggle('hidden');
+    }
+
+    // --- Topic History Slide-over Drawer ---
+    async function openTopicHistoryDrawer() {
+      const drawer = document.getElementById('topic-history-drawer');
+      drawer.classList.remove('closed');
+      await loadTopicHistory();
+    }
+    function closeTopicHistoryDrawer() {
+      document.getElementById('topic-history-drawer').classList.add('closed');
+    }
+
+    async function loadTopicHistory() {
+      try {
+        const res = await fetch('/api/topics/history');
+        const history = await res.json();
+        const container = document.getElementById('topic-history-feed');
+        container.innerHTML = '';
+        if (history.length === 0) {
+          container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">No saved topics yet. Refresh suggestions to build history!</div>';
+          return;
+        }
+
+        history.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'bg-surface-light border border-border p-3.5 rounded-xl flex flex-col justify-between gap-2 hover:border-accent transition group';
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
+                <span class="text-accent font-semibold">${t.category || 'Science'}</span>
+                <span>${t.created_at || 'Saved'}</span>
+              </div>
+              <div class="font-bold text-xs text-slate-100 group-hover:text-accent">${t.title}</div>
+              <div class="text-[11px] text-slate-400 italic mt-1 line-clamp-2">"${t.hook || ''}"</div>
+            </div>
+            <button onclick="closeTopicHistoryDrawer(); openWithTopic('${t.title.replace(/'/g, "\\'")}')" class="self-end text-xs bg-accent text-black font-bold px-2.5 py-1 rounded-md transition hover:bg-cyan-400">
+              Use Topic →
+            </button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Failed loading topic history", err);
+      }
+    }
+
+    // --- Foldable Property Inspector & Tab Controller ---
+    function toggleInspectorFold(forceFold = null) {
+      const panel = document.getElementById('scene-inspector-panel');
+      const unfoldBtn = document.getElementById('btn-unfold-inspector');
+      if (!panel) return;
+      
+      const isFolded = panel.classList.contains('folded');
+      const shouldFold = forceFold !== null ? forceFold : !isFolded;
+      
+      if (shouldFold) {
+        panel.classList.add('folded');
+        if (unfoldBtn) unfoldBtn.classList.remove('hidden');
+      } else {
+        panel.classList.remove('folded');
+        if (unfoldBtn) unfoldBtn.classList.add('hidden');
+      }
+    }
+
+    function toggleMobileInspector() {
+      toggleInspectorFold();
+    }
+
+    function switchInspectorTab(tab) {
+      // 1. Ensure drawer is unfolded and visible
+      toggleInspectorFold(false);
+
+      // 2. Tab IDs and badge names
+      const tabs = ['voice', 'image', 'video', 'caption', 'title'];
+      const badges = {
+        voice: { text: 'SCRIPT', color: 'text-amber-400 bg-amber-400/20' },
+        image: { text: 'STILL', color: 'text-accent bg-accent/20' },
+        video: { text: 'VIDEO', color: 'text-cyan-400 bg-cyan-400/20' },
+        caption: { text: 'SUBS', color: 'text-yellow-400 bg-yellow-400/20' },
+        title: { text: 'HOOK', color: 'text-emerald-400 bg-emerald-400/20' }
+      };
+
+      tabs.forEach(t => {
+        const btn = document.getElementById(`itab-btn-${t}`);
+        const content = document.getElementById(`itab-content-${t}`);
+        if (t === tab) {
+          if (btn) {
+            btn.className = 'itab-btn py-1.5 text-[11px] font-bold rounded-lg text-accent bg-surface-light border border-accent/40 transition flex flex-col items-center gap-0.5';
+          }
+          if (content) {
+            content.classList.remove('hidden');
+            content.classList.add('flex');
+          }
+        } else {
+          if (btn) {
+            btn.className = 'itab-btn py-1.5 text-[11px] font-bold rounded-lg text-slate-400 hover:text-white transition flex flex-col items-center gap-0.5';
+          }
+          if (content) {
+            content.classList.add('hidden');
+            content.classList.remove('flex');
+          }
+        }
+      });
+
+      const badge = document.getElementById('inspector-tab-badge');
+      if (badge && badges[tab]) {
+        badge.innerText = badges[tab].text;
+        badge.className = `text-[9px] font-black uppercase px-2 py-0.5 rounded ${badges[tab].color}`;
+      }
+
+      // Contextual focusing
+      if (tab === 'image') {
+        const f = document.getElementById('inspector-flux-prompt');
+        if (f) setTimeout(() => f.focus(), 150);
+      } else if (tab === 'video') {
+        const m = document.getElementById('inspector-motion-prompt');
+        if (m) setTimeout(() => m.focus(), 150);
+      } else if (tab === 'voice') {
+        const n = document.getElementById('inspector-narration');
+        if (n) setTimeout(() => n.focus(), 150);
+      } else if (tab === 'caption') {
+        const box = document.getElementById('draggable-caption');
+        if (box) {
+          box.classList.add('ring-2', 'ring-accent');
+          setTimeout(() => box.classList.remove('ring-2', 'ring-accent'), 1000);
+        }
+      } else if (tab === 'title') {
+        const banner = document.getElementById('canvas-top-title-banner');
+        if (banner) banner.classList.remove('hidden');
+        const inp = document.getElementById('inspector-hook-input');
+        if (inp) setTimeout(() => inp.focus(), 150);
+      }
+    }
+
+    function insertMotionChip(chipText) {
+      const el = document.getElementById('inspector-motion-prompt');
+      if (!el) return;
+      if (!el.value.trim()) {
+        el.value = chipText;
+      } else {
+        el.value = el.value.trim() + ", " + chipText;
+      }
+      if (activeProject && activeProject.scenes && activeProject.scenes[activeSceneIdx]) {
+        activeProject.scenes[activeSceneIdx].minimax_motion_prompt = el.value;
+      }
+    }
+
+    function onCaptionSliderChange(val) {
+      const percent = parseFloat(val);
+      captionYPercent = percent;
+      updateCaptionPosition(percent);
+      if (activeProject) {
+        activeProject.caption_y_percent = percent;
+      }
+    }
+
+    let activeCaptionColor = 'yellow';
+    function setCaptionColorTheme(theme) {
+      activeCaptionColor = theme;
+      const preview = document.getElementById('caption-preview-text');
+      if (!preview) return;
+      const words = preview.innerText.split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        const colorMap = {
+          yellow: 'text-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.95)]',
+          cyan: 'text-cyan-400 drop-shadow-[0_0_12px_rgba(6,182,212,0.95)]',
+          emerald: 'text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.95)]',
+          white: 'text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.95)]'
+        };
+        const c = colorMap[theme] || colorMap.yellow;
+        preview.innerHTML = `<span class="${c} scale-110 inline-block font-black">${words[0]}</span> ` + words.slice(1).join(' ');
+      }
+    }
+
+    function onInspectorStyleChange(styleId) {
+      if (!activeProject) return;
+      activeProject.art_style = styleId;
+      const label = document.getElementById('inspector-scene-label');
+      if (label) {
+        const orig = label.innerText;
+        label.innerText = "✓ Style Selected";
+        setTimeout(() => { label.innerText = orig; }, 1200);
+      }
+    }
+
+    function toggleCanvasTitleBanner() {
+      const banner = document.getElementById('canvas-top-title-banner');
+      if (!banner) return;
+      banner.classList.toggle('hidden');
+      const btn = document.getElementById('btn-toggle-hook-banner');
+      if (banner.classList.contains('hidden')) {
+        if (btn) btn.innerText = "Show on Canvas";
+      } else {
+        if (btn) btn.innerText = "Hide from Canvas";
+        const input = document.getElementById('canvas-top-title-input');
+        if (input) {
+          input.value = (document.getElementById('inspector-hook-input').value || activeProject?.hook || 'HOOK HEADLINE').toUpperCase();
+          input.focus();
+        }
+      }
+    }
+
+    function onHookInputChange(val) {
+      if (!activeProject) return;
+      activeProject.hook = val;
+      const canvasInput = document.getElementById('canvas-top-title-input');
+      if (canvasInput) canvasInput.value = val.toUpperCase();
+    }
+
+    function onShortTitleChange(val) {
+      if (!activeProject) return;
+      activeProject.title = val;
+    }
+
+    function previewCurrentSceneAudio() {
+      if (!activeProject || !activeProject.scenes || !activeProject.scenes[activeSceneIdx]) return;
+      const s = activeProject.scenes[activeSceneIdx];
+      if (s.audio_url) {
+        const a = new Audio(s.audio_url);
+        a.play().catch(() => {});
+      } else {
+        alert("Audio not generated yet. Click '1. Frames First' to generate audio.");
+      }
+    }
+
+    async function generateHookThumbnail() {
+      if (!activeProject) return;
+      const headline = document.getElementById('inspector-hook-input').value || activeProject.hook || activeProject.title;
+      setCanvasShimmer(true, "Generating CapCut Thumbnail...");
+      try {
+        const res = await fetch('/api/project/generate-thumbnail', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            project_name: activeProject.project_name,
+            headline: headline
+          })
+        });
+        const data = await res.json();
+        if (data.thumbnail_url) {
+          activeProject.thumbnail_url = data.thumbnail_url;
+          alert("Thumbnail generated successfully!");
+        }
+      } catch (err) {
+        alert("Thumbnail generation failed: " + err.message);
+      } finally {
+        setCanvasShimmer(false);
+      }
+    }
+
+    // --- Studio Mode View Toggle (Hides Red Sections) ---
+    function openEditorProject(projectName) {
+      // 1. Hide Main App Header and Bottom Nav Dock!
+      document.getElementById('main-app-header').classList.add('hidden');
+      document.getElementById('main-app-nav').classList.add('hidden');
+
+      // 2. Open Full Screen Studio Editor
+      document.getElementById('view-editor').classList.remove('hidden');
+
+      // 3. Start inspector folded so canvas is centered with zero dead space
+      toggleInspectorFold(true);
+
+      fetch(`/api/project/${projectName}`)
+        .then(r => r.json())
+        .then(p => {
+          activeProject = p;
+          renderEditorUI();
+        })
+        .catch(err => alert("Failed to open project: " + err.message));
+    }
+
+    function closeEditor() {
+      // 1. Restore Main App Header and Bottom Nav Dock!
+      document.getElementById('main-app-header').classList.remove('hidden');
+      document.getElementById('main-app-nav').classList.remove('hidden');
+
+      // 2. Close Studio View
+      document.getElementById('view-editor').classList.add('hidden');
+      loadProjects();
+    }
+
+    function renderEditorUI() {
+      if (!activeProject) return;
+      document.getElementById('editor-title').innerText = activeProject.title || activeProject.project_name;
+      captionYPercent = activeProject.caption_y_percent || 72.0;
+      updateCaptionPosition(captionYPercent);
+
+      const reel = document.getElementById('editor-filmstrip');
+      reel.innerHTML = '';
+
+      (activeProject.scenes || []).forEach((s, idx) => {
+        const card = document.createElement('div');
+        card.className = `shrink-0 w-20 aspect-[9/16] bg-surface rounded-xl border ${idx === activeSceneIdx ? 'border-accent shadow-lg shadow-cyan-950' : 'border-border'} overflow-hidden relative cursor-pointer group`;
+        card.onclick = () => selectScene(idx);
+
+        let mediaTag = `<div class="w-full h-full flex items-center justify-center text-[10px] text-slate-600">Pending</div>`;
+        if (s.video_url) {
+          mediaTag = `<video src="${s.video_url}" class="w-full h-full object-cover" muted></video>`;
+        } else if (s.image_url) {
+          mediaTag = `<img src="${s.image_url}" class="w-full h-full object-cover" />`;
+        }
+
+        card.innerHTML = `
+          ${mediaTag}
+          <div class="absolute top-1 left-1 bg-black/70 px-1 rounded text-[9px] font-bold">#${s.scene_number}</div>
+          <button onclick="event.stopPropagation(); rerollScene(${s.scene_number});" title="Re-roll Frame" class="absolute bottom-1 right-1 bg-black/80 hover:bg-accent text-accent hover:text-black w-5 h-5 rounded flex items-center justify-center text-[10px] border border-border">⚡</button>
+        `;
+        reel.appendChild(card);
+      });
+
+      selectScene(activeSceneIdx);
+    }
+
+    // --- Interactive Studio Player State ---
+    let slideshowPlayer = {
+      isPlaying: false,
+      audio: new Audio(),
+      subInterval: null,
+      timeInterval: null
+    };
+
+    function selectScene(idx) {
+      activeSceneIdx = idx;
+      if (!activeProject || !activeProject.scenes || !activeProject.scenes[idx]) return;
+      const scene = activeProject.scenes[idx];
+
+      const img = document.getElementById('canvas-image');
+      const vid = document.getElementById('canvas-video');
+      const empty = document.getElementById('canvas-empty-state');
+      const shimmer = document.getElementById('canvas-shimmer');
+
+      if (scene.video_url) {
+        vid.src = scene.video_url;
+        vid.classList.remove('hidden');
+        img.classList.add('hidden');
+        empty.classList.add('hidden');
+        if (!slideshowPlayer.isPlaying) vid.pause();
+      } else if (scene.image_url) {
+        img.src = scene.image_url;
+        img.classList.remove('hidden');
+        vid.classList.add('hidden');
+        empty.classList.add('hidden');
+      } else {
+        img.classList.add('hidden');
+        vid.classList.add('hidden');
+        empty.classList.remove('hidden');
+      }
+
+      document.getElementById('inspector-scene-label').innerText = `Scene ${scene.scene_number} of ${activeProject.scenes.length}`;
+      document.getElementById('player-scene-badge').innerText = `Scene ${scene.scene_number}/${activeProject.scenes.length}`;
+      document.getElementById('inspector-narration').value = scene.narration || '';
+      document.getElementById('inspector-flux-prompt').value = scene.flux_image_prompt || '';
+      document.getElementById('inspector-motion-prompt').value = scene.minimax_motion_prompt || '';
+
+      // Update audio status & duration
+      const audioMeta = document.getElementById('inspector-audio-meta');
+      const audioStatus = document.getElementById('inspector-audio-status');
+      if (scene.audio_url) {
+        if (audioStatus) audioStatus.innerText = "✓ Audio Ready";
+        if (audioMeta) audioMeta.innerText = `Duration: ~${(scene.actual_audio_duration || 4.5).toFixed(1)}s`;
+      } else {
+        if (audioStatus) audioStatus.innerText = "Pending";
+        if (audioMeta) audioMeta.innerText = "Not generated yet";
+      }
+
+      // Update art style select
+      const artSelect = document.getElementById('inspector-art-style');
+      if (artSelect && activeProject.art_style) {
+        artSelect.value = activeProject.art_style;
+      }
+
+      // Update hook & title inputs
+      const hookInp = document.getElementById('inspector-hook-input');
+      const titleInp = document.getElementById('inspector-title-input');
+      if (hookInp) hookInp.value = activeProject.hook || '';
+      if (titleInp) titleInp.value = activeProject.title || '';
+
+      // Update subtitle slider and indicator
+      const slider = document.getElementById('slider-caption-y');
+      const curY = activeProject.caption_y_percent || 72;
+      if (slider) slider.value = curY;
+      const yVal = document.getElementById('inspector-caption-y-val');
+      if (yVal) yVal.innerText = `${Math.round(curY)}%`;
+
+      // Update subtitle preview cleanly
+      const words = (scene.narration || 'CAPTION PREVIEW').split(/\s+/).filter(Boolean);
+      document.getElementById('caption-preview-text').innerText = words.slice(0, 4).join(' ').toUpperCase();
+
+      // Update top title banner
+      const topBanner = document.getElementById('canvas-top-title-banner');
+      const topInput = document.getElementById('canvas-top-title-input');
+      if (activeProject.hook && topBanner && !topBanner.classList.contains('hidden')) {
+        topInput.value = activeProject.hook.toUpperCase();
+      }
+      
+      const reelCards = document.querySelectorAll('#editor-filmstrip > div');
+      reelCards.forEach((c, i) => {
+        c.classList.toggle('border-accent', i === idx);
+        c.classList.toggle('shadow-cyan-950', i === idx);
+        c.classList.toggle('border-border', i !== idx);
+      });
+    }
+
+    // --- Interactive Playhead / Slideshow Player ---
+    function togglePlaySlideshow() {
+      if (slideshowPlayer.isPlaying) {
+        pauseSlideshow();
+      } else {
+        startSlideshow();
+      }
+    }
+
+    function startSlideshow() {
+      if (!activeProject || !activeProject.scenes || activeProject.scenes.length === 0) return;
+      slideshowPlayer.isPlaying = true;
+      document.getElementById('icon-play').classList.add('hidden');
+      document.getElementById('icon-pause').classList.remove('hidden');
+
+      // If at end of scenes, wrap back to scene 0
+      if (activeSceneIdx >= activeProject.scenes.length - 1) {
+        activeSceneIdx = 0;
+      }
+      playSceneInSlideshow(activeSceneIdx);
+    }
+
+    function pauseSlideshow() {
+      slideshowPlayer.isPlaying = false;
+      document.getElementById('icon-play').classList.remove('hidden');
+      document.getElementById('icon-pause').classList.add('hidden');
+
+      slideshowPlayer.audio.pause();
+      const vid = document.getElementById('canvas-video');
+      if (vid) vid.pause();
+
+      if (slideshowPlayer.subInterval) clearInterval(slideshowPlayer.subInterval);
+      if (slideshowPlayer.timeInterval) clearInterval(slideshowPlayer.timeInterval);
+
+      // Restore static subtitle
+      const scene = activeProject.scenes[activeSceneIdx];
+      if (scene) {
+        const words = (scene.narration || 'CAPTION PREVIEW').split(/\s+/).filter(Boolean);
+        document.getElementById('caption-preview-text').innerText = words.slice(0, 4).join(' ').toUpperCase();
+      }
+    }
+
+    function stopSlideshow() {
+      pauseSlideshow();
+      selectScene(0);
+      document.getElementById('player-time-badge').innerText = '0:00';
+    }
+
+    function playSceneInSlideshow(idx) {
+      if (!slideshowPlayer.isPlaying || !activeProject || !activeProject.scenes[idx]) return;
+      selectScene(idx);
+      const scene = activeProject.scenes[idx];
+      const vid = document.getElementById('canvas-video');
+
+      if (slideshowPlayer.subInterval) clearInterval(slideshowPlayer.subInterval);
+      if (slideshowPlayer.timeInterval) clearInterval(slideshowPlayer.timeInterval);
+
+      const words = (scene.narration || '').split(/\s+/).filter(Boolean);
+
+      if (scene.video_url && vid) {
+        vid.currentTime = 0;
+        vid.muted = false;
+        vid.play().catch(() => {});
+        vid.onended = () => advanceSlideshow();
+
+        slideshowPlayer.subInterval = setInterval(() => {
+          if (!slideshowPlayer.isPlaying) return;
+          animateSubtitleWords(words, vid.currentTime, vid.duration || 5.0);
+          updateTimeBadge(vid.currentTime);
+        }, 80);
+
+      } else if (scene.audio_url) {
+        slideshowPlayer.audio.src = scene.audio_url;
+        slideshowPlayer.audio.currentTime = 0;
+        slideshowPlayer.audio.play().catch(() => {});
+        slideshowPlayer.audio.onended = () => advanceSlideshow();
+
+        const estDuration = scene.actual_audio_duration || 5.0;
+        slideshowPlayer.subInterval = setInterval(() => {
+          if (!slideshowPlayer.isPlaying) return;
+          const curr = slideshowPlayer.audio.currentTime;
+          animateSubtitleWords(words, curr, slideshowPlayer.audio.duration || estDuration);
+          updateTimeBadge(curr);
+        }, 80);
+
+      } else {
+        // Fallback timer if media not rendered yet
+        let timer = 0;
+        const fallbackDur = 4.0;
+        slideshowPlayer.subInterval = setInterval(() => {
+          if (!slideshowPlayer.isPlaying) return;
+          timer += 0.1;
+          animateSubtitleWords(words, timer, fallbackDur);
+          updateTimeBadge(timer);
+          if (timer >= fallbackDur) {
+            clearInterval(slideshowPlayer.subInterval);
+            advanceSlideshow();
+          }
+        }, 100);
+      }
+    }
+
+    function advanceSlideshow() {
+      if (!slideshowPlayer.isPlaying) return;
+      if (activeSceneIdx < activeProject.scenes.length - 1) {
+        playSceneInSlideshow(activeSceneIdx + 1);
+      } else {
+        // Finished all 5 scenes
+        stopSlideshow();
+      }
+    }
+
+    function animateSubtitleWords(words, currentTime, totalDuration) {
+      if (!words || words.length === 0) return;
+      const dur = Math.max(0.5, totalDuration);
+      const wordDur = dur / words.length;
+      const activeWordIdx = Math.min(words.length - 1, Math.max(0, Math.floor(currentTime / wordDur)));
+
+      // 3-word punchy CapCut window
+      const chunkSize = 3;
+      const chunkStart = Math.floor(activeWordIdx / chunkSize) * chunkSize;
+      const chunkWords = words.slice(chunkStart, chunkStart + chunkSize);
+
+      const html = chunkWords.map((w, i) => {
+        const globalIdx = chunkStart + i;
+        const cleanWord = w.toUpperCase().replace(/[^\w\s\$\!\?]/g, '');
+        if (globalIdx === activeWordIdx) {
+          return `<span class="text-yellow-400 scale-110 inline-block drop-shadow-[0_0_12px_rgba(250,204,21,0.95)] transition-transform duration-75">${cleanWord}</span>`;
+        } else {
+          return `<span class="text-white">${cleanWord}</span>`;
+        }
+      }).join(' ');
+
+      document.getElementById('caption-preview-text').innerHTML = html;
+    }
+
+    function updateTimeBadge(seconds) {
+      const s = Math.floor(seconds);
+      const m = Math.floor(s / 60);
+      const secRem = s % 60;
+      document.getElementById('player-time-badge').innerText = `${m}:${secRem < 10 ? '0' : ''}${secRem}`;
+    }
+
+    // Spacebar play/pause listener
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !['TEXTAREA', 'INPUT'].includes(e.target.tagName)) {
+        const editor = document.getElementById('view-editor');
+        if (!editor.classList.contains('hidden')) {
+          e.preventDefault();
+          togglePlaySlideshow();
+        }
+      }
+    });
+
+    // --- Fast Canvas Tool Stack Handlers ---
+    let captionStyleIndex = 0;
+    const captionStyles = [
+      { textClass: 'capcut-text text-white', glow: '#06b6d4', name: 'CapCut Classic (Yellow Glow)' },
+      { textClass: 'capcut-text text-cyan-300', glow: '#00ffff', name: 'Neon Cyan' },
+      { textClass: 'capcut-text text-amber-300', glow: '#f59e0b', name: 'Electric Gold' }
+    ];
+
+    function focusTool(tool) {
+      if (tool === 'image') {
+        switchInspectorTab('image');
+      } else if (tool === 'video') {
+        switchInspectorTab('video');
+      } else if (tool === 'caption') {
+        switchInspectorTab('caption');
+      } else if (tool === 'title') {
+        toggleCanvasTitleBanner();
+        switchInspectorTab('title');
+      }
+    }
+
+    function updateTopTitle(val) {
+      if (!activeProject) return;
+      activeProject.hook = val;
+    }
+
+    function onNarrationChange(val) {
+      if (!activeProject || !activeProject.scenes || !activeProject.scenes[activeSceneIdx]) return;
+      activeProject.scenes[activeSceneIdx].narration = val;
+      const words = val.split(/\s+/).filter(Boolean);
+      document.getElementById('caption-preview-text').innerText = words.slice(0, 4).join(' ').toUpperCase();
+    }
+
+    // --- In-Studio Shimmer & Execution Helpers ---
+    function setCanvasShimmer(active, label = "Generating with OpenRouter...") {
+      const shim = document.getElementById('canvas-shimmer');
+      const text = document.getElementById('canvas-shimmer-text');
+      if (active) {
+        text.innerText = label;
+        shim.classList.remove('hidden');
+        shim.classList.add('flex');
+      } else {
+        shim.classList.add('hidden');
+        shim.classList.remove('flex');
+      }
+    }
+
+    // --- Stage 1 & 2 Execution ---
+    async function runFramesFirst() {
+      if (!activeProject) return;
+      const btn = document.getElementById('btn-frames-first');
+      btn.innerHTML = '<span>⚡ Rendering Stills...</span>';
+      btn.disabled = true;
+      setCanvasShimmer(true, "Rendering 5 Keyframes (Krea Turbo) & Audio...");
+
+      try {
+        const res = await fetch('/api/project/generate-frames', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: activeProject.project_name })
+        });
+        activeProject = await res.json();
+        renderEditorUI();
+      } catch (err) {
+        alert("Failed generating keyframes: " + err.message);
+      } finally {
+        setCanvasShimmer(false);
+        btn.innerHTML = '<span>⚡ 1. Frames First</span>';
+        btn.disabled = false;
+      }
+    }
+
+    async function rerollScene(sceneNumber) {
+      if (!activeProject) return;
+      setCanvasShimmer(true, `Re-rolling Scene ${sceneNumber} Keyframe...`);
+      try {
+        const res = await fetch('/api/project/reroll-frame', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            project_name: activeProject.project_name,
+            scene_number: sceneNumber,
+            custom_prompt: document.getElementById('inspector-flux-prompt').value
+          })
+        });
+        activeProject = await res.json();
+        renderEditorUI();
+      } catch (err) {
+        alert("Frame re-roll failed: " + err.message);
+      } finally {
+        setCanvasShimmer(false);
+      }
+    }
+
+    function rerollCurrentScene() {
+      if (!activeProject || !activeProject.scenes[activeSceneIdx]) return;
+      rerollScene(activeProject.scenes[activeSceneIdx].scene_number);
+    }
+
+    async function rerollVideoCurrentScene() {
+      if (!activeProject || !activeProject.scenes[activeSceneIdx]) return;
+      const sceneNum = activeProject.scenes[activeSceneIdx].scene_number;
+      setCanvasShimmer(true, `Animating Scene ${sceneNum} Video...`);
+      try {
+        const res = await fetch('/api/project/reroll-video', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            project_name: activeProject.project_name,
+            scene_number: sceneNum,
+            custom_motion_prompt: document.getElementById('inspector-motion-prompt').value
+          })
+        });
+        activeProject = await res.json();
+        renderEditorUI();
+      } catch (err) {
+        alert("Video animation failed: " + err.message);
+      } finally {
+        setCanvasShimmer(false);
+      }
+    }
+
+    async function saveCurrentSceneEdits() {
+      if (!activeProject || !activeProject.scenes[activeSceneIdx]) return;
+      const sceneNum = activeProject.scenes[activeSceneIdx].scene_number;
+      try {
+        const res = await fetch('/api/project/save-scene', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            project_name: activeProject.project_name,
+            scene_number: sceneNum,
+            narration: document.getElementById('inspector-narration').value,
+            flux_prompt: document.getElementById('inspector-flux-prompt').value,
+            motion_prompt: document.getElementById('inspector-motion-prompt').value
+          })
+        });
+        activeProject = await res.json();
+        // Subtle confirmation
+        const label = document.getElementById('inspector-scene-label');
+        const orig = label.innerText;
+        label.innerText = "✓ Saved!";
+        setTimeout(() => { label.innerText = orig; }, 1200);
+      } catch (err) {
+        console.error("Save failed", err);
+      }
+    }
+
+    async function runAnimateVideos() {
+      if (!activeProject) return;
+      const btn = document.getElementById('btn-animate-video');
+      btn.innerHTML = '<span>🎬 Animating (Seedance)...</span>';
+      btn.disabled = true;
+      setCanvasShimmer(true, "Animating All 5 Scenes (Seedance 2.0 / MiniMax)...");
+
+      try {
+        const res = await fetch('/api/project/render-videos', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: activeProject.project_name })
+        });
+        activeProject = await res.json();
+        renderEditorUI();
+      } catch (err) {
+        alert("Video generation failed: " + err.message);
+      } finally {
+        setCanvasShimmer(false);
+        btn.innerHTML = '<span>🎬 2. Animate (MiniMax)</span>';
+      }
+    }
+
+    // --- Interactive Caption Dragger & Element Click Binders ---
+    function initCaptionDragger() {
+      const box = document.getElementById('draggable-caption');
+      const container = document.getElementById('canvas-container');
+      let dragging = false;
+      let startY = 0;
+
+      function onPointerMove(e) {
+        if (!dragging) return;
+        const rect = container.getBoundingClientRect();
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        let percent = ((clientY - rect.top) / rect.height) * 100;
+        percent = Math.max(8, Math.min(88, percent));
+        captionYPercent = percent;
+        updateCaptionPosition(percent);
+      }
+
+      function onPointerUp(e) {
+        if (dragging && activeProject) {
+          activeProject.caption_y_percent = captionYPercent;
+        }
+        const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        if (Math.abs(clientY - startY) < 5) {
+          switchInspectorTab('caption');
+        }
+        dragging = false;
+        window.removeEventListener('mousemove', onPointerMove);
+        window.removeEventListener('mouseup', onPointerUp);
+        window.removeEventListener('touchmove', onPointerMove);
+        window.removeEventListener('touchend', onPointerUp);
+      }
+
+      box.addEventListener('mousedown', (e) => {
+        dragging = true;
+        startY = e.clientY;
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+      });
+
+      box.addEventListener('touchstart', (e) => {
+        dragging = true;
+        startY = e.touches[0].clientY;
+        window.addEventListener('touchmove', onPointerMove);
+        window.addEventListener('touchend', onPointerUp);
+      });
+
+      // Bind canvas element clicks to unfold inspector with exact properties
+      const topBanner = document.getElementById('canvas-top-title-banner');
+      if (topBanner) {
+        topBanner.addEventListener('click', () => switchInspectorTab('title'));
+      }
+      const cImg = document.getElementById('canvas-image');
+      if (cImg) {
+        cImg.addEventListener('click', () => switchInspectorTab('image'));
+      }
+      const cVid = document.getElementById('canvas-video');
+      if (cVid) {
+        cVid.addEventListener('click', () => switchInspectorTab('video'));
+      }
+    }
+
+    function updateCaptionPosition(percent) {
+      document.getElementById('draggable-caption').style.top = `${percent}%`;
+      document.getElementById('caption-y-indicator').innerText = `${Math.round(percent)}%`;
+      const expY = document.getElementById('export-caption-y');
+      if (expY) expY.innerText = `${Math.round(percent)}%`;
+      const inspY = document.getElementById('inspector-caption-y-val');
+      if (inspY) inspY.innerText = `${Math.round(percent)}%`;
+      const slider = document.getElementById('slider-caption-y');
+      if (slider && parseFloat(slider.value) !== percent) slider.value = percent;
+    }
+
+    // --- Export Modal & Graceful Assembly Execution ---
+    function updateExportProgress(percent, label, sub) {
+      // 1. CapCut perimeter border progress around video
+      const rect = document.getElementById('export-perimeter-progress');
+      if (rect) {
+        const offset = Math.max(0, 100 - percent);
+        rect.style.strokeDashoffset = offset;
+        rect.style.stroke = percent >= 100 ? '#10b981' : '#06b6d4';
+      }
+
+      // 2. In-center loader
+      const centerLoader = document.getElementById('export-center-loader');
+      const centerPct = document.getElementById('export-center-pct');
+      const centerLabel = document.getElementById('export-center-label');
+      const centerSub = document.getElementById('export-center-sub');
+      const btn = document.getElementById('btn-render-final');
+
+      if (centerLoader) {
+        if (percent > 0 && percent < 100) {
+          centerLoader.classList.remove('hidden');
+          centerLoader.classList.add('flex');
+          if (centerPct) centerPct.innerText = `${percent}%`;
+          if (centerLabel) centerLabel.innerText = label || "Processing...";
+          if (centerSub) centerSub.innerText = sub || "";
+          if (btn) btn.innerHTML = `<span>⏳ Processing ${percent}%...</span>`;
+        } else if (percent >= 100) {
+          if (centerPct) centerPct.innerText = "✓";
+          if (centerLabel) centerLabel.innerText = "Ready!";
+          if (centerSub) centerSub.innerText = "Final Short Assembled";
+          setTimeout(() => {
+            centerLoader.classList.add('hidden');
+            centerLoader.classList.remove('flex');
+          }, 900);
+          if (btn) {
+            btn.innerHTML = `<span>✓ Re-Process</span>`;
+            btn.disabled = false;
+          }
+        } else {
+          centerLoader.classList.add('hidden');
+          centerLoader.classList.remove('flex');
+        }
+      }
+    }
+
+    function openExportModal() {
+      if (!activeProject) return;
+      document.getElementById('export-title-input').value = activeProject.title || '';
+      document.getElementById('export-desc-input').value = `${activeProject.hook || ''}\n\n#shorts #science #viral #facts`;
+      document.getElementById('export-thumb-headline').value = activeProject.hook || '';
+      
+      const vPlayer = document.getElementById('export-video-preview');
+      const tImg = document.getElementById('export-thumb-preview');
+      const dBtn = document.getElementById('btn-download-final');
+      const btn = document.getElementById('btn-render-final');
+
+      updateExportProgress(0, "", "");
+      dBtn.classList.add('hidden');
+      if (btn) {
+        btn.innerHTML = '<span>⚡ Process</span>';
+        btn.disabled = false;
+      }
+
+      if (activeProject.final_video_url) {
+        vPlayer.src = activeProject.final_video_url;
+        vPlayer.classList.remove('hidden');
+        tImg.classList.add('hidden');
+        dBtn.href = activeProject.final_video_url;
+        dBtn.classList.remove('hidden');
+        updateExportProgress(100, "Ready", "Short Assembled");
+      } else if (activeProject.thumbnail_url) {
+        tImg.src = activeProject.thumbnail_url;
+        tImg.classList.remove('hidden');
+        vPlayer.classList.add('hidden');
+      } else if (activeProject.scenes && activeProject.scenes[0] && activeProject.scenes[0].image_url) {
+        tImg.src = activeProject.scenes[0].image_url;
+        tImg.classList.remove('hidden');
+        vPlayer.classList.add('hidden');
+      }
+
+      document.getElementById('modal-export').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('modal-export').classList.add('hidden');
+    }
+
+    async function triggerThumbnailGen() {
+      if (!activeProject) return;
+      const headline = document.getElementById('export-thumb-headline').value;
+      const btn = document.getElementById('btn-thumb-gen');
+      btn.innerText = 'Generating...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/project/generate-thumbnail', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: activeProject.project_name, headline })
+        });
+        const data = await res.json();
+        const tImg = document.getElementById('export-thumb-preview');
+        tImg.src = data.thumbnail_url;
+        tImg.classList.remove('hidden');
+        document.getElementById('export-video-preview').classList.add('hidden');
+      } catch (err) {
+        alert("Thumbnail generation failed: " + err.message);
+      } finally {
+        btn.innerText = 'Generate Thumbnail!';
+        btn.disabled = false;
+      }
+    }
+
+    async function executeFinalExport() {
+      if (!activeProject) return;
+      const btn = document.getElementById('btn-render-final');
+      const dBtn = document.getElementById('btn-download-final');
+
+      btn.disabled = true;
+      dBtn.classList.add('hidden');
+
+      // CapCut perimeter and center animation steps
+      updateExportProgress(28, "Standardizing", "Merging Scene Audio & Video");
+
+      const timer1 = setTimeout(() => {
+        updateExportProgress(65, "Burning Captions", "Word-by-word kinetic highlight");
+      }, 2400);
+
+      const timer2 = setTimeout(() => {
+        updateExportProgress(88, "Encoding MP4", "High Bitrate 1080p 60fps");
+      }, 5500);
+
+      try {
+        const bgmTrack = document.getElementById('export-bgm-select').value;
+        const res = await fetch('/api/project/assemble', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            project_name: activeProject.project_name,
+            caption_y_percent: captionYPercent,
+            bgm_path: bgmTrack || null,
+            archive: false
+          })
+        });
+        const data = await res.json();
+
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+
+        updateExportProgress(100, "Ready!", "Short Complete");
+
+        const vPlayer = document.getElementById('export-video-preview');
+        vPlayer.src = data.final_video_url;
+        vPlayer.classList.remove('hidden');
+        document.getElementById('export-thumb-preview').classList.add('hidden');
+        vPlayer.play().catch(() => {});
+
+        // Unhide download button
+        dBtn.href = data.final_video_url;
+        dBtn.download = `${activeProject.project_name}_final.mp4`;
+        dBtn.classList.remove('hidden');
+
+        // Automatically trigger browser download
+        const dlLink = document.createElement('a');
+        dlLink.href = data.final_video_url;
+        dlLink.download = `${activeProject.project_name}_final.mp4`;
+        document.body.appendChild(dlLink);
+        dlLink.click();
+        document.body.removeChild(dlLink);
+
+        activeProject.final_video_url = data.final_video_url;
+      } catch (err) {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        updateExportProgress(0, "", "");
+        alert("Assembly failed: " + err.message);
+        btn.innerHTML = '<span>⚡ Process</span>';
+        btn.disabled = false;
+      }
+    }
+
+    // --- Modal Draft Helpers ---
+    function openNewProjectModal(aspect = '9:16') {
+      document.getElementById('new-aspect-ratio').value = aspect;
+      document.getElementById('new-topic-input').value = '';
+      document.getElementById('modal-new').classList.remove('hidden');
+    }
+    function closeNewProjectModal() {
+      document.getElementById('modal-new').classList.add('hidden');
+    }
+    function openWithTopic(topic) {
+      openNewProjectModal('9:16');
+      document.getElementById('new-topic-input').value = topic;
+    }
+
+    async function submitNewDraft() {
+      const topic = document.getElementById('new-topic-input').value.trim();
+      const aspect = document.getElementById('new-aspect-ratio').value;
+      if (!topic) return;
+
+      const btn = document.getElementById('btn-create-draft');
+      btn.innerText = 'Writing Screenplay...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/project/create-draft', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ topic, aspect_ratio: aspect })
+        });
+        const data = await res.json();
+        closeNewProjectModal();
+        openEditorProject(data.project_name);
+      } catch (err) {
+        alert("Draft creation failed: " + err.message);
+      } finally {
+        btn.innerText = 'Create Draft';
+        btn.disabled = false;
+      }
+    }
+
+    // --- Load Data Helpers ---
+    // --- Mode Selector (SmoothUI / Minimal Primitives) ---
+    let currentStudioMode = 'create';
+
+    function toggleModeMenu(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('mode-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function selectStudioMode(mode) {
+      currentStudioMode = mode;
+      const icon = document.getElementById('active-mode-icon');
+      const label = document.getElementById('active-mode-label');
+      const badgeCreate = document.getElementById('badge-mode-create');
+      const badgeRepurp = document.getElementById('badge-mode-repurpose');
+      const optCreate = document.getElementById('mode-opt-create');
+      const optRepurp = document.getElementById('mode-opt-repurpose');
+
+      if (mode === 'create') {
+        if (icon) icon.textContent = '✨';
+        if (label) label.textContent = 'Create';
+        if (badgeCreate) {
+          badgeCreate.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-accent/20 text-accent';
+          badgeCreate.textContent = 'Active';
+        }
+        if (badgeRepurp) {
+          badgeRepurp.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-void text-slate-400 border border-border';
+          badgeRepurp.textContent = 'Switch';
+        }
+        if (optCreate) optCreate.className = 'p-2.5 rounded-xl border border-accent/40 bg-accent-muted/30 cursor-pointer transition flex items-start gap-2.5';
+        if (optRepurp) optRepurp.className = 'p-2.5 rounded-xl border border-border hover:border-slate-600 hover:bg-surface-light cursor-pointer transition flex items-start gap-2.5';
+      } else {
+        if (icon) icon.textContent = '🔄';
+        if (label) label.textContent = 'Repurpose';
+        if (badgeRepurp) {
+          badgeRepurp.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40';
+          badgeRepurp.textContent = 'Active';
+        }
+        if (badgeCreate) {
+          badgeCreate.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-void text-slate-400 border border-border';
+          badgeCreate.textContent = 'Switch';
+        }
+        if (optRepurp) optRepurp.className = 'p-2.5 rounded-xl border border-indigo-500/40 bg-indigo-950/30 cursor-pointer transition flex items-start gap-2.5';
+        if (optCreate) optCreate.className = 'p-2.5 rounded-xl border border-border hover:border-slate-600 hover:bg-surface-light cursor-pointer transition flex items-start gap-2.5';
+        openRepurposeModal();
+      }
+      const menu = document.getElementById('mode-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    function openRepurposeModal() {
+      const modal = document.getElementById('modal-repurpose-info');
+      if (modal) modal.classList.remove('hidden');
+    }
+    function closeRepurposeModal() {
+      const modal = document.getElementById('modal-repurpose-info');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // --- Multi-Channel Hub Management (Your Own Channels) ---
+    let userChannelsData = [];
+
+    async function loadChannelHubData() {
+      try {
+        const res = await fetch('/api/channels');
+        const data = await res.json();
+        const active = data.active_channel || { name: 'Newyr', handle: '@Newyrr', subscribers: '8', videos: 3, niche: 'Science Shorts' };
+        userChannelsData = data.user_channels || [active];
+
+        const avatar = document.getElementById('my-channel-avatar');
+        if (avatar) avatar.textContent = (active.name && active.name[0]) ? active.name[0].toUpperCase() : 'N';
+        
+        const nameEl = document.getElementById('my-channel-name');
+        if (nameEl) nameEl.textContent = `${active.name} (${active.handle})`;
+
+        const nicheEl = document.getElementById('my-channel-niche-badge');
+        if (nicheEl) nicheEl.textContent = active.niche || 'Science Shorts';
+
+        const bioEl = document.getElementById('my-channel-bio');
+        if (bioEl) bioEl.textContent = active.bio || active.niche || 'Shorts science. How and what if moments.';
+
+        const subsEl = document.getElementById('my-channel-subs');
+        if (subsEl) subsEl.textContent = active.subscribers || '0';
+
+        const vidsEl = document.getElementById('my-channel-vids');
+        if (vidsEl) vidsEl.textContent = active.videos || 0;
+
+        const topEl = document.getElementById('my-channel-top');
+        if (topEl) topEl.textContent = active.top_video || '1.5K';
+
+        renderMyChannelsDropdown(userChannelsData, active.handle);
+      } catch (err) {
+        console.error("Failed loading channel hub data:", err);
+      }
+    }
+
+    function renderMyChannelsDropdown(channels, activeHandle) {
+      const dropdown = document.getElementById('my-channels-dropdown');
+      if (!dropdown) return;
+      dropdown.innerHTML = `
+        <div class="px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-border/70 pb-1.5 mb-1">
+          My YouTube Channels
+        </div>
+      `;
+      channels.forEach(ch => {
+        const isActive = ch.handle.toLowerCase() === (activeHandle || '').toLowerCase();
+        const div = document.createElement('div');
+        div.className = `p-2 rounded-xl flex items-center justify-between cursor-pointer transition ${isActive ? 'bg-accent/15 border border-accent/40 text-accent' : 'hover:bg-surface-light text-slate-200'}`;
+        div.onclick = () => selectUserChannel(ch.handle);
+        div.innerHTML = `
+          <div class="flex items-center gap-2 overflow-hidden">
+            <div class="w-6 h-6 rounded-full ${isActive ? 'bg-accent text-black font-black' : 'bg-void border border-border text-slate-300 font-bold'} flex items-center justify-center text-[10px] shrink-0">
+              ${(ch.name && ch.name[0]) ? ch.name[0].toUpperCase() : '@'}
+            </div>
+            <div class="overflow-hidden">
+              <div class="font-bold text-xs truncate leading-tight">${ch.name}</div>
+              <div class="text-[10px] text-slate-400 truncate">${ch.handle}</div>
+            </div>
+          </div>
+          ${isActive ? `<span class="text-xs font-bold text-accent">✓</span>` : ''}
+        `;
+        dropdown.appendChild(div);
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'w-full mt-1 pt-1.5 border-t border-border/70 text-left px-2 py-1.5 text-xs text-accent hover:underline font-semibold flex items-center gap-1.5';
+      addBtn.onclick = () => { toggleMyChannelsDropdown(); openAddUserChannelModal(); };
+      addBtn.innerHTML = `<span>+ Add Another Channel</span>`;
+      dropdown.appendChild(addBtn);
+    }
+
+    function toggleMyChannelsDropdown(event) {
+      if (event) event.stopPropagation();
+      const dd = document.getElementById('my-channels-dropdown');
+      if (dd) dd.classList.toggle('hidden');
+    }
+
+    async function selectUserChannel(handle) {
+      const dd = document.getElementById('my-channels-dropdown');
+      if (dd) dd.classList.add('hidden');
+      try {
+        await fetch('/api/channels/select-active', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ handle })
+        });
+        await loadChannelHubData();
+        loadTopicSuggestions();
+      } catch (e) {
+        console.error("Failed selecting channel:", e);
+      }
+    }
+
+    function openAddUserChannelModal() {
+      const modal = document.getElementById('modal-add-user-channel');
+      if (modal) {
+        document.getElementById('input-user-channel-name').value = '';
+        document.getElementById('input-user-channel-handle').value = '';
+        document.getElementById('input-user-channel-niche').value = '';
+        document.getElementById('input-user-channel-subs').value = '0';
+        document.getElementById('input-user-channel-vids').value = '0';
+        modal.classList.remove('hidden');
+        setTimeout(() => document.getElementById('input-user-channel-name').focus(), 50);
+      }
+    }
+
+    function closeAddUserChannelModal() {
+      const modal = document.getElementById('modal-add-user-channel');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitAddUserChannel() {
+      const name = document.getElementById('input-user-channel-name').value.trim();
+      let handle = document.getElementById('input-user-channel-handle').value.trim();
+      const niche = document.getElementById('input-user-channel-niche').value.trim() || 'Shorts Science';
+      const subs = document.getElementById('input-user-channel-subs').value.trim() || '0';
+      const vids = parseInt(document.getElementById('input-user-channel-vids').value.trim() || '0', 10);
+
+      if (!name || !handle) {
+        alert("Please enter channel name and handle.");
+        return;
+      }
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      try {
+        await fetch('/api/channels/user-add', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ name, handle, niche, subscribers: subs, videos: vids })
+        });
+        closeAddUserChannelModal();
+        loadChannelHubData();
+        loadTopicSuggestions();
+      } catch (e) {
+        alert("Failed to add user channel: " + e.message);
+      }
+    }
+
+    // --- Horizontal Scroll Helpers ---
+    function scrollTopicsHoriz(delta) {
+      const el = document.getElementById('topics-list');
+      if (el) el.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    function scrollTrackedHoriz(delta) {
+      const el = document.getElementById('tracked-channels-list');
+      if (el) el.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    // --- Load Data Helpers (Space-Saving Horizontal Layouts) ---
+    async function loadTopicSuggestions() {
+      try {
+        const res = await fetch('/api/topics/suggest');
+        const topics = await res.json();
+        const container = document.getElementById('topics-list');
+        container.innerHTML = '';
+        topics.forEach(t => {
+          const div = document.createElement('div');
+          div.className = 'min-w-[280px] sm:min-w-[320px] max-w-[340px] shrink-0 snap-start bg-surface hover:bg-surface-light border border-border hover:border-accent p-4 rounded-2xl cursor-pointer transition-all duration-200 flex flex-col justify-between group shadow-sm active:scale-[0.99]';
+          div.onclick = () => openWithTopic(t.title);
+          div.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-2">
+                <span class="text-accent font-semibold flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                  ${t.category || 'Science'}
+                </span>
+                <span class="text-accent group-hover:underline text-[11px] font-bold">Use Topic →</span>
+              </div>
+              <div class="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-accent leading-snug line-clamp-2">${t.title}</div>
+            </div>
+            <div class="text-[11px] text-slate-400 italic mt-3 line-clamp-2 bg-void/60 p-2 rounded-xl border border-border/60">"${t.hook || ''}"</div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    async function loadTrackedChannels() {
+      try {
+        const res = await fetch('/api/channels');
+        const data = await res.json();
+        const container = document.getElementById('tracked-channels-list');
+        container.innerHTML = '';
+        const channels = data.tracked_channels || [];
+        const countEl = document.getElementById('tracked-channels-count');
+        if (countEl) countEl.textContent = `${channels.length} tracked`;
+
+        if (channels.length === 0) {
+          container.innerHTML = `<div class="text-xs text-slate-500 py-3 px-2">No inspiration channels tracked yet.</div>`;
+          return;
+        }
+
+        channels.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'min-w-[240px] sm:min-w-[260px] shrink-0 snap-start bg-surface hover:bg-surface-light border border-border hover:border-slate-600 p-3 rounded-2xl flex items-center justify-between gap-3 group transition shadow-sm';
+          div.innerHTML = `
+            <div class="flex items-center gap-2.5 overflow-hidden">
+              <!-- Kibo UI Circular Avatar with Initial -->
+              <div class="w-8 h-8 rounded-full bg-void border border-border group-hover:border-accent flex items-center justify-center font-bold text-accent text-xs shrink-0 transition">
+                ${(c.name && c.name[0]) ? c.name[0].toUpperCase() : '@'}
+              </div>
+              <div class="overflow-hidden">
+                <div class="font-bold text-xs truncate text-slate-100">${c.name}</div>
+                <div class="text-[10px] text-slate-400 truncate">${c.focus || c.handle}</div>
+              </div>
+            </div>
+            <!-- Remove Button on hover -->
+            <button onclick="removeTrackedChannel('${c.handle}', event)" title="Untrack channel" class="w-6 h-6 rounded-full hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition shrink-0">
+              ✕
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    async function removeTrackedChannel(handle, event) {
+      if (event) event.stopPropagation();
+      try {
+        await fetch('/api/channels/remove-tracked', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ handle })
+        });
+        loadTrackedChannels();
+      } catch (e) {
+        console.error("Failed removing tracked channel:", e);
+      }
+    }
+
+    async function loadAnalytics() {
+      try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        const container = document.getElementById('analytics-videos-list');
+        container.innerHTML = '';
+        (data.videos || []).forEach(v => {
+          const div = document.createElement('div');
+          div.className = 'p-3.5 flex items-center justify-between hover:bg-surface-light/40 transition';
+          div.innerHTML = `
+            <div class="flex items-center gap-3">
+              <div class="w-2 h-2 rounded-full ${v.views > 1000 ? 'bg-emerald-400' : 'bg-slate-500'}"></div>
+              <div>
+                <div class="font-semibold text-xs text-slate-200">${v.title}</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">${v.topic || 'YouTube Short'}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-xs text-slate-100">${Number(v.views).toLocaleString()} views</div>
+              <div class="text-[10px] ${v.views > 1000 ? 'text-emerald-400 font-semibold' : 'text-slate-500'}">${v.views > 1000 ? 'High Retention' : 'Underperformer'}</div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {}
+    }
+
+    let selectedProjectForMenu = null;
+
+    async function loadProjects() {
+      try {
+        const res = await fetch('/api/projects');
+        const projects = await res.json();
+        const container = document.getElementById('projects-feed');
+        container.innerHTML = '';
+        document.getElementById('projects-count').innerText = `${projects.length} projects`;
+
+        projects.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'bg-surface hover:bg-surface-light border border-border hover:border-accent rounded-xl overflow-hidden transition flex flex-col group relative';
+          
+          const thumb = p.thumbnail_url || (p.scenes && p.scenes[0] && p.scenes[0].image_url) || '';
+          div.innerHTML = `
+            <div class="aspect-[9/16] bg-black overflow-hidden relative cursor-pointer" onclick="openEditorProject('${p.project_name}')">
+              ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />` : `<div class="w-full h-full flex items-center justify-center text-[10px] text-slate-600">Draft</div>`}
+              <div class="absolute top-2 left-2 bg-black/70 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-300">${p.aspect_ratio || '9:16'}</div>
+            </div>
+            <!-- 3 Dots Context Menu Button -->
+            <button onclick="toggleProjectMenu('${p.project_name}', event)" title="Project options" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/75 hover:bg-black/95 border border-slate-700/80 text-slate-200 hover:text-white flex items-center justify-center text-sm font-bold opacity-80 hover:opacity-100 transition z-10 shadow-lg">
+              •••
+            </button>
+            <div class="p-2.5 flex flex-col justify-between flex-1 cursor-pointer" onclick="openEditorProject('${p.project_name}')">
+              <div class="font-bold text-xs truncate text-slate-200 group-hover:text-accent">${p.title || p.project_name}</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase font-semibold">${(p.status || 'Draft').replace('_', ' ')}</div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+        updateTrashBadge();
+      } catch (err) {
+        console.error("Failed loading projects:", err);
+      }
+    }
+
+    function toggleProjectMenu(pName, event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('project-action-menu');
+      if (!menu) return;
+
+      if (!menu.classList.contains('hidden') && selectedProjectForMenu === pName) {
+        menu.classList.add('hidden');
+        selectedProjectForMenu = null;
+        return;
+      }
+
+      selectedProjectForMenu = pName;
+      
+      const rect = event.currentTarget.getBoundingClientRect();
+      let left = rect.right - 176;
+      if (left < 10) left = 10;
+      let top = rect.bottom + 6;
+      if (top + 100 > window.innerHeight) {
+        top = rect.top - 90;
+      }
+
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+      menu.classList.remove('hidden');
+    }
+
+    function onProjectMenuStudio() {
+      const menu = document.getElementById('project-action-menu');
+      if (menu) menu.classList.add('hidden');
+      if (selectedProjectForMenu) {
+        openEditorProject(selectedProjectForMenu);
+      }
+    }
+
+    async function onProjectMenuTrash() {
+      const menu = document.getElementById('project-action-menu');
+      if (menu) menu.classList.add('hidden');
+      if (!selectedProjectForMenu) return;
+
+      const pName = selectedProjectForMenu;
+      selectedProjectForMenu = null;
+      try {
+        const res = await fetch('/api/projects/delete', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: pName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadProjects();
+        } else {
+          alert("Error: " + (data.error || "Could not move to trash"));
+        }
+      } catch (e) {
+        alert("Failed to move to trash: " + e);
+      }
+    }
+
+    // Close project action menu on background click
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('project-action-menu');
+      if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    // --- Recently Deleted (Trash Bin) Functions ---
+    async function updateTrashBadge() {
+      try {
+        const res = await fetch('/api/projects/trash');
+        const trash = await res.json();
+        const badge = document.getElementById('trash-count-badge');
+        if (badge) {
+          badge.textContent = trash.length || 0;
+          if (trash.length > 0) {
+            badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          } else {
+            badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+          }
+        }
+      } catch (err) {}
+    }
+
+    async function openTrashBinModal() {
+      const modal = document.getElementById('modal-trash');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      loadTrashProjectsFeed();
+    }
+
+    function closeTrashBinModal() {
+      const modal = document.getElementById('modal-trash');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function loadTrashProjectsFeed() {
+      const feed = document.getElementById('trash-projects-feed');
+      if (!feed) return;
+      feed.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center">Loading trash...</div>';
+
+      try {
+        const res = await fetch('/api/projects/trash');
+        const trash = await res.json();
+        feed.innerHTML = '';
+        if (trash.length === 0) {
+          feed.innerHTML = `
+            <div class="p-8 text-center flex flex-col items-center justify-center text-slate-500 gap-2">
+              <span class="text-3xl opacity-40">🗑</span>
+              <span class="text-xs">Trash is empty. Deleted projects appear here for 7 days.</span>
+            </div>
+          `;
+          return;
+        }
+
+        trash.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'bg-surface/80 border border-border hover:border-slate-600 p-3 rounded-xl flex items-center justify-between gap-3 transition';
+          const thumb = p.thumbnail_url || (p.scenes && p.scenes[0] && p.scenes[0].image_url) || '';
+          div.innerHTML = `
+            <div class="flex items-center gap-3 overflow-hidden">
+              <div class="w-12 h-16 bg-void rounded-lg overflow-hidden shrink-0 border border-border flex items-center justify-center">
+                ${thumb ? `<img src="${thumb}" class="w-full h-full object-cover opacity-70" />` : `<span class="text-[9px] text-slate-600">No Img</span>`}
+              </div>
+              <div class="overflow-hidden">
+                <div class="font-bold text-xs text-slate-200 truncate">${p.title || p.project_name}</div>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-amber-400 font-semibold bg-amber-950/40 border border-amber-600/30 px-1.5 py-0.5 rounded">
+                    ⏳ ${p.days_left}d remaining
+                  </span>
+                  <span class="text-[10px] text-slate-500 uppercase">${p.aspect_ratio || '9:16'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="restoreProject('${p.project_name}')" class="px-3 py-1.5 rounded-lg bg-emerald-950/40 hover:bg-emerald-900 border border-emerald-600/40 text-emerald-300 text-xs font-semibold flex items-center gap-1 transition active:scale-95">
+                <span>↩</span><span>Restore</span>
+              </button>
+              <button onclick="purgeProject('${p.project_name}')" title="Permanently delete now" class="p-1.5 rounded-lg hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 border border-transparent hover:border-rose-800 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+          `;
+          feed.appendChild(div);
+        });
+      } catch (e) {
+        feed.innerHTML = `<div class="text-xs text-rose-400 p-4">Error loading trash: ${e.message}</div>`;
+      }
+    }
+
+    async function restoreProject(projectName) {
+      try {
+        const res = await fetch('/api/projects/restore', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: projectName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadTrashProjectsFeed();
+          loadProjects();
+        } else {
+          alert("Error: " + (data.error || "Could not restore"));
+        }
+      } catch (e) {
+        alert("Failed to restore: " + e);
+      }
+    }
+
+    async function purgeProject(projectName) {
+      if (!confirm(`Permanently delete "${projectName}"? This cannot be undone.`)) return;
+      try {
+        const res = await fetch('/api/projects/purge', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ project_name: projectName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadTrashProjectsFeed();
+          updateTrashBadge();
+        } else {
+          alert("Error: " + (data.error || "Could not purge"));
+        }
+      } catch (e) {
+        alert("Failed to purge: " + e);
+      }
+    }
+
+    async function emptyTrashConfirm() {
+      if (!confirm("Are you sure you want to permanently delete all projects in the trash? This cannot be undone.")) return;
+      try {
+        const res = await fetch('/api/projects/empty-trash', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          loadTrashProjectsFeed();
+          updateTrashBadge();
+        } else {
+          alert("Error: " + (data.error || "Could not empty trash"));
+        }
+      } catch (e) {
+        alert("Failed to empty trash: " + e);
+      }
+    }
+
+    // --- Channel Tracking Dialog Functions ---
+    function openAddChannelModal() {
+      const modal = document.getElementById('modal-add-channel');
+      if (modal) {
+        document.getElementById('input-channel-handle').value = '';
+        document.getElementById('input-channel-focus').value = '';
+        modal.classList.remove('hidden');
+        setTimeout(() => document.getElementById('input-channel-handle').focus(), 50);
+      }
+    }
+
+    function closeAddChannelModal() {
+      const modal = document.getElementById('modal-add-channel');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitAddChannel() {
+      const handleInput = document.getElementById('input-channel-handle');
+      const focusInput = document.getElementById('input-channel-focus');
+      let handle = handleInput.value.trim();
+      const focus = focusInput.value.trim() || 'General Science';
+
+      if (!handle) {
+        alert("Please enter a YouTube handle or channel name.");
+        return;
+      }
+      if (!handle.startsWith('@') && !handle.includes(' ')) {
+        handle = '@' + handle;
+      }
+
+      try {
+        const res = await fetch('/api/channels/add', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            handle,
+            name: handle.replace('@', ''),
+            focus
+          })
+        });
+        const data = await res.json();
+        closeAddChannelModal();
+        loadTrackedChannels();
+      } catch (err) {
+        alert("Failed to add channel: " + err.message);
+      }
+    }
+
+    function addTrackedPrompt() {
+      openAddChannelModal();
+    }
+
+    // --- Settings Popover Management (Minimal Primitives UI) ---
+    function toggleSettingsPopover() {
+      const popover = document.getElementById('settings-popover');
+      if (popover) {
+        popover.classList.toggle('hidden');
+        if (!popover.classList.contains('hidden')) {
+          loadCurrentSettings();
+        }
+      }
+    }
+
+    async function loadCurrentSettings() {
+      try {
+        const res = await fetch('/api/settings');
+        const settings = await res.json();
+        if (document.getElementById('setting-llm')) {
+          if (settings.llm_model) document.getElementById('setting-llm').value = settings.llm_model;
+          if (settings.image_model) document.getElementById('setting-image').value = settings.image_model;
+          if (settings.video_provider) document.getElementById('setting-video').value = settings.video_provider;
+          if (settings.tts_voice) document.getElementById('setting-tts').value = settings.tts_voice;
+          if (settings.art_style) document.getElementById('setting-art').value = settings.art_style;
+          updateEstimatedCost();
+        }
+        updateEngineBadge(settings);
+      } catch (e) {
+        console.error("Failed to load settings:", e);
+      }
+    }
+
+    function updateEngineBadge(settings) {
+      const badge = document.getElementById('active-engine-badge');
+      if (!badge) return;
+      const img = (settings.image_model || '').includes('krea') ? 'Krea Turbo' :
+                  (settings.image_model || '').includes('banana') ? 'Nano Banana' : 'Flux Schnell';
+      const vid = (settings.video_provider || '').includes('seedance') ? 'Seedance 2.0' :
+                  (settings.video_provider || '').includes('hailuo') ? 'Hailuo-3' : 'RunPod H3';
+      badge.textContent = `${img} + ${vid}`;
+    }
+
+    function updateEstimatedCost() {
+      const imgModel = document.getElementById('setting-image').value;
+      const vidModel = document.getElementById('setting-video').value;
+      const ttsVoice = document.getElementById('setting-tts').value;
+
+      let llmCost = 0.0004;
+      let imgCost = 0.075; // 5 x $0.015 Krea Turbo
+      if (imgModel.includes('3.1-flash') || imgModel.includes('banana') && !imgModel.includes('lite')) {
+        imgCost = 0.010; // 5 x $0.002 Nano Banana 2
+      } else if (imgModel.includes('lite')) {
+        imgCost = 0.004; // 5 x $0.0008 Nano Banana 2 Lite
+      } else if (imgModel.includes('flux')) {
+        imgCost = 0.015; // 5 x $0.003 Flux Schnell
+      }
+
+      let vidCost = 0.040; // 5 x $0.008 RunPod MiniMax H3 Max Turbo
+      if (vidModel.includes('seedance')) {
+        vidCost = 0.840; // 25s x $0.03363 ByteDance Seedance 2.0 Mini ($0.84/Short)
+      } else if (vidModel.includes('openrouter') || vidModel.includes('hailuo')) {
+        vidCost = 3.250; // 25s x $0.13 OpenRouter Hailuo-3
+      }
+
+      let ttsCost = 0.0015; // Google Studio TTS
+      if (ttsVoice.startsWith('flux-')) {
+        ttsCost = 0.0000; // Deepgram Flux Free
+      }
+
+      const total = llmCost + imgCost + vidCost + ttsCost;
+      const display = document.getElementById('setting-cost-display');
+      if (display) {
+        display.textContent = `$${total.toFixed(2)}`;
+      }
+    }
+
+    async function applySettings() {
+      const btn = document.getElementById('btn-apply-settings');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>Saving...</span>';
+
+      const ttsChoice = document.getElementById('setting-tts').value;
+      const ttsModel = ttsChoice.startsWith('flux-') ? 'deepgram/flux-tts:free' : 'google/gemini-3.8-flash-lite-tts';
+
+      const payload = {
+        llm_model: document.getElementById('setting-llm').value,
+        image_model: document.getElementById('setting-image').value,
+        video_provider: document.getElementById('setting-video').value,
+        tts_model: ttsModel,
+        tts_voice: ttsChoice,
+        art_style: document.getElementById('setting-art').value
+      };
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          btn.innerHTML = '<span>✓ Saved!</span>';
+          updateEngineBadge(payload);
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            toggleSettingsPopover();
+          }, 650);
+        }
+      } catch (e) {
+        btn.innerHTML = originalText;
+        alert('Failed to save settings: ' + e);
+      }
+    }
+
+    // Close dropdowns and popovers when clicking outside
+    document.addEventListener('click', (e) => {
+      const popover = document.getElementById('settings-popover');
+      const triggerMain = document.getElementById('btn-settings-trigger');
+      const triggerEditor = document.getElementById('btn-settings-trigger-editor');
+      if (popover && !popover.classList.contains('hidden')) {
+        if (!popover.contains(e.target) && !triggerMain?.contains(e.target) && !triggerEditor?.contains(e.target)) {
+          popover.classList.add('hidden');
+        }
+      }
+
+      const modeMenu = document.getElementById('mode-menu');
+      const modeWrap = document.getElementById('mode-selector-wrapper');
+      if (modeMenu && !modeMenu.classList.contains('hidden')) {
+        if (!modeWrap?.contains(e.target)) {
+          modeMenu.classList.add('hidden');
+        }
+      }
+
+      const channelDropdown = document.getElementById('my-channels-dropdown');
+      if (channelDropdown && !channelDropdown.classList.contains('hidden')) {
+        if (!channelDropdown.parentElement?.contains(e.target)) {
+          channelDropdown.classList.add('hidden');
+        }
+      }
+    });
+
+    function init() {
+      loadCurrentSettings();
+      loadChannelHubData();
+      loadTopicSuggestions();
+      loadTrackedChannels();
+      loadAnalytics();
+      loadProjects();
+    }
+
+    init();
+    initCaptionDragger();
+  </script>
+</body>
+</html>
