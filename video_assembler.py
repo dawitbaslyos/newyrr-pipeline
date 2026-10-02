@@ -143,8 +143,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 clean_a = str(Path(audio_file).resolve()).replace("\\", "/")
                 cmd = [
                     "ffmpeg", "-y",
+                    "-stream_loop", "-1",
                     "-i", clean_v,
                     "-i", clean_a,
+                    "-map", "0:v:0",
+                    "-map", "1:a:0",
                     "-c:v", "libx264",
                     "-preset", "veryfast",
                     "-vf", f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},fps=30",
@@ -180,15 +183,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # Case B: Graceful Fallback from Stills + Audio (Ken-Burns motion)
         if image_file and os.path.exists(image_file):
             clean_img = str(Path(image_file).resolve()).replace("\\", "/")
-            total_frames = int(max(1.0, duration) * 30)
-            
-            # Alternate zoom in and zoom out across scenes for dynamic pacing
-            if num % 2 == 1:
-                zoom_expr = f"min(zoom+0.0007,1.08)"
-            else:
-                zoom_expr = f"max(1.08-0.0007*on,1.0)"
-
-            vf_motion = f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='{zoom_expr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s={target_w}x{target_h}:fps=30"
+            # Clean static hold without childish zoompan
+            vf_motion = f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},fps=30"
 
             if audio_file and os.path.exists(audio_file):
                 clean_aud = str(Path(audio_file).resolve()).replace("\\", "/")

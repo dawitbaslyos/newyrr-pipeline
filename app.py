@@ -113,7 +113,7 @@ def get_settings():
     data = {
         "llm_model": getattr(Config, "OPENROUTER_MODEL", "openai/gpt-4o-mini"),
         "image_model": getattr(Config, "ACTIVE_IMAGE_MODEL", "krea/krea-2-medium-turbo"),
-        "video_provider": getattr(Config, "ACTIVE_VIDEO_PROVIDER", "runpod_minimax_turbo"),
+        "video_provider": getattr(Config, "ACTIVE_VIDEO_PROVIDER", "bytedance/seedance-2.0-mini"),
         "tts_model": getattr(Config, "ACTIVE_TTS_MODEL", "google/gemini-3.8-flash-lite-tts"),
         "tts_voice": getattr(Config, "ACTIVE_TTS_VOICE", "Charon"),
         "art_style": getattr(Config, "ACTIVE_ART_STYLE", "cinematic_film")

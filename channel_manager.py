@@ -386,42 +386,44 @@ class ChannelManager:
         return self.get_data()
 
     def sync_user_channel(self, handle: str):
-        meta = self.scrape_youtube_channel(handle)
         data = self._load_channels()
         norm_handle = handle.lower().strip()
-        for ch in data.get("user_channels", []):
-            if ch.get("handle", "").lower().strip() == norm_handle:
-                if meta.get("name") and meta["name"] != handle.lstrip("@"):
-                    ch["name"] = meta["name"]
-                if meta.get("subscribers") and meta["subscribers"] != "0":
-                    ch["subscribers"] = str(meta["subscribers"])
-                if meta.get("videos") and meta["videos"] > 0:
-                    ch["videos"] = int(meta["videos"])
-                if meta.get("avatar_url"):
-                    ch["avatar_url"] = meta["avatar_url"]
-                if data.get("active_channel", {}).get("handle", "").lower().strip() == norm_handle:
-                    data["active_channel"] = ch
-                self._save_channels(data)
-                return ch
-        return meta
+        try:
+            analytics = youtube_analytics.get_channel_analytics(handle, force_refresh=True)
+            for ch in data.get("user_channels", []):
+                if ch.get("handle", "").lower().strip() == norm_handle:
+                    if analytics.get("channel_name"):
+                        ch["name"] = analytics["channel_name"]
+                    if analytics.get("subscribers"):
+                        ch["subscribers"] = analytics["subscribers"]
+                    if analytics.get("video_count") is not None:
+                        ch["videos"] = analytics["video_count"]
+                    if analytics.get("total_views"):
+                        ch["top_video"] = analytics["total_views"]
+                    if data.get("active_channel", {}).get("handle", "").lower().strip() == norm_handle:
+                        data["active_channel"] = ch
+                    self._save_channels(data)
+                    return ch
+        except Exception as e:
+            print(f"[Channel Manager] sync_user_channel error: {e}")
+        return data.get("active_channel")
 
     def set_active_channel(self, handle: str):
         data = self._load_channels()
         norm_handle = handle.lower().strip()
         for ch in data.get("user_channels", []):
             if ch.get("handle", "").lower().strip() == norm_handle:
-                if not ch.get("avatar_url") or ch.get("subscribers") == "0":
-                    try:
-                        meta = self.scrape_youtube_channel(handle)
-                        if meta.get("avatar_url"):
-                            ch["avatar_url"] = meta["avatar_url"]
-                        if meta.get("subscribers") and meta["subscribers"] != "0":
-                            ch["subscribers"] = str(meta["subscribers"])
-                        if meta.get("videos") and meta["videos"] > 0:
-                            ch["videos"] = int(meta["videos"])
-                    except Exception:
-                        pass
+                # Instant switch - no blocking network scrapes
                 data["active_channel"] = ch
+                
+                # Switch tracked channels context for this workspace
+                handle_key = norm_handle
+                tracked_by_ch = data.get("tracked_by_channel", {})
+                if handle_key in tracked_by_ch:
+                    data["tracked_channels"] = tracked_by_ch[handle_key]
+                elif handle_key in CHANNEL_PROFILES:
+                    data["tracked_channels"] = CHANNEL_PROFILES[handle_key]["tracked_channels"]
+                
                 self._save_channels(data)
                 return self.get_data()
         return self.get_data()

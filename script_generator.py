@@ -26,12 +26,15 @@ Every scene operates in two distinct phases: The Stage Picture (First Frame) and
    - **Lighting & Lens**: Depth of field (e.g., "Shot on 85mm anamorphic lens at f/1.8"), volumetric rim lighting, unified color signature adhering to {art_style_name}.
    - **STRICT PROHIBITION**: NEVER write meta phrases ('Hyper-realistic 9:16 vertical prompt for Flux Krea', 'An image of', 'A photorealistic shot'). Start immediately with the physical subject and scene blocking.
 
-2. **Motion Guidance (Action Catalyst & Camera Choreography - 'minimax_motion_prompt')**:
-   - Each scene is an independent 5-second video clip. The AI video model receives only the initial frame.
-   - **ABSOLUTE RULE - ZERO TIMESTAMPS**: NEVER write "At 0.00 seconds", "At 15.00 seconds", or ANY timeline timestamps. The AI model generates a single 4-5s clip from scratch and has no timeline concept.
-   - **Camera Choreography**: Direct the camera's physical movement: "Slow continuous macro push-in along the optical axis", "Subtle 20-degree rotational orbit centered on the subject", "Low-angle creeping dolly shot tracking right".
-   - **Action Catalyst (The Trigger Event)**: Specify the exact physical event that breaks the stillness (e.g., "The needle shears through the epidermis, unleashing a wave of...", "Viscous cellular foam erupts across the surface, causing...").
-   - **Physical Dynamics & Secondary Physics**: Fluid viscosity, particulate dispersion, cellular membrane elasticity, light refracting across moving curves.
+2. **Motion Guidance (Object Animation & Action Catalyst - 'minimax_motion_prompt')**:
+   - Each scene is an independent 5-second video clip. The AI video model (Seedance 2.0 / MiniMax) receives only the initial frame.
+   - **OBJECT ANIMATION FIRST (MANDATORY)**: You MUST direct the physical movement and animation of the objects established in the still keyframe. The video model prioritizes the first 10 words.
+     * **BAD (Do NOT do this)**: "Slow continuous push-in along the optical axis as the ball rests" ➔ The AI will just zoom in on a completely static, lifeless object.
+     * **GOOD (Animate the object)**: "The red rubber ball drops with heavy gravity, compresses flat against the concrete floor, springs upward in an elastic bounce, and oscillates to a stop, while the camera tracks slightly to follow the rebound."
+     * **BAD**: "Cinematic low-angle dolly shot centered on the sneaker cleaner"
+     * **GOOD**: "The white foam cleaner rapidly expands across the textured leather surface, thousands of tiny soap bubbles bursting and dissolving grease in real time, with the camera holding tight macro focus."
+   - **ABSOLUTE RULE - ZERO TIMESTAMPS**: NEVER write "At 0.00 seconds", "At 15.00 seconds", or ANY timeline timestamps. The AI model generates a single self-contained clip.
+   - **Physics & Material Dynamics**: Elastic compression, tensile fracture, viscous fluid flow, shearing surfaces, particulate dispersion.
 
 3. **Scriptwriting & Viral Hook Rules**:
    - **Hook (0-1.5s)**: Immediate visceral contradiction or mind-bending tactile fact. No greetings, no "did you know".
@@ -50,7 +53,7 @@ You MUST return ONLY valid JSON matching this schema:
       "duration_seconds": 5,
       "narration": "Exact spoken narration text",
       "flux_image_prompt": "Tactile stage picture establishing [subject and set blocking], [materials and textures], [lighting and color palette], shot on [lens/camera]...",
-      "minimax_motion_prompt": "[Camera choreography move] as [action catalyst trigger event occurs], capturing [physical reactions, fluid dynamics, and material deformation] with cinematic physics.",
+      "minimax_motion_prompt": "The [primary subject/object established in the image] [actively moves/deforms/bounces/bursts/operates with physical momentum], [secondary physics/particles/fluid reactions], while the camera [accompanying camera framing/tracking].",
       "sfx_cue": "Specific sound effect cue"
     }}
   ]
@@ -215,7 +218,7 @@ class ScriptGenerator:
                     "duration_seconds": 5,
                     "narration": "When a needle pierces your dermis, your body thinks it's under foreign invasion.",
                     "flux_image_prompt": "Tactile stage picture of a polished surgical steel tattoo needle hovering micrometers above elastic skin tissue, microscopic mist droplet spray suspended in atmospheric rim light, dark moody studio backdrop, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Low-angle creeping dolly tracking downward as the needle shears cleanly through the epidermis, sending microscopic acoustic shockwaves across the elastic skin surface.",
+                    "minimax_motion_prompt": "The polished surgical needle plunges and shears cleanly through the epidermis, sending microscopic acoustic ripples across the elastic skin surface with tiny pigment droplets spraying outward, while the camera maintains tight macro focus.",
                     "sfx_cue": "High-frequency mechanical hum and skin punch"
                 },
                 {
@@ -223,7 +226,7 @@ class ScriptGenerator:
                     "duration_seconds": 5,
                     "narration": "Millions of microscopic macrophages rush in to devour the ink, trying to cleanse the wound.",
                     "flux_image_prompt": "Tactile stage picture inside the intercellular matrix, golden glowing macrophage immune cells positioned around crystalline black pigment particles, deep indigo fluid backdrop, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Subtle 20-degree rotational orbit centered on the subject as amoebic white blood cells extend fluid pseudopods, wrapping around and absorbing shiny pigment granules.",
+                    "minimax_motion_prompt": "Amoebic white blood cells actively swarm and stretch fluid pseudopods outward, wrapping tightly around and engulfing shiny black pigment granules in rapid succession, with the camera executing a subtle rotational orbit.",
                     "sfx_cue": "Viscous fluid swoosh"
                 },
                 {
@@ -231,7 +234,7 @@ class ScriptGenerator:
                     "duration_seconds": 5,
                     "narration": "The ink particles are too massive to digest, so the cells lock in place and die holding them.",
                     "flux_image_prompt": "Tactile stage picture of a single crystallized immune cell locked around an immovable black metallic pigment cluster, cellular wall showing delicate micro-fractures, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Slow macro push-in as the macrophage cellular structure locks rigid and freezes permanently around the immovable pigment mass.",
+                    "minimax_motion_prompt": "The macrophage cellular structure locks rigid and crystallizes into an immovable shell around the dark pigment mass, delicate stress micro-fractures spreading across the surface, as the camera slowly pushes in.",
                     "sfx_cue": "Crystalline freeze crackle"
                 },
                 {
@@ -239,7 +242,7 @@ class ScriptGenerator:
                     "duration_seconds": 5,
                     "narration": "Whenever an old cell dies, a new one immediately eats the same ink again, which is why...",
                     "flux_image_prompt": "Tactile stage picture of a dying immune cell releasing trapped obsidian ink, directly adjacent to a fresh vibrant macrophage reaching outward in an infinite cycle, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Continuous forward dolly tracking through the cellular handover as the dying cell disperses and is instantly engulfed by the incoming macrophage, seamlessly cycling back to scene one.",
+                    "minimax_motion_prompt": "The dying immune cell ruptures open to release trapped obsidian ink particles, which are instantaneously vacuumed up and devoured by the incoming fresh macrophage in an unbroken cycle.",
                     "sfx_cue": "Rising tension riser cutting sharply"
                 }
             ]

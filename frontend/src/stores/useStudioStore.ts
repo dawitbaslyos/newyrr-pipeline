@@ -186,6 +186,13 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   },
 
   selectActiveChannel: async (handle: string) => {
+    // Optimistic instant UI switch
+    const target = get().userChannels.find(
+      (c) => c.handle.toLowerCase().trim() === handle.toLowerCase().trim()
+    );
+    if (target) {
+      set({ activeChannel: target });
+    }
     try {
       await fetch('/api/channels/select-active', {
         method: 'POST',

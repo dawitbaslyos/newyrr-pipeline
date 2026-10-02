@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 from config import Config
 
+import io
+from PIL import Image
+
 class OpenRouterVideoClient:
     """
     Client for OpenRouter Video Generation API:
@@ -37,8 +40,23 @@ class OpenRouterVideoClient:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Input image not found: {image_path}")
 
-        with open(image_path, "rb") as f:
-            b64_image = base64.b64encode(f.read()).decode("utf-8")
+        # Compress to high-quality 720p JPEG in-memory to prevent large payload SSL write timeouts
+        try:
+            with Image.open(image_path) as img:
+                rgb_img = img.convert("RGB")
+                # Standardize to 720p vertical or horizontal matching target resolution
+                if aspect_ratio == "9:16":
+                    rgb_img = rgb_img.resize((720, 1280), Image.Resampling.LANCZOS)
+                elif aspect_ratio == "16:9":
+                    rgb_img = rgb_img.resize((1280, 720), Image.Resampling.LANCZOS)
+                buf = io.BytesIO()
+                rgb_img.save(buf, format="JPEG", quality=88, optimize=True)
+                b64_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+                mime_type = "image/jpeg"
+        except Exception:
+            with open(image_path, "rb") as f:
+                b64_image = base64.b64encode(f.read()).decode("utf-8")
+                mime_type = "image/png"
 
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -60,7 +78,7 @@ class OpenRouterVideoClient:
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/png;base64,{b64_image}"
+                        "url": f"data:{mime_type};base64,{b64_image}"
                     },
                     "frame_type": "first_frame"
                 }
@@ -68,8 +86,14 @@ class OpenRouterVideoClient:
         }
 
         print(f"[OpenRouter Video] Submitting I2V job ({model}) for {os.path.basename(image_path)}: '{motion_prompt[:45]}...'")
-        res = requests.post(self.base_url, headers=headers, json=payload, timeout=40)
+        res = requests.post(self.base_url, headers=headers, json=payload, timeout=90)
         
+        if res.status_code == 403 and "Key limit exceeded" in res.text:
+            raise RuntimeError(
+                "OpenRouter API Key spending limit reached ($1.00 cap). "
+                "Please raise or remove the limit in your OpenRouter Dashboard (https://openrouter.ai/settings/keys) to continue generating videos."
+            )
+
         if res.status_code not in (200, 201, 202):
             raise RuntimeError(f"OpenRouter Video submit failed ({res.status_code}): {res.text}")
 
@@ -95,19 +119,20 @@ class OpenRouterVideoClient:
                         urls = status_data.get("unsigned_urls") or []
                         if urls and urls[0]:
                             vid_url = urls[0]
-                            dl_res = requests.get(vid_url, timeout=40)
-                            with open(output_path, "wb") as f:
-                                f.write(dl_res.content)
-                            print(f"[OpenRouter Video] Downloaded finished video: {output_path}")
-                            return output_path
+                            dl_res = requests.get(vid_url, headers=headers, timeout=60)
+                            if dl_res.status_code == 200 and len(dl_res.content) > 1000:
+                                with open(output_path, "wb") as f:
+                                    f.write(dl_res.content)
+                                print(f"[OpenRouter Video] Downloaded finished video ({len(dl_res.content)} bytes): {output_path}")
+                                return output_path
                         
                         # Alternative content endpoint
                         content_url = f"{poll_url}/content"
-                        content_res = requests.get(content_url, headers=headers, timeout=40)
-                        if content_res.status_code == 200:
+                        content_res = requests.get(content_url, headers=headers, timeout=60)
+                        if content_res.status_code == 200 and len(content_res.content) > 1000:
                             with open(output_path, "wb") as f:
                                 f.write(content_res.content)
-                            print(f"[OpenRouter Video] Saved video from content API: {output_path}")
+                            print(f"[OpenRouter Video] Saved video from content API ({len(content_res.content)} bytes): {output_path}")
                             return output_path
                         
                     elif status in ("failed", "cancelled", "expired"):

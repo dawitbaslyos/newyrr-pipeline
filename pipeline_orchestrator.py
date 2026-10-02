@@ -200,40 +200,8 @@ class VideoPipelineOrchestrator:
         video_file = project_dir / f"scene_{num:02d}_video.mp4"
         scene_duration = int(round(max(4, scene.get("actual_audio_duration", 5))))
 
-        # 1. ByteDance Seedance 2.0 Mini via OpenRouter ($0.03363/s)
-        if "seedance" in provider.lower():
-            try:
-                self.openrouter_video.render_video_i2v(
-                    image_path=str(image_file),
-                    motion_prompt=scene["minimax_motion_prompt"],
-                    output_path=str(video_file),
-                    model="bytedance/seedance-2.0-mini",
-                    duration=scene_duration,
-                    aspect_ratio=aspect_ratio,
-                    resolution="720p"
-                )
-            except Exception as e:
-                print(f"[Seedance 2.0 Mini] Scene {num} error: {e}. Generating high-definition motion pass...")
-                self._create_mock_video_clip(str(image_file), str(audio_file), str(video_file), duration=scene.get("actual_audio_duration", 5.0))
-
-        # 2. MiniMax Hailuo-3 via OpenRouter ($0.13/s)
-        elif "hailuo" in provider.lower():
-            try:
-                self.openrouter_video.render_video_i2v(
-                    image_path=str(image_file),
-                    motion_prompt=scene["minimax_motion_prompt"],
-                    output_path=str(video_file),
-                    model="minimax/hailuo-3",
-                    duration=scene_duration,
-                    aspect_ratio=aspect_ratio,
-                    resolution="720p"
-                )
-            except Exception as e:
-                print(f"[Hailuo-3] Scene {num} error: {e}. Generating high-definition motion pass...")
-                self._create_mock_video_clip(str(image_file), str(audio_file), str(video_file), duration=scene.get("actual_audio_duration", 5.0))
-
-        # 3. MiniMax H3 Max Turbo on RunPod Serverless (~$0.04/Short)
-        elif self.minimax_client.api_key and self.minimax_client.endpoint_id:
+        # 1. MiniMax H3 Max Turbo on RunPod Serverless (if configured and explicit)
+        if "runpod" in provider.lower() and self.minimax_client.api_key and self.minimax_client.endpoint_id:
             try:
                 payload = self.minimax_client.build_runpod_payload(
                     image_path_or_url=str(image_file),
@@ -244,11 +212,40 @@ class VideoPipelineOrchestrator:
                 )
                 self.minimax_client.render_scene_video(payload, str(video_file))
             except Exception as e:
-                print(f"[MiniMax H3] Scene {num} RunPod job encountered: {e}. Generating high-definition motion pass...")
-                self._create_mock_video_clip(str(image_file), str(audio_file), str(video_file), duration=scene.get("actual_audio_duration", 5.0))
+                print(f"[MiniMax H3] RunPod error: {e}. Falling back to OpenRouter Seedance 2.0 Mini...")
+                self.openrouter_video.render_video_i2v(
+                    image_path=str(image_file),
+                    motion_prompt=scene["minimax_motion_prompt"],
+                    output_path=str(video_file),
+                    model="bytedance/seedance-2.0-mini",
+                    duration=scene_duration,
+                    aspect_ratio=aspect_ratio,
+                    resolution="720p"
+                )
+
+        # 2. MiniMax Hailuo-3 via OpenRouter
+        elif "hailuo" in provider.lower():
+            self.openrouter_video.render_video_i2v(
+                image_path=str(image_file),
+                motion_prompt=scene["minimax_motion_prompt"],
+                output_path=str(video_file),
+                model="minimax/hailuo-3",
+                duration=scene_duration,
+                aspect_ratio=aspect_ratio,
+                resolution="720p"
+            )
+
+        # 3. Default: ByteDance Seedance 2.0 Mini via OpenRouter ($0.03363/s)
         else:
-            # Fast local animated fallback
-            self._create_mock_video_clip(str(image_file), str(audio_file), str(video_file), duration=scene.get("actual_audio_duration", 5.0))
+            self.openrouter_video.render_video_i2v(
+                image_path=str(image_file),
+                motion_prompt=scene["minimax_motion_prompt"],
+                output_path=str(video_file),
+                model="bytedance/seedance-2.0-mini",
+                duration=scene_duration,
+                aspect_ratio=aspect_ratio,
+                resolution="720p"
+            )
 
         scene["video_file"] = str(video_file)
         scene["status"] = "VIDEO_READY"
@@ -260,7 +257,7 @@ class VideoPipelineOrchestrator:
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
-        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "runpod_minimax_turbo")
+        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "bytedance/seedance-2.0-mini")
         aspect_ratio = manifest.get("aspect_ratio", "9:16")
 
         for scene in manifest.get("scenes", []):
@@ -283,7 +280,7 @@ class VideoPipelineOrchestrator:
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
-        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "runpod_minimax_turbo")
+        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "bytedance/seedance-2.0-mini")
         aspect_ratio = manifest.get("aspect_ratio", "9:16")
 
         print(f"[Orchestrator] Rendering Videos for approved frames in {project_name} using '{provider}'...")
@@ -302,7 +299,7 @@ class VideoPipelineOrchestrator:
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
-        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "runpod_minimax_turbo")
+        provider = getattr(Config, "ACTIVE_VIDEO_PROVIDER", "bytedance/seedance-2.0-mini")
         aspect_ratio = manifest.get("aspect_ratio", "9:16")
 
         for scene in manifest.get("scenes", []):
@@ -380,10 +377,7 @@ class VideoPipelineOrchestrator:
         clean_out = output_path.replace("\\", "/")
         clean_aud = audio_path.replace("\\", "/")
         
-        # Subtle Ken Burns slow push-in zoompan effect
-        total_frames = int(max(1, duration) * 30)
-        vf_motion = f"scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0008,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s=768x1344:fps=30"
-
+        # Clean static hold without any childish zoompan
         cmd = [
             "ffmpeg", "-y",
             "-loop", "1",
@@ -393,7 +387,7 @@ class VideoPipelineOrchestrator:
             "-preset", "veryfast",
             "-t", str(duration),
             "-pix_fmt", "yuv420p",
-            "-vf", vf_motion,
+            "-vf", "scale=768:1344:force_original_aspect_ratio=increase,crop=768:1344,fps=30",
             "-c:a", "aac",
             "-b:a", "192k",
             "-shortest",
@@ -401,24 +395,8 @@ class VideoPipelineOrchestrator:
         ]
         try:
             subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        except Exception:
-            # Fallback simple scale if zoompan is unsupported
-            cmd_simple = [
-                "ffmpeg", "-y",
-                "-loop", "1",
-                "-i", clean_img,
-                "-i", clean_aud,
-                "-c:v", "libx264",
-                "-preset", "ultrafast",
-                "-t", str(duration),
-                "-pix_fmt", "yuv420p",
-                "-vf", "scale=768:1344",
-                "-c:a", "aac",
-                "-b:a", "192k",
-                "-shortest",
-                clean_out
-            ]
-            subprocess.run(cmd_simple, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        except Exception as e:
+            print(f"[Orchestrator] Warning generating static clip: {e}")
 
     def get_manifest(self, project_name: str) -> Dict[str, Any]:
         p = Config.PROJECTS_DIR / project_name / "manifest.json"

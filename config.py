@@ -46,7 +46,7 @@ class Config:
     
     # Active Models from Settings Modal
     ACTIVE_IMAGE_MODEL: str = _saved_settings.get("image_model", "krea/krea-2-medium-turbo")
-    ACTIVE_VIDEO_PROVIDER: str = _saved_settings.get("video_provider", "runpod_minimax_turbo")
+    ACTIVE_VIDEO_PROVIDER: str = _saved_settings.get("video_provider", "bytedance/seedance-2.0-mini")
     ACTIVE_TTS_MODEL: str = _saved_settings.get("tts_model", "google/gemini-3.8-flash-lite-tts")
     ACTIVE_TTS_VOICE: str = _saved_settings.get("tts_voice", "Charon")
     ACTIVE_ART_STYLE: str = _saved_settings.get("art_style", "photo_35mm")
