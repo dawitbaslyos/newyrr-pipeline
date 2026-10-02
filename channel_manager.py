@@ -7,6 +7,8 @@ import requests
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from config import Config
+from youtube_analytics import youtube_analytics
+from competitor_tracker import competitor_tracker
 
 CHANNELS_FILE = Path(__file__).resolve().parent / "channels.json"
 TOPIC_HISTORY_FILE = Path(__file__).resolve().parent / "topic_history.json"
@@ -181,33 +183,94 @@ class ChannelManager:
             data["tracked_channels"] = CHANNEL_PROFILES.get("@newyrr", {}).get("tracked_channels", [])
         return data
 
-    def get_analytics_for_channel(self, handle: Optional[str] = None) -> Dict[str, Any]:
+    def get_analytics_for_channel(self, handle: Optional[str] = None, force_refresh: bool = False) -> Dict[str, Any]:
         data = self._load_channels()
         active = data.get("active_channel") or {}
-        target_handle = (handle or active.get("handle") or "@newyrr").lower().strip()
+        target_handle = (handle or active.get("handle") or "@Newyrr").strip()
         
-        if target_handle in CHANNEL_PROFILES:
-            return CHANNEL_PROFILES[target_handle]["analytics"]
-        
-        # Default fallback
-        return CHANNEL_PROFILES["@newyrr"]["analytics"]
+        # Pull live analytics from YouTube Data API v3 (or fresh cache)
+        try:
+            return youtube_analytics.get_channel_analytics(target_handle, force_refresh=force_refresh)
+        except Exception as e:
+            print(f"[Channel Manager] Analytics fetch error for {target_handle}: {e}")
+            norm = target_handle.lower()
+            if norm in CHANNEL_PROFILES:
+                return CHANNEL_PROFILES[norm]["analytics"]
+            return CHANNEL_PROFILES["@newyrr"]["analytics"]
 
-    def add_tracked_channel(self, handle: str, name: str, focus: str = "Science Trivia"):
+    def sync_active_channel(self, force: bool = True) -> Dict[str, Any]:
+        """
+        Synchronizes both data tracks for the active workspace:
+        1. User Channel: Live views, subscriber count, and video stats via official YouTube Data API v3.
+        2. Tracked Competitor Channels: Recent uploads and themes via free Atom RSS feeds (0 API quota).
+        """
+        data = self._load_channels()
+        active = data.get("active_channel") or {}
+        active_handle = active.get("handle", "@Newyrr")
+        norm_handle = active_handle.lower().strip()
+
+        # 1. Sync User Channel via YouTube Data API v3
+        analytics = self.get_analytics_for_channel(active_handle, force_refresh=force)
+        for ch in data.get("user_channels", []):
+            if ch.get("handle", "").lower().strip() == norm_handle:
+                if analytics.get("channel_name"):
+                    ch["name"] = analytics["channel_name"]
+                if analytics.get("subscribers"):
+                    ch["subscribers"] = analytics["subscribers"]
+                if analytics.get("video_count") is not None:
+                    ch["videos"] = analytics["video_count"]
+                if analytics.get("total_views"):
+                    ch["top_video"] = analytics["total_views"]
+                if data.get("active_channel", {}).get("handle", "").lower().strip() == norm_handle:
+                    data["active_channel"] = ch
+                break
+
+        # 2. Sync Tracked Competitor Channels via Free RSS Feeds
+        tracked = self.get_data().get("tracked_channels", [])
+        competitor_tracker.sync_tracked_channels_for_workspace(tracked, force=force)
+
+        self._save_channels(data)
+        return {
+            "success": True,
+            "active_channel": data.get("active_channel"),
+            "analytics": analytics,
+            "tracked_count": len(tracked)
+        }
+
+    def add_tracked_channel(self, handle: str, name: Optional[str] = None, focus: str = "Tactile 3D / Science"):
         data = self._load_channels()
         active = data.get("active_channel") or {}
         handle_key = active.get("handle", "").lower().strip() or "@newyrr"
+        norm_handle = handle.lower().strip()
+
+        # Resolve channel details for free via HTML scraping
+        meta = competitor_tracker.resolve_channel_free(handle)
+        resolved_name = (name and name.strip()) or (meta.get("title") if meta else None) or handle.lstrip("@").title()
+        avatar_url = meta.get("avatar_url") if meta else None
+        channel_id = meta.get("id") if meta else None
 
         tracked_by_ch = data.setdefault("tracked_by_channel", {})
         current_tracked = tracked_by_ch.get(handle_key) or data.get("tracked_channels", [])
 
         # Deduplicate
         existing_handles = {c.get("handle", "").lower().strip() for c in current_tracked}
-        norm_handle = handle.lower().strip()
         if norm_handle not in existing_handles:
-            current_tracked.append({"handle": handle, "name": name, "focus": focus})
+            new_item = {
+                "handle": handle if handle.startswith("@") else f"@{handle}",
+                "name": resolved_name,
+                "focus": focus,
+                "channel_id": channel_id,
+                "avatar_url": avatar_url
+            }
+            current_tracked.append(new_item)
             tracked_by_ch[handle_key] = current_tracked
             data["tracked_channels"] = current_tracked
             self._save_channels(data)
+
+            # Pre-fetch recent uploads for this new competitor
+            if channel_id:
+                competitor_tracker.sync_tracked_channels_for_workspace([new_item], force=True)
+
         return self.get_data()
 
     def remove_tracked_channel(self, handle: str):
@@ -400,11 +463,22 @@ class ChannelManager:
             self.save_topic_to_history(fallback)
             return fallback
 
-        prompt = f"""You are a viral YouTube Shorts content strategist and visual director for {name} ({handle}).
-Channel Niche & Theme: '{niche}'.
-Style: Zack D Films Mise-en-scène, high-retention tactile pacing, surprising everyday contradictions, and captivating what-if concepts.
+        # Synthesize real data from both tracks
+        tracked_channels = self.get_data().get("tracked_channels", [])
+        competitor_context = competitor_tracker.get_competitor_context_for_llm(tracked_channels)
+        performance_context = youtube_analytics.get_prompt_context(handle)
 
-Generate 6 brand new, high-retention YouTube Short concepts specifically tailored to this channel's niche and audience.
+        prompt = f"""You are an elite YouTube Shorts content director and algorithmic strategist for {name} ({handle}).
+Channel Niche & Theme: '{niche}'.
+Aesthetic & Narrative Standard: Zack D Films Mise-en-scène (Tactile set building, State 0 anticipation, physical breakdown / catalyst, zero timestamps, seamless grammatical loop).
+
+{performance_context}
+
+{competitor_context}
+
+TASK:
+Based on our channel's real winning patterns and the trending concepts from tracked competitors, generate 6 brand new, high-velocity YouTube Short concepts.
+Each concept MUST have an immediate 1.5-second scroll-stopping tactile hook (State 0 anticipation).
 Return JSON ONLY matching:
 {{
   "topics": [
@@ -442,6 +516,7 @@ Return JSON ONLY matching:
         self.save_topic_to_history(fallback)
         return fallback
 
+channel_mgr = ChannelManager()
+
 if __name__ == "__main__":
-    cm = ChannelManager()
-    print("History count:", len(cm.get_topic_history()))
+    print("History count:", len(channel_mgr.get_topic_history()))

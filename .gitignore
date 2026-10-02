@@ -10,6 +10,8 @@ projects/
 output/
 data/
 *.db
+competitor_cache.json
+analytics_cache.json
 *.mp4
 *.mp3
 *.wav

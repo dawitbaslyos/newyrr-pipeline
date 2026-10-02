@@ -77,7 +77,20 @@ class ScriptGenerator:
         self.analytics = YouTubeAnalyticsManager()
 
     def generate_script(self, topic: str, max_retries: int = 2, art_style: Optional[str] = None, channel_handle: Optional[str] = None, channel_niche: Optional[str] = None) -> Dict[str, Any]:
-        analytics_context = self.analytics.get_prompt_context()
+        handle = channel_handle or "@Newyrr"
+        niche = channel_niche or "Shorts science. How and what if moments."
+
+        # Real multi-channel performance intelligence + competitor insights
+        analytics_context = self.analytics.get_prompt_context(handle)
+        try:
+            from competitor_tracker import competitor_tracker
+            from channel_manager import channel_mgr
+            tracked = channel_mgr.get_data().get("tracked_channels", [])
+            comp_context = competitor_tracker.get_competitor_context_for_llm(tracked)
+            full_context = f"{analytics_context}\n\n{comp_context}"
+        except Exception:
+            full_context = analytics_context
+
         art_key = art_style or getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm")
         
         clio_info = getattr(Config, "CLIO_STYLES", {}).get(art_key)
@@ -87,14 +100,11 @@ class ScriptGenerator:
         else:
             art_name = art_key
             art_directive = ART_STYLE_MAP.get(art_key, "35mm Photography with authentic Kodak film grain and organic bokeh.")
-            
-        handle = channel_handle or "@Newyrr"
-        niche = channel_niche or "Shorts science. How and what if moments."
 
         system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
             channel_handle=handle,
             channel_niche=niche,
-            analytics_context=analytics_context,
+            analytics_context=full_context,
             art_style_directive=art_directive,
             art_style_name=art_name
         )

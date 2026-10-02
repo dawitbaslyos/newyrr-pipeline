@@ -55,6 +55,16 @@ export const TrackedChannelsReel: React.FC = () => {
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <button
+            onClick={async () => {
+              await fetch('/api/channels/sync', { method: 'POST' });
+              fetchChannels();
+            }}
+            title="Sync competitor RSS feeds"
+            className="w-6 h-6 rounded-lg bg-[#0d111a] hover:bg-[#161b26] border border-[#1f2736] text-slate-300 hover:text-cyan-400 flex items-center justify-center text-xs transition active:scale-95 cursor-pointer"
+          >
+            <span className="text-[11px]">⚡</span>
+          </button>
+          <button
             onClick={() => setModal('addTrackedChannel', true)}
             className="text-xs text-cyan-400 hover:underline font-semibold flex items-center gap-1 ml-1 cursor-pointer"
           >
@@ -78,7 +88,7 @@ export const TrackedChannelsReel: React.FC = () => {
               className="min-w-[240px] sm:min-w-[260px] shrink-0 snap-start bg-[#0d111a] hover:bg-[#161b26] border border-[#1f2736] hover:border-slate-600 p-3 rounded-2xl flex items-center justify-between gap-3 group transition shadow-sm"
             >
               <div className="flex items-center gap-2.5 overflow-hidden">
-                <AvatarRing initials={c.name[0] || '@'} size="sm" />
+                <AvatarRing src={c.avatar_url} initials={c.name[0] || '@'} size="sm" />
                 <div className="overflow-hidden">
                   <div className="font-bold text-xs truncate text-slate-100">{c.name}</div>
                   <div className="text-[10px] text-slate-400 truncate">{c.focus || c.handle}</div>

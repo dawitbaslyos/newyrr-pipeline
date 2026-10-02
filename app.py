@@ -181,8 +181,12 @@ def get_topic_history():
     return channel_mgr.get_topic_history()
 
 @app.get("/api/analytics")
-def get_analytics(handle: Optional[str] = None):
-    return channel_mgr.get_analytics_for_channel(handle)
+def get_analytics(handle: Optional[str] = None, refresh: bool = False):
+    return channel_mgr.get_analytics_for_channel(handle, force_refresh=refresh)
+
+@app.post("/api/channels/sync")
+def sync_channels(force: bool = True):
+    return channel_mgr.sync_active_channel(force=force)
 
 @app.get("/api/channels")
 def get_channels():

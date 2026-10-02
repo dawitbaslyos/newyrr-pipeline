@@ -46,6 +46,8 @@ export interface TrackedChannel {
   name: string;
   handle: string;
   focus: string;
+  avatar_url?: string;
+  channel_id?: string;
 }
 
 export interface TopicSuggestion {
