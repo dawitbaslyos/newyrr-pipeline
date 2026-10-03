@@ -61,6 +61,13 @@
       "handle": "@Kurzgesagt",
       "name": "Kurzgesagt",
       "focus": "Microscopic biology & existential questions"
+    },
+    {
+      "handle": "@theoutliners",
+      "name": "theoutliners",
+      "focus": "Science Trivia",
+      "channel_id": "UCnyYE7Gv1M2bonzGv7_gLRA",
+      "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj"
     }
   ],
   "tracked_by_channel": {
@@ -128,6 +135,13 @@
         "handle": "@Kurzgesagt",
         "name": "Kurzgesagt",
         "focus": "Microscopic biology & existential questions"
+      },
+      {
+        "handle": "@theoutliners",
+        "name": "theoutliners",
+        "focus": "Science Trivia",
+        "channel_id": "UCnyYE7Gv1M2bonzGv7_gLRA",
+        "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj"
       }
     ]
   }

@@ -169,6 +169,9 @@ export const StudioEditor: React.FC = () => {
         if (res.ok) {
           const updated = await res.json();
           useStudioStore.setState({ activeProject: updated });
+        } else {
+          const errData = await res.json().catch(() => ({ detail: `Failed generating frame for Scene ${i}` }));
+          throw new Error(errData.detail || `Failed generating frame for Scene ${i}`);
         }
         setGenerationProgress(Math.round((i / total) * 100));
       }
@@ -231,6 +234,9 @@ export const StudioEditor: React.FC = () => {
         const updated = await res.json();
         useStudioStore.setState({ activeProject: updated });
         fetchProjects();
+      } else {
+        const errData = await res.json().catch(() => ({ detail: 'Failed regenerating frame' }));
+        alert(errData.detail || 'Failed regenerating frame');
       }
     } catch (e) {
       alert('Failed regenerating frame: ' + e);

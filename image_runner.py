@@ -34,8 +34,7 @@ class ImageGenerator:
     ) -> str:
         output_path = str(Path(output_path).resolve())
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-        model = Config.ACTIVE_IMAGE_MODEL or Config.OPENROUTER_IMAGE_MODEL
+        model = Config.ACTIVE_IMAGE_MODEL or Config.OPENROUTER_IMAGE_MODEL or "krea/krea-2-medium-turbo"
 
         # 1. OpenRouter (Krea 2 Turbo or Nano Banana)
         if self.openrouter_key:
@@ -44,7 +43,11 @@ class ImageGenerator:
                 if img_path and os.path.exists(img_path):
                     return img_path
             except Exception as e:
-                print(f"[Image Generator] OpenRouter image error ({model}): {e}. Trying fallback...")
+                print(f"[Image Generator] OpenRouter image error ({model}): {e}")
+                # Propagate key limit or quota errors directly
+                if "spending limit reached" in str(e).lower() or "key limit exceeded" in str(e).lower() or "403" in str(e):
+                    raise e
+                last_err = e
 
         # 2. Replicate (if configured)
         if self.replicate_token:
@@ -54,9 +57,13 @@ class ImageGenerator:
                     return img_path
             except Exception as e:
                 print(f"[Image Generator] Replicate error: {e}...")
+                last_err = e
 
-        # 3. Fallback
-        return self._generate_local_fallback(prompt, output_path, width, height)
+        # If both fail, raise the real error instead of silently drawing a confusing wireframe
+        raise RuntimeError(
+            f"Image generation failed for '{prompt[:40]}...': {last_err if 'last_err' in locals() else 'No active image provider'}. "
+            "Please verify your API key credits in Settings."
+        )
 
     def _generate_openrouter(self, prompt: str, output_path: str, model: str, aspect_ratio: str = "9:16") -> str:
         headers = {
@@ -82,6 +89,11 @@ class ImageGenerator:
             }
             print(f"[Image Generator] Calling OpenRouter /images ({model}) for: '{prompt[:45]}...'")
             res = requests.post("https://openrouter.ai/api/v1/images", headers=headers, json=payload, timeout=45)
+            if res.status_code == 403 and "Key limit exceeded" in res.text:
+                raise RuntimeError(
+                    "OpenRouter API Key spending limit reached ($1.00 cap). "
+                    "Please raise or remove the limit in your OpenRouter Dashboard (https://openrouter.ai/settings/keys) to continue generating images."
+                )
             if res.status_code == 200:
                 data = res.json()
                 items = data.get("data", [])
@@ -113,6 +125,11 @@ class ImageGenerator:
 
         print(f"[Image Generator] Calling OpenRouter chat ({payload['model']}) for: '{prompt[:45]}...'")
         res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=45)
+        if res.status_code == 403 and "Key limit exceeded" in res.text:
+            raise RuntimeError(
+                "OpenRouter API Key spending limit reached ($1.00 cap). "
+                "Please raise or remove the limit in your OpenRouter Dashboard (https://openrouter.ai/settings/keys) to continue generating images."
+            )
         if res.status_code == 200:
             data = res.json()
             choices = data.get("choices", [])

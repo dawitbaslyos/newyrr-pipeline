@@ -233,16 +233,20 @@ def list_projects():
                     final_vid = Config.OUTPUT_DIR / f"{data['project_name']}_final.mp4"
                     data["final_video_url"] = f"/static_output/{final_vid.name}" if final_vid.exists() else None
                         
-                    # Add web accessible paths for scene assets
+                    # Add web accessible paths for scene assets with cache busting
                     for s in data.get("scenes", []):
                         if s.get("image_file"):
-                            s["image_url"] = f"/static_projects/{data['project_name']}/{Path(s['image_file']).name}"
+                            mtime = int(os.path.getmtime(s["image_file"])) if os.path.exists(s["image_file"]) else int(time.time())
+                            s["image_url"] = f"/static_projects/{data['project_name']}/{Path(s['image_file']).name}?t={mtime}"
                         if s.get("video_file"):
-                            s["video_url"] = f"/static_projects/{data['project_name']}/{Path(s['video_file']).name}"
+                            mtime = int(os.path.getmtime(s["video_file"])) if os.path.exists(s["video_file"]) else int(time.time())
+                            s["video_url"] = f"/static_projects/{data['project_name']}/{Path(s['video_file']).name}?t={mtime}"
                         if s.get("audio_file"):
-                            s["audio_url"] = f"/static_projects/{data['project_name']}/{Path(s['audio_file']).name}"
+                            mtime = int(os.path.getmtime(s["audio_file"])) if os.path.exists(s["audio_file"]) else int(time.time())
+                            s["audio_url"] = f"/static_projects/{data['project_name']}/{Path(s['audio_file']).name}?t={mtime}"
                     if data.get("thumbnail_file"):
-                        data["thumbnail_url"] = f"/static_projects/{data['project_name']}/{Path(data['thumbnail_file']).name}"
+                        mtime = int(os.path.getmtime(data["thumbnail_file"])) if os.path.exists(data["thumbnail_file"]) else int(time.time())
+                        data["thumbnail_url"] = f"/static_projects/{data['project_name']}/{Path(data['thumbnail_file']).name}?t={mtime}"
 
                     projects.append(data)
                 except Exception:
@@ -353,13 +357,17 @@ def get_project(project_name: str):
         data["final_video_url"] = f"/static_output/{final_vid.name}" if final_vid.exists() else None
         for s in data.get("scenes", []):
             if s.get("image_file"):
-                s["image_url"] = f"/static_projects/{project_name}/{Path(s['image_file']).name}"
+                mtime = int(os.path.getmtime(s["image_file"])) if os.path.exists(s["image_file"]) else int(time.time())
+                s["image_url"] = f"/static_projects/{project_name}/{Path(s['image_file']).name}?t={mtime}"
             if s.get("video_file"):
-                s["video_url"] = f"/static_projects/{project_name}/{Path(s['video_file']).name}"
+                mtime = int(os.path.getmtime(s["video_file"])) if os.path.exists(s["video_file"]) else int(time.time())
+                s["video_url"] = f"/static_projects/{project_name}/{Path(s['video_file']).name}?t={mtime}"
             if s.get("audio_file"):
-                s["audio_url"] = f"/static_projects/{project_name}/{Path(s['audio_file']).name}"
+                mtime = int(os.path.getmtime(s["audio_file"])) if os.path.exists(s["audio_file"]) else int(time.time())
+                s["audio_url"] = f"/static_projects/{project_name}/{Path(s['audio_file']).name}?t={mtime}"
         if data.get("thumbnail_file"):
-            data["thumbnail_url"] = f"/static_projects/{project_name}/{Path(data['thumbnail_file']).name}"
+            mtime = int(os.path.getmtime(data["thumbnail_file"])) if os.path.exists(data["thumbnail_file"]) else int(time.time())
+            data["thumbnail_url"] = f"/static_projects/{project_name}/{Path(data['thumbnail_file']).name}?t={mtime}"
         return data
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
