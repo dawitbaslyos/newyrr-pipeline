@@ -68,9 +68,22 @@ class OpenRouterVideoClient:
         # Seedance 2.0 Mini accepted durations: 4 to 15
         valid_duration = max(4, min(10, int(round(duration))))
 
+        # Sanitize motion prompt (strip any timestamps like 'At 0.00 seconds')
+        clean_motion = motion_prompt
+        try:
+            import re
+            clean_motion = re.sub(r'^[Aa]t \d+(\.\d+)? seconds?,?\s*', '', clean_motion)
+            clean_motion = re.sub(r'^[Aa]t \d+:\d+,?\s*', '', clean_motion)
+            clean_motion = re.sub(r'^\d+(\.\d+)? seconds? in,?\s*', '', clean_motion)
+            clean_motion = re.sub(r'\[?\d+:\d+\]?\s*', '', clean_motion).strip()
+            if clean_motion and clean_motion[0].islower():
+                clean_motion = clean_motion[0].upper() + clean_motion[1:]
+        except Exception:
+            clean_motion = motion_prompt
+
         payload = {
             "model": model,
-            "prompt": motion_prompt,
+            "prompt": clean_motion,
             "duration": valid_duration,
             "aspect_ratio": aspect_ratio,
             "resolution": resolution,

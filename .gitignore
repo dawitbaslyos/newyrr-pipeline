@@ -8,13 +8,17 @@ scratch/
 # Media outputs & Project Renders
 projects/
 output/
-data/
+data/*
+!data/sfx_catalog.json
+!data/sfx_bank
+!data/sfx_bank/*
 *.db
 competitor_cache.json
 analytics_cache.json
 *.mp4
 *.mp3
 *.wav
+!data/sfx_bank/*.wav
 *.pcm
 *.png
 *.jpg

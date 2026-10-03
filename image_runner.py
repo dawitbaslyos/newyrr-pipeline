@@ -75,12 +75,12 @@ class ImageGenerator:
 
         # A. Krea 2 Turbo & Native Image Models (via /api/v1/images)
         if "krea" in model.lower() or "dall-e" in model.lower() or "imagen" in model.lower() and not "gemini" in model.lower():
-            final_prompt = prompt
-            if not prompt.strip().startswith("Style:"):
-                art_key = getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm")
+            final_prompt = prompt.strip()
+            if not final_prompt.startswith("Style:"):
+                art_key = getattr(Config, "ACTIVE_ART_STYLE", "render_unreal")
                 clio_info = getattr(Config, "CLIO_STYLES", {}).get(art_key)
-                if clio_info:
-                    final_prompt = f"Style: {clio_info['name']}: {clio_info['prompt']}. Subject: {prompt}"
+                if clio_info and clio_info.get("prompt"):
+                    final_prompt = f"{clio_info['prompt']} Subject: {final_prompt}. Uncluttered 9:16 vertical composition, strong single focal point, clean negative space."
 
             payload = {
                 "model": model,
@@ -115,8 +115,8 @@ class ImageGenerator:
 
         # B. Gemini / Nano Banana (via chat/completions)
         enriched_prompt = (
-            f"Generate a cinematic, high-resolution vertical {aspect_ratio} photograph. "
-            f"Professional cinematography, Hasselblad macro lens, 8k photorealistic textures: {prompt}"
+            f"Generate a clean, high-impact vertical {aspect_ratio} visual. "
+            f"Crisp single focal subject, uncluttered composition, cinematic lighting: {prompt}"
         )
         payload = {
             "model": model if "gemini" in model.lower() else "google/gemini-3.1-flash-image",

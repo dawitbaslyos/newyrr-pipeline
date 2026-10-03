@@ -31,8 +31,17 @@ class MiniMaxRunPodClient:
     ) -> Dict[str, Any]:
         workflow = json.loads(json.dumps(self.base_workflow))
 
+        # Sanitize motion prompt
+        import re
+        clean_motion = re.sub(r'^[Aa]t \d+(\.\d+)? seconds?,?\s*', '', motion_prompt)
+        clean_motion = re.sub(r'^[Aa]t \d+:\d+,?\s*', '', clean_motion)
+        clean_motion = re.sub(r'^\d+(\.\d+)? seconds? in,?\s*', '', clean_motion)
+        clean_motion = re.sub(r'\[?\d+:\d+\]?\s*', '', clean_motion).strip()
+        if clean_motion and clean_motion[0].islower():
+            clean_motion = clean_motion[0].upper() + clean_motion[1:]
+
         # Node 14: Prompt text
-        workflow["14"]["inputs"]["value"] = motion_prompt
+        workflow["14"]["inputs"]["value"] = clean_motion
 
         # Node 25: Image filename
         workflow["25"]["inputs"]["image"] = image_ref

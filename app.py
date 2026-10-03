@@ -14,12 +14,17 @@ from youtube_analytics import YouTubeAnalyticsManager
 from channel_manager import ChannelManager
 from pipeline_orchestrator import VideoPipelineOrchestrator
 from video_assembler import VideoAssembler
+from sfx_manager import sfx_manager
 
 app = FastAPI(title="Newyrr Media Studio", version="2.0.0")
 
 # Mount static media directories
 app.mount("/static_output", StaticFiles(directory=str(Config.OUTPUT_DIR)), name="output")
 app.mount("/static_projects", StaticFiles(directory=str(Config.PROJECTS_DIR)), name="projects")
+
+SFX_BANK_DIR = Config.BASE_DIR / "data" / "sfx_bank"
+SFX_BANK_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/static_sfx", StaticFiles(directory=str(SFX_BANK_DIR)), name="sfx_bank")
 
 RENDERS_DIR = Config.BASE_DIR / "data" / "renders"
 RENDERS_DIR.mkdir(parents=True, exist_ok=True)
@@ -485,6 +490,49 @@ def generate_thumbnail(req: ThumbnailRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ----------------- Curated SFX & JEV Sound Design APIs -----------------
+@app.get("/api/sfx/catalog")
+def get_sfx_catalog():
+    """Returns the 18 curated, normalized sound effects with transient peak metadata."""
+    return sfx_manager.catalog
+
+@app.get("/api/project/{project_name}/sfx-timeline")
+def get_project_sfx_timeline(project_name: str):
+    """Returns the peak-aligned SFX design timeline for the project."""
+    timeline_path = Config.PROJECTS_DIR / project_name / "sfx_timeline.json"
+    if timeline_path.exists():
+        try:
+            with open(timeline_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    manifest_path = Config.PROJECTS_DIR / project_name / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+    return sfx_manager.generate_sfx_timeline(manifest, use_ai=True)
+
+@app.post("/api/project/generate-sfx")
+def generate_project_sfx(req: ProjectActionRequest):
+    """Runs TypeSafe JEV Router on OpenRouter to generate or re-generate sound design."""
+    manifest_path = Config.PROJECTS_DIR / req.project_name / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+    timeline = sfx_manager.generate_sfx_timeline(manifest, use_ai=True)
+    timeline_path = Config.PROJECTS_DIR / req.project_name / "sfx_timeline.json"
+    try:
+        with open(timeline_path, "w", encoding="utf-8") as f:
+            json.dump(timeline, f, indent=2)
+    except Exception:
+        pass
+    return {
+        "status": "success",
+        "timeline": timeline
+    }
 
 # ----------------- Viral Repurpose Engine APIs -----------------
 class RepurposeDeconstructRequest(BaseModel):

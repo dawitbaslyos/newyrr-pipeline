@@ -1,77 +1,155 @@
 import json
 import os
+import re
 import requests
 from typing import Dict, Any, Optional
 from config import Config
 from youtube_analytics import YouTubeAnalyticsManager
 
-# Advanced Cinematic Cohesion & Prompt Engineering System (Zack D Films Mise-en-scène Standard)
-SYSTEM_PROMPT_TEMPLATE = """You are an elite cinematic visual director, storyteller, and motion choreographer in the style of Zack D Films for the YouTube Shorts channel {channel_handle} ('{channel_niche}').
+# ─────────────────────────────────────────────────────────────────────────────
+# THE UNIFIED 5-BEAT CAUSAL STORYTELLING ENGINE
+# ─────────────────────────────────────────────────────────────────────────────
+
+SYSTEM_PROMPT_TEMPLATE = """You are an elite cinematic director and master short-form screenwriter for the channel {channel_handle} ('{channel_niche}').
+
+{archetype_directive}
 
 {analytics_context}
 
-## REQUIRED VISUAL AESTHETIC / ART DIRECTION:
+## CURRENT ART STYLE DIRECTIVE:
 {art_style_directive}
 
-## YOUR OBJECTIVE:
-Turn the user's topic into an extraordinary, 5-scene viral YouTube Short (25-30 seconds). Treat every scene as its own self-contained cinematic video production with independent camera setup, photography, tactile blocking, and pacing.
+---
 
-## ZACK D FILMS MISE-EN-SCÈNE & VISUAL ARCHITECTURE:
-Every scene operates in two distinct phases: The Stage Picture (First Frame) and The Action Catalyst (Motion Guidance).
+## CORE ARCHITECTURAL LAWS (NON-NEGOTIABLE):
 
-1. **First Frame Generation (The Stage Picture / The Set - 'flux_image_prompt')**:
-   - Establishes the static "Stage Picture" just BEFORE action triggers (State 0 anticipation).
-   - **Set Building & Spatial Blocking**: Precise object/subject placement in 3D space, cutaway cross-sections, anatomical layers, or mechanical assemblies.
-   - **Tactile Details**: Subsurface scattering, viscous fluid droplets, microscopic fissures, cellular membranes, surface textures.
-   - **Lighting & Lens**: Depth of field (e.g., "Shot on 85mm anamorphic lens at f/1.8"), volumetric rim lighting, unified color signature adhering to {art_style_name}.
-   - **STRICT PROHIBITION**: NEVER write meta phrases ('Hyper-realistic 9:16 vertical prompt for Flux Krea', 'An image of', 'A photorealistic shot'). Start immediately with the physical subject and scene blocking.
+### 1. THE 5-BEAT CAUSAL CHAIN SCRIPT
+Every script consists of EXACTLY 5 progressive scenes (25–30 seconds total, 12–16 spoken words per scene, ~70 words total).
+Every scene MUST follow the Causal Chain ("Because of A, B happens; which triggers C"):
 
-2. **Motion Guidance (Object Animation & Action Catalyst - 'minimax_motion_prompt')**:
-   - Each scene is an independent 5-second video clip. The AI video model (Seedance 2.0 / MiniMax) receives only the initial frame.
-   - **OBJECT ANIMATION FIRST (MANDATORY)**: You MUST direct the physical movement and animation of the objects established in the still keyframe. The video model prioritizes the first 10 words.
-     * **BAD (Do NOT do this)**: "Slow continuous push-in along the optical axis as the ball rests" ➔ The AI will just zoom in on a completely static, lifeless object.
-     * **GOOD (Animate the object)**: "The red rubber ball drops with heavy gravity, compresses flat against the concrete floor, springs upward in an elastic bounce, and oscillates to a stop, while the camera tracks slightly to follow the rebound."
-     * **BAD**: "Cinematic low-angle dolly shot centered on the sneaker cleaner"
-     * **GOOD**: "The white foam cleaner rapidly expands across the textured leather surface, thousands of tiny soap bubbles bursting and dissolving grease in real time, with the camera holding tight macro focus."
-   - **ABSOLUTE RULE - ZERO TIMESTAMPS**: NEVER write "At 0.00 seconds", "At 15.00 seconds", or ANY timeline timestamps. The AI model generates a single self-contained clip.
-   - **Physics & Material Dynamics**: Elastic compression, tensile fracture, viscous fluid flow, shearing surfaces, particulate dispersion.
+- **Scene 1 (The Paradox Hook, 0–2s)**:
+  * State a shocking, counter-intuitive fact or impossible reality with absolute documentary authority.
+  * **STRICT PROHIBITION**: NEVER use greetings ("Hey everyone"), rhetorical questions ("Have you ever wondered?"), exclamation marks, childish nicknames ("cheesy menace", "stinky bugs"), or generic hype ("You won't believe this").
+- **Scene 2 (The Underlying Mechanism / Context, 2–8s)**:
+  * Deliver the exact physical mechanism, biological organ, historical origin year, or life context.
+- **Scene 3 (The Kinetic Reaction / The Escalation, 8–16s)**:
+  * The unseen physical reaction, physiological cascade, or escalating human crisis.
+- **Scene 4 (The Turning Point / Consequence, 16–24s)**:
+  * The extreme metric, medical anomaly, or historical shift that reveals the true scale.
+- **Scene 5 (The Closed-Loop Reveal, 24–30s)**:
+  * The shocking resolution that makes total sense in retrospect.
+  * **Infinite Loop Requirement**: The final sentence MUST end on a grammatical setup that loops seamlessly back into the very first word of Scene 1.
 
-3. **Scriptwriting & Viral Hook Rules**:
-   - **Hook (0-1.5s)**: Immediate visceral contradiction or mind-bending tactile fact. No greetings, no "did you know".
-   - **Pacing**: Exactly 5 scenes. 10-14 spoken words per scene (~5 seconds each).
-   - **Infinite Loop**: The final sentence of Scene 5 MUST grammatically connect back into the first word of Scene 1.
+### 2. NARRATOR VOICE & TONE:
+* Zero preachy advice. NEVER write "Remember to...", "Be sure to clean...", "Always make sure...", or moralistic lectures.
+* Zero exclamation marks.
+* Cold, intelligent, highly respectful of the viewer's intellect. Speak with the cadence of an elite documentary narrator.
 
-You MUST return ONLY valid JSON matching this schema:
+### 3. MASTER SCENE ANCHORING (STRICT CONTINUITY):
+To prevent jarring visual disconnects between cuts, you MUST define ONE persistent Master Subject and spatial world before writing prompts:
+- All 5 scenes are progressive camera shots of the **SAME physical subject and environment**.
+- Maintain the exact same lighting signature and color palette across all scenes.
+
+### 4. KEYFRAME PROMPT ARCHITECTURE ('flux_image_prompt'):
+- Uncluttered, vertical 9:16 mobile composition.
+- **Formula**: `[Shot distance and lens] of [Master Subject performing this beat's action], [consistent environment backdrop], [lighting signature]. Single clear central focal point, clean negative space, uncluttered composition.`
+- **BANNED BUZZWORDS**: NEVER write "hyperrealistic", "4k", "trending on artstation", "halftone patterns", "abstract glowing lines", or meta phrases like "prompt for flux". Keep it purely physical and tangible.
+
+### 5. MOTION GUIDANCE ('minimax_motion_prompt'):
+- Direct the **physical kinetics of the subject**, NOT the camera. Video AI models morph or ruin the shot when told to zoom or pan.
+- **Formula**: `The [master subject] [actively physically deforms / breaks / releases fluid / moves with momentum], [secondary physical particle/fluid reaction], fixed static camera frame.`
+- **STRICT PROHIBITION**: NEVER include timestamps ("At 0.00 seconds", "[00:15]"). Video models generate single isolated 5-second clips.
+
+---
+
+You MUST output ONLY valid JSON matching this exact schema:
 {{
-  "title": "Viral 5-7 word title with emoji",
-  "hook": "Opening hook text",
-  "visual_style_bible": "Unified color palette, lighting motif, and tactile aesthetic across all scenes",
-  "loop_connection": "Explanation of how Scene 5 loops back to Scene 1",
+  "title": "5-7 word compelling title with one relevant emoji",
+  "hook": "Opening hook line from Scene 1",
+  "master_visual_bible": {{
+    "master_subject": "Precise description of the single persistent subject/character/organ",
+    "environment": "Unified spatial background and room/setting",
+    "color_palette": "Specific 3-color harmony and film/render lighting tone"
+  }},
+  "loop_connection": "Explanation of how Scene 5 grammatically flows into Scene 1",
   "scenes": [
     {{
       "scene_number": 1,
       "duration_seconds": 5,
-      "narration": "Exact spoken narration text",
-      "flux_image_prompt": "Tactile stage picture establishing [subject and set blocking], [materials and textures], [lighting and color palette], shot on [lens/camera]...",
-      "minimax_motion_prompt": "The [primary subject/object established in the image] [actively moves/deforms/bounces/bursts/operates with physical momentum], [secondary physics/particles/fluid reactions], while the camera [accompanying camera framing/tracking].",
-      "sfx_cue": "Specific sound effect cue"
+      "narration": "12-16 words of authoritative spoken narration",
+      "flux_image_prompt": "Clean, uncluttered 9:16 prompt establishing master subject with clear single focal point...",
+      "minimax_motion_prompt": "Physical kinetic momentum and material deformation of the subject, fixed static camera...",
+      "sfx_cue": "Specific tactile sound design cue"
+    }},
+    {{
+      "scene_number": 2,
+      "duration_seconds": 5,
+      "narration": "12-16 words explaining the underlying physical or historical mechanism",
+      "flux_image_prompt": "Medium cutaway shot maintaining the exact master subject in the same environment...",
+      "minimax_motion_prompt": "Physical kinetic action of the subject, fixed static camera...",
+      "sfx_cue": "Specific tactile sound design cue"
+    }},
+    {{
+      "scene_number": 3,
+      "duration_seconds": 5,
+      "narration": "12-16 words on the unseen reaction or crisis escalation",
+      "flux_image_prompt": "Detailed macro cross-section or closer framing of the master subject...",
+      "minimax_motion_prompt": "Physical fluid or mechanical reaction of the subject, fixed static camera...",
+      "sfx_cue": "Specific tactile sound design cue"
+    }},
+    {{
+      "scene_number": 4,
+      "duration_seconds": 5,
+      "narration": "12-16 words on the extreme consequence or turning point",
+      "flux_image_prompt": "Dramatic framing maintaining continuity of the master subject and lighting...",
+      "minimax_motion_prompt": "Kinetic reaction or deformation, fixed static camera...",
+      "sfx_cue": "Specific tactile sound design cue"
+    }},
+    {{
+      "scene_number": 5,
+      "duration_seconds": 5,
+      "narration": "12-16 words revealing the resolution and ending on the infinite loop bridge",
+      "flux_image_prompt": "Final full perspective of the master subject in the environment...",
+      "minimax_motion_prompt": "Final physical momentum completing the loop, fixed static camera...",
+      "sfx_cue": "Specific tactile sound design cue"
     }}
   ]
 }}
 """
 
-ART_STYLE_MAP = {
-    "cinematic_film": "35mm Cinematic Film Stock (Kodak Vision3 500T 5219, anamorphic 85mm lens at f/1.8, cool cyan and deep slate shadows, warm amber rim lighting)",
-    "macro_science": "Extreme Macro Scientific Realism (85mm macro lens, ultra-detailed tactile textures, cellular subsurface scattering, sterile surgical contrast)",
-    "vintage_retro": "1970s Vintage Technicolor Retro (warm Kodachrome 64 tones, authentic halation, slight analog grain, rich saturated ambers and faded teals)",
-    "cyberpunk_neon": "Cyberpunk Neon Slate (high contrast chiaroscuro, electric cyan and ultraviolet specular highlights, wet reflective dark surfaces)",
-    "documentary_clean": "Clean Modern Documentary (Hasselblad H6D-100c medium format, neutral daylight temperature, hyper-crisp architectural precision)"
+ARCHETYPE_DIRECTIVES = {
+    "tactile_origins": """## CHANNEL PERSONA: TACTILE ORIGINS & ANATOMY (@Newyrr Standard)
+You are directing high-end tactile 3D anatomical and historical origin breakdowns in the benchmark caliber of @zackdfilms and @simplihowww.
+- Focus: Human body mechanics, medical curiosities, and the surprising physical origins of everyday fashion, inventions, and habits.
+- Visuals: Stylized 3D tactile cutaways, cross-sections showing interior muscular/skeletal/cellular layers, or authentic historical craftsmanship.
+- Pacing: Clinical precision, physical cause-and-effect, visceral curiosity.""",
+
+    "human_drama": """## CHANNEL PERSONA: EXTRAORDINARY HUMAN STORIES (@internetChill Standard)
+You are directing gripping real-life human interest documentaries and bizarre true phenomena in the benchmark caliber of @afrimaxenglish, @wholesomewendy, and @hisystory.
+- Focus: Unbelievable real people, extreme survival feats, medical anomalies, and wild, weird, or unforgettable life moments.
+- Visuals: Cinematic 35mm film stills, high-contrast atmospheric lighting, realistic character portraits, expressive human emotion, dramatic natural environments.
+- Pacing: High-stakes tension, emotional depth, escalating suspense, and profound psychological turns.""",
+
+    "badass_cinema": """## CHANNEL PERSONA: BADASS CINEMA MOMENTS (@MainQuestCC Standard)
+You are directing high-octane cinematic scene breakdowns and badass character showdowns.
+- Focus: Calculated moves, psychological outsmarting, iconic dialogue beats, and intense character confrontations.
+- Visuals: Cinematic anamorphic film stills, moody chiaroscuro lighting, razor-sharp focus on expressions and tactical gear.
+- Pacing: Tight, tension-building, punchy."""
 }
+
+ART_STYLE_MAP = {
+    "render_unreal": "3D Cinematic CGI Render (Unreal Engine 5 Lumen lighting, smooth tactile physical surfaces, soft ambient occlusion, crisp single focal point)",
+    "photo_35mm": "35mm Cinematic Film Still (Kodak Vision3 500T, authentic fine grain, natural depth of field, documentary realism, clean composition)",
+    "digital_xray": "Tactile Anatomical Cutaway (translucent internal biological layers, soft internal illumination, clean slate background, medical precision)",
+    "paint_chiaroscuro": "Dramatic Chiaroscuro (deep moody shadow contrast, focused warm key light, rich sculptural depth, timeless painterly weight)"
+}
+
 
 class ScriptGenerator:
     """
-    Generates high-retention screenplays with professional cinematic visual cohesion
-    and zero meta-text leakage.
+    Unified High-Retention Storytelling Engine for YouTube Shorts.
+    Enforces the 5-Beat Causal Story Arc, Master Subject Continuity,
+    and Decluttered Keyframe & Motion Directives.
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
@@ -79,11 +157,30 @@ class ScriptGenerator:
         self.model = model or Config.OPENROUTER_MODEL
         self.analytics = YouTubeAnalyticsManager()
 
-    def generate_script(self, topic: str, max_retries: int = 2, art_style: Optional[str] = None, channel_handle: Optional[str] = None, channel_niche: Optional[str] = None) -> Dict[str, Any]:
-        handle = channel_handle or "@Newyrr"
-        niche = channel_niche or "Shorts science. How and what if moments."
+    def _determine_archetype(self, handle: str, niche: str) -> str:
+        handle_lower = handle.lower()
+        niche_lower = niche.lower()
+        if "internetchill" in handle_lower or "people" in niche_lower or "story" in niche_lower or "moment" in niche_lower:
+            return "human_drama"
+        elif "mainquest" in handle_lower or "movie" in niche_lower or "badass" in niche_lower:
+            return "badass_cinema"
+        else:
+            return "tactile_origins"
 
-        # Real multi-channel performance intelligence + competitor insights
+    def generate_script(
+        self,
+        topic: str,
+        max_retries: int = 2,
+        art_style: Optional[str] = None,
+        channel_handle: Optional[str] = None,
+        channel_niche: Optional[str] = None
+    ) -> Dict[str, Any]:
+        handle = channel_handle or "@Newyrr"
+        niche = channel_niche or "How-to and origins of the human body, fashion, lifestyle, and physical mechanics."
+        archetype_key = self._determine_archetype(handle, niche)
+        archetype_directive = ARCHETYPE_DIRECTIVES.get(archetype_key, ARCHETYPE_DIRECTIVES["tactile_origins"])
+
+        # Fetch performance intelligence
         analytics_context = self.analytics.get_prompt_context(handle)
         try:
             from competitor_tracker import competitor_tracker
@@ -94,24 +191,27 @@ class ScriptGenerator:
         except Exception:
             full_context = analytics_context
 
-        art_key = art_style or getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm")
-        
+        art_key = art_style or getattr(Config, "ACTIVE_ART_STYLE", "render_unreal")
         clio_info = getattr(Config, "CLIO_STYLES", {}).get(art_key)
         if clio_info:
             art_name = clio_info.get("name", art_key)
-            art_directive = f"Aesthetic Style Name: {art_name}.\nArt Direction: {clio_info.get('prompt', '')}"
+            art_directive = f"Aesthetic: {art_name}. Visual Direction: {clio_info.get('prompt', '')}"
         else:
             art_name = art_key
-            art_directive = ART_STYLE_MAP.get(art_key, "35mm Photography with authentic Kodak film grain and organic bokeh.")
+            art_directive = ART_STYLE_MAP.get(art_key, ART_STYLE_MAP["render_unreal"])
 
         system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
             channel_handle=handle,
             channel_niche=niche,
+            archetype_directive=archetype_directive,
             analytics_context=full_context,
-            art_style_directive=art_directive,
-            art_style_name=art_name
+            art_style_directive=art_directive
         )
-        user_prompt = f"Create a viral 5-scene cinematic YouTube Short for this topic: '{topic}'"
+        user_prompt = (
+            f"Produce an elite 5-scene viral Short for this topic: '{topic}'.\n"
+            f"Enforce the 5-Beat Causal Storytelling Chain, absolute master subject continuity, "
+            f"zero preachy advice, and uncluttered visual prompts."
+        )
 
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -126,21 +226,25 @@ class ScriptGenerator:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            "temperature": 0.75,
+            "temperature": 0.7,
             "response_format": {"type": "json_object"}
         }
 
-        models_to_try = [self.model, "deepseek/deepseek-v4.1-flash", "openai/gpt-4o-mini"]
-        for model in models_to_try:
+        models_to_try = [self.model, "anthropic/claude-3.5-sonnet", "openai/gpt-4o-mini"]
+        # Deduplicate models
+        seen = set()
+        clean_models = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
+
+        for model in clean_models:
             payload["model"] = model
-            for attempt in range(2):
+            for attempt in range(max_retries):
                 try:
                     print(f"[Script Generator] Calling OpenRouter ({model}) for topic: '{topic}'...")
                     res = requests.post(
                         "https://openrouter.ai/api/v1/chat/completions",
                         headers=headers,
                         json=payload,
-                        timeout=50
+                        timeout=55
                     )
 
                     if res.status_code == 200:
@@ -154,16 +258,14 @@ class ScriptGenerator:
                 except Exception as e:
                     print(f"[Script Generator] Attempt {attempt+1} on {model} failed: {e}")
 
-        # High-quality fallback if API fails
-        return self._get_fallback_script(topic)
+        # Fallback if cloud APIs are unavailable
+        return self._get_fallback_script(topic, archetype_key)
 
     def _sanitize_prompts(self, script_data: Dict[str, Any]):
         """
-        Removes any accidental meta-instruction phrases like 'Hyper-realistic prompt for Flux Krea'
-        and strips any timeline timestamps like 'At 0.00 seconds' or 'At 15.00 seconds'.
+        Strips meta-instruction leaks, unwanted buzzwords, and all timeline timestamps.
         """
-        import re
-        forbidden_phrases = [
+        forbidden_image_phrases = [
             "Hyper-realistic 9:16 vertical prompt for Flux Krea,",
             "Hyper-realistic 9:16 vertical prompt for Flux Krea",
             "prompt for Flux Krea,",
@@ -174,86 +276,157 @@ class ScriptGenerator:
             "9:16 vertical prompt",
             "A photorealistic 9:16 shot of",
             "A cinematic 9:16 photo of",
-            "An image of"
+            "An image of",
+            "trending on artstation",
+            "4k resolution",
+            "8k resolution",
+            "hyperrealistic"
         ]
 
         for scene in script_data.get("scenes", []):
-            # 1. Sanitize Flux Image Prompt (Stage Picture)
+            # 1. Clean Keyframe Image Prompt
             f_prompt = scene.get("flux_image_prompt", "")
-            for phrase in forbidden_phrases:
+            for phrase in forbidden_image_phrases:
                 f_prompt = f_prompt.replace(phrase, "").strip()
+            # Clean leading lowercase or punctuation
+            f_prompt = re.sub(r'^[,.\s]+', '', f_prompt)
             if f_prompt and f_prompt[0].islower():
                 f_prompt = f_prompt[0].upper() + f_prompt[1:]
             scene["flux_image_prompt"] = f_prompt
 
-            # 2. Sanitize Motion Guidance Prompt (Action Catalyst) - Strip all timestamps!
+            # 2. Clean Motion Prompt: Strip timestamps and camera panning
             m_prompt = scene.get("minimax_motion_prompt", "")
-            # Remove "At 0.00 seconds, ", "At 15.00 seconds, ", "[00:15] ", etc.
             m_prompt = re.sub(r'^[Aa]t \d+(\.\d+)? seconds?,?\s*', '', m_prompt)
             m_prompt = re.sub(r'^[Aa]t \d+:\d+,?\s*', '', m_prompt)
             m_prompt = re.sub(r'^\d+(\.\d+)? seconds? in,?\s*', '', m_prompt)
             m_prompt = re.sub(r'\[?\d+:\d+\]?\s*', '', m_prompt)
-            m_prompt = m_prompt.strip()
+            m_prompt = re.sub(r'^[,.\s]+', '', m_prompt).strip()
             if m_prompt and m_prompt[0].islower():
                 m_prompt = m_prompt[0].upper() + m_prompt[1:]
             scene["minimax_motion_prompt"] = m_prompt
 
-    def _get_fallback_script(self, topic: str) -> Dict[str, Any]:
-        return {
-            "title": f"{topic} 🧬",
-            "hook": "Your skin isn't holding your tattoo ink. Your immune cells are trapped eating it.",
-            "visual_style_bible": "Kodak Vision3 500T 5219 color grade, bioluminescent cyan and warm tungsten amber, 85mm anamorphic macro, volumetric rim light",
-            "loop_connection": "The final sentence ends with 'which is why', linking into 'Your skin isn't holding...'",
-            "scenes": [
-                {
-                    "scene_number": 1,
-                    "duration_seconds": 5,
-                    "narration": "Your skin isn't holding your tattoo ink. Your immune cells are trapped eating it.",
-                    "flux_image_prompt": "Tactile stage picture establishing a microscopic cross-section of the human dermis, sharp obsidian black pigment clusters anchored in elastic cellular tissue, surrounding white macrophages frozen in anticipation, Kodak Vision3 500T color science, teal shadows with warm amber rim light, shot on 85mm anamorphic macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Slow continuous macro push-in along the optical axis as translucent cellular membranes suddenly flex, engulfing stationary black pigment clusters with organic fluid physics.",
-                    "sfx_cue": "Deep biological heartbeat thump"
+            # 3. Clean Narration: Eradicate exclamation marks and preachy phrases
+            narration = scene.get("narration", "")
+            narration = narration.replace("!", ".").replace("  ", " ").strip()
+            scene["narration"] = narration
+
+    def _get_fallback_script(self, topic: str, archetype: str) -> Dict[str, Any]:
+        """Provides instant high-quality zero-API fallback scripts matching the archetype."""
+        if archetype == "human_drama":
+            return {
+                "title": "Fell Two Miles and Survived ✈️🌿",
+                "hook": "In 1971, a seventeen-year-old girl fell two miles out of an airplane strapped to her seat.",
+                "master_visual_bible": {
+                    "master_subject": "Seventeen-year-old Juliane Koepcke in torn clothing, determined and wounded",
+                    "environment": "Dense Peruvian Amazon rainforest, muddy riverbanks, dense mist canopy",
+                    "color_palette": "Deep jungle emerald, muted earth tones, soft atmospheric canopy daylight"
                 },
-                {
-                    "scene_number": 2,
-                    "duration_seconds": 5,
-                    "narration": "When a needle pierces your dermis, your body thinks it's under foreign invasion.",
-                    "flux_image_prompt": "Tactile stage picture of a polished surgical steel tattoo needle hovering micrometers above elastic skin tissue, microscopic mist droplet spray suspended in atmospheric rim light, dark moody studio backdrop, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "The polished surgical needle plunges and shears cleanly through the epidermis, sending microscopic acoustic ripples across the elastic skin surface with tiny pigment droplets spraying outward, while the camera maintains tight macro focus.",
-                    "sfx_cue": "High-frequency mechanical hum and skin punch"
+                "loop_connection": "The final sentence ends with 'which began when', flowing into 'In 1971...'",
+                "scenes": [
+                    {
+                        "scene_number": 1,
+                        "duration_seconds": 5,
+                        "narration": "In 1971, a seventeen-year-old girl fell two miles out of an airplane strapped to her seat.",
+                        "flux_image_prompt": "Cinematic medium shot of 17-year-old Juliane Koepcke awakening amidst tangled Amazon foliage, airplane seat strapped to her back, morning jungle mist filtering through canopy trees. Single clear central focal point, clean negative space, uncluttered composition.",
+                        "minimax_motion_prompt": "The young girl slowly blinks and raises her wounded hand to shield her eyes, moisture dripping from surrounding broad palm leaves, fixed static camera frame.",
+                        "sfx_cue": "Distant jungle canopy thunder and morning bird call"
+                    },
+                    {
+                        "scene_number": 2,
+                        "duration_seconds": 5,
+                        "narration": "The row of passenger seats spun like a maple seed, cushioning her terminal velocity impact.",
+                        "flux_image_prompt": "Cutaway angle showing the broken blue airline seat resting against thick springy forest branches, torn fabric and bent metal frame resting in dense vegetation. Clean composition, natural diffused daylight.",
+                        "minimax_motion_prompt": "The bent metal seat frame settles with a quiet creak into the thick moss layer, dislodging tiny water droplets, fixed static camera frame.",
+                        "sfx_cue": "Metallic creak and foliage rustle"
+                    },
+                    {
+                        "scene_number": 3,
+                        "duration_seconds": 5,
+                        "narration": "Armed only with a bag of candy, she remembered her father's rule: follow water downstream.",
+                        "flux_image_prompt": "Low-angle close-up of Juliane wading through shallow murky river water, determined expression, dense foliage bordering both sides. Single clear focal point, cinematic depth of field.",
+                        "minimax_motion_prompt": "Murky river water ripples outward as her bare foot steps firmly onto the riverbed gravel, small bubbles rising to the surface, fixed static camera frame.",
+                        "sfx_cue": "Gentle water wading and flowing stream"
+                    },
+                    {
+                        "scene_number": 4,
+                        "duration_seconds": 5,
+                        "narration": "For eleven days she floated past crocodiles and stinging insects, treating open wounds with gasoline.",
+                        "flux_image_prompt": "Intimate cinematic portrait of Juliane floating on her back down a wide jungle river under open sky, exhausted yet resolute, sunlight reflecting off the calm water. Clean balanced framing.",
+                        "minimax_motion_prompt": "Calm river currents slowly drift her floating silhouette down the water surface, gentle eddies swirling around her shoulders, fixed static camera frame.",
+                        "sfx_cue": "Lapping river water and deep drone"
+                    },
+                    {
+                        "scene_number": 5,
+                        "duration_seconds": 5,
+                        "narration": "Local lumbermen discovered her inside a river hut, ending an impossible survival journey that began when...",
+                        "flux_image_prompt": "Wide cinematic shot from inside an open wooden river shelter, warm lantern light illuminating Juliane resting on a wooden floor, lumbermen silhouette in doorway. High contrast, atmospheric rim light.",
+                        "minimax_motion_prompt": "Warm lantern smoke rises gently toward the thatched roof as the wooden door swings slowly open, fixed static camera frame.",
+                        "sfx_cue": "Warm wooden door creak and soft acoustic exhale"
+                    }
+                ]
+            }
+        else:
+            return {
+                "title": "Why High Heels Were For Men 👠⚔️",
+                "hook": "High heels were not invented for women. In 1599, they were heavy military combat gear.",
+                "master_visual_bible": {
+                    "master_subject": "16th-century Persian cavalry warrior in polished leather boots with raised 2-inch block heels",
+                    "environment": "High-altitude desert combat terrain, dusty warm sunlight, clear sky",
+                    "color_palette": "Deep saddle brown, burnished bronze, warm terracotta sand, clean studio lighting"
                 },
-                {
-                    "scene_number": 3,
-                    "duration_seconds": 5,
-                    "narration": "Millions of microscopic macrophages rush in to devour the ink, trying to cleanse the wound.",
-                    "flux_image_prompt": "Tactile stage picture inside the intercellular matrix, golden glowing macrophage immune cells positioned around crystalline black pigment particles, deep indigo fluid backdrop, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "Amoebic white blood cells actively swarm and stretch fluid pseudopods outward, wrapping tightly around and engulfing shiny black pigment granules in rapid succession, with the camera executing a subtle rotational orbit.",
-                    "sfx_cue": "Viscous fluid swoosh"
-                },
-                {
-                    "scene_number": 4,
-                    "duration_seconds": 5,
-                    "narration": "The ink particles are too massive to digest, so the cells lock in place and die holding them.",
-                    "flux_image_prompt": "Tactile stage picture of a single crystallized immune cell locked around an immovable black metallic pigment cluster, cellular wall showing delicate micro-fractures, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "The macrophage cellular structure locks rigid and crystallizes into an immovable shell around the dark pigment mass, delicate stress micro-fractures spreading across the surface, as the camera slowly pushes in.",
-                    "sfx_cue": "Crystalline freeze crackle"
-                },
-                {
-                    "scene_number": 5,
-                    "duration_seconds": 5,
-                    "narration": "Whenever an old cell dies, a new one immediately eats the same ink again, which is why...",
-                    "flux_image_prompt": "Tactile stage picture of a dying immune cell releasing trapped obsidian ink, directly adjacent to a fresh vibrant macrophage reaching outward in an infinite cycle, shot on 85mm macro lens at f/1.8.",
-                    "minimax_motion_prompt": "The dying immune cell ruptures open to release trapped obsidian ink particles, which are instantaneously vacuumed up and devoured by the incoming fresh macrophage in an unbroken cycle.",
-                    "sfx_cue": "Rising tension riser cutting sharply"
-                }
-            ]
-        }
+                "loop_connection": "The final sentence ends with 'which is why in 1599', looping into 'High heels were not invented...'",
+                "scenes": [
+                    {
+                        "scene_number": 1,
+                        "duration_seconds": 5,
+                        "narration": "High heels were not invented for women. In 1599, they were heavy military combat gear.",
+                        "flux_image_prompt": "3D tactile full-length shot of a 16th-century Persian cavalry warrior mounted on a warhorse, wearing thick leather boots with distinct 2-inch wooden block heels. Clear single focal subject, clean neutral background, warm directional sunlight.",
+                        "minimax_motion_prompt": "The horse shifts its weight, causing the warrior's leather boots to plant firmly into the bronze stirrups with rigid balance, fixed static camera frame.",
+                        "sfx_cue": "Heavy leather creak and horse hoof thud"
+                    },
+                    {
+                        "scene_number": 2,
+                        "duration_seconds": 5,
+                        "narration": "Persian archers needed stability to stand up in their horse stirrups while firing arrows.",
+                        "flux_image_prompt": "Medium cutaway shot focusing on the warrior's boot heel hooked securely beneath the curved bronze stirrup ring, horse leather flank in background. Clean tactile textures, soft ambient occlusion.",
+                        "minimax_motion_prompt": "The thick boot heel locks downward with physical weight, wedging tightly against the bronze stirrup ring with zero slipping, fixed static camera frame.",
+                        "sfx_cue": "Metallic stirrup clink and leather strain"
+                    },
+                    {
+                        "scene_number": 3,
+                        "duration_seconds": 5,
+                        "narration": "Without a raised heel, a rider's foot would slip through, throwing them into the stampede.",
+                        "flux_image_prompt": "Anatomical tactile simulation showing a flat-soled leather shoe sliding dangerously forward through a stirrup ring, motion blur lines. Clean studio lighting, uncluttered frame.",
+                        "minimax_motion_prompt": "The flat leather sole rapidly slips through the stirrup ring, friction dust particles scattering as it loses grip, fixed static camera frame.",
+                        "sfx_cue": "Sharp sliding leather whoosh"
+                    },
+                    {
+                        "scene_number": 4,
+                        "duration_seconds": 5,
+                        "narration": "When Persian diplomats visited Europe, aristocratic kings adopted the shoes to appear taller and formidable.",
+                        "flux_image_prompt": "Stylized 3D render of King Louis XIV in ornate royal court attire wearing red-lacquered wooden high heels on polished marble floor. Single focal subject, elegant palace rim lighting.",
+                        "minimax_motion_prompt": "The King's red-heeled shoe strikes down firmly on the polished marble floor, volumetric dust motes swirling in light beams, fixed static camera frame.",
+                        "sfx_cue": "Sharp resonant heel tap on marble"
+                    },
+                    {
+                        "scene_number": 5,
+                        "duration_seconds": 5,
+                        "narration": "It took two centuries of male combat fashion before heels ever shifted to women, which is why...",
+                        "flux_image_prompt": "Wide split composition comparing a rugged Persian combat boot side-by-side with a modern high-heel shoe, showcasing the identical arch angle. Clean studio backdrop, high contrast lighting.",
+                        "minimax_motion_prompt": "Both shoes settle simultaneously onto the flat pedestal, a subtle puff of air dispersing between them, fixed static camera frame.",
+                        "sfx_cue": "Deep sub-bass impact with sharp cut"
+                    }
+                ]
+            }
+
 
 if __name__ == "__main__":
     import sys
     sys.stdout.reconfigure(encoding='utf-8')
     sg = ScriptGenerator()
-    test_script = sg.generate_script("Can you taste colors?")
+    test_script = sg.generate_script("What Happens If You Swallow a Needle?", channel_handle="@Newyrr")
     print("Title:", test_script["title"])
-    print("Visual Bible:", test_script.get("visual_style_bible"))
-    print("Scene 1 Flux Prompt:", test_script["scenes"][0]["flux_image_prompt"])
+    print("Master Subject:", test_script.get("master_visual_bible", {}).get("master_subject"))
+    print("Scene 1 Narration:", test_script["scenes"][0]["narration"])
+    print("Scene 1 Image Prompt:", test_script["scenes"][0]["flux_image_prompt"])
     print("Scene 1 Motion Prompt:", test_script["scenes"][0]["minimax_motion_prompt"])

@@ -334,9 +334,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # 5. Burn subtitles & mix audio (Narration + Local SFX timeline + optional BGM)
         escaped_ass = str(ass_sub_path).replace("\\", "/").replace(":", "\\:")
         
-        # Build intelligent sound design timeline from local user SFX library
-        sfx_timeline = sfx_manager.build_scene_sfx_cues(manifest.get("scenes", []))
-        print(f"[Assembler] Layering {len(sfx_timeline)} local SFX cues across video timeline...")
+        # Build intelligent sound design timeline via TypeSafe JEV router
+        sfx_timeline = sfx_manager.generate_sfx_timeline(manifest, use_ai=True)
+        print(f"[Assembler] Layering {len(sfx_timeline)} peak-aligned SFX cues across video timeline...")
+
+        # Save sound design timeline into project directory for transparency
+        sfx_timeline_path = project_dir / "sfx_timeline.json"
+        try:
+            with open(sfx_timeline_path, "w", encoding="utf-8") as f:
+                json.dump(sfx_timeline, f, indent=2)
+        except Exception:
+            pass
 
         cmd_inputs = ["-i", str(stitched_raw).replace("\\", "/")]
         filter_parts = []
@@ -348,9 +356,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             sfx_file = ev.get("file")
             if sfx_file and os.path.exists(sfx_file):
                 cmd_inputs.extend(["-i", str(Path(sfx_file).resolve()).replace("\\", "/")])
-                delay_ms = int(round(ev.get("offset_seconds", 0.0) * 1000))
-                vol = ev.get("volume", 0.3)
-                filter_parts.append(f"[{input_counter}:a]aresample=44100,adelay={delay_ms}|{delay_ms},volume={vol}[sfx{idx}]")
+                delay_ms = int(round(ev.get("aligned_offset_seconds", 0.0) * 1000))
+                vol = ev.get("volume", 0.28)
+                filter_parts.append(f"[{input_counter}:a]aresample=44100,volume={vol},adelay={delay_ms}|{delay_ms}[sfx{idx}]")
                 mix_inputs.append(f"[sfx{idx}]")
                 input_counter += 1
 

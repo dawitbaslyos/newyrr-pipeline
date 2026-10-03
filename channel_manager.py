@@ -20,7 +20,7 @@ DEFAULT_CHANNELS_DATA = {
         "handle": "@Newyrr",
         "subscribers": "8",
         "videos": 3,
-        "niche": "Shorts science. How and what if moments."
+        "niche": "How-to and origins of the human body, fashion, lifestyle, and physical mechanics."
     },
     "user_channels": [
         {
@@ -31,44 +31,46 @@ DEFAULT_CHANNELS_DATA = {
     ],
     "tracked_channels": [
         {
-            "handle": "@Veritasium",
-            "name": "Veritasium",
-            "focus": "Counter-intuitive science & physics"
+            "handle": "@zackdfilms",
+            "name": "Zack D. Films",
+            "focus": "Tactile 3D Anatomical & Physical Mechanics"
         },
         {
-            "handle": "@Kurzgesagt",
-            "name": "Kurzgesagt",
-            "focus": "Microscopic biology & existential questions"
+            "handle": "@simplihowww",
+            "name": "Simplihowww",
+            "focus": "3D Human Body & Curiosity How-Tos"
         },
         {
-            "handle": "@ActionLab",
-            "name": "The Action Lab",
-            "focus": "Hands-on material science & weird substances"
+            "handle": "@theoutliners",
+            "name": "The Outliners",
+            "focus": "Science, Lifestyle & Origin Trivia"
         }
     ]
 }
 
 CHANNEL_PROFILES = {
     "@newyrr": {
-        "niche": "Shorts science. How and what if moments.",
+        "niche": "How-to and origins of the human body, fashion, lifestyle, and physical mechanics.",
         "tracked_channels": [
-            {"handle": "@zackdfilms", "name": "zackdfilms", "focus": "Tactile Mise-en-scène & How Things Work"},
-            {"handle": "@Veritasium", "name": "Veritasium", "focus": "Counter-intuitive science & physics"},
-            {"handle": "@TheActionLab", "name": "The Action Lab", "focus": "Hands-on material science & weird substances"},
-            {"handle": "@Kurzgesagt", "name": "Kurzgesagt", "focus": "Microscopic biology & existential questions"}
+            {"handle": "@zackdfilms", "name": "Zack D. Films", "focus": "Tactile 3D Anatomical & Physical Mechanics"},
+            {"handle": "@simplihowww", "name": "Simplihowww", "focus": "3D Human Body & Curiosity How-Tos"},
+            {"handle": "@theoutliners", "name": "The Outliners", "focus": "Science, Lifestyle & Origin Trivia"},
+            {"handle": "@SimpleHistory", "name": "Simple History", "focus": "History & Origins of Everyday Things"},
+            {"handle": "@zeckfelms", "name": "Zeck Felms", "focus": "3D What-If & Tactile Physical Scenarios"},
+            {"handle": "@nykentertain", "name": "NYKentertain", "focus": "Animated Survival & Body Scenarios"}
         ],
         "default_topics": [
-            {"title": "Why Astronauts Lose Their Fingernails", "category": "Extreme Biology", "hook": "When astronauts work outside the space station, their fingernails can literally pop off in their gloves."},
-            {"title": "What Happens If You Swallow a Fish Bone", "category": "Body Horrors", "hook": "Swallowing a tiny needle-sharp fish bone doesn't just hurt—it can migrate directly through your throat tissue."},
-            {"title": "Why Alcatraz Only Gave Burning Hot Showers", "category": "Bizarre Realities", "hook": "Alcatraz prison forced inmates to take steaming hot showers, and the reason was pure calculated warfare."},
-            {"title": "Why You Must Never Pop Danger Triangle Pimples", "category": "Medical Anatomy", "hook": "Popping a pimple inside this tiny facial zone can send lethal bacteria straight into your brain veins."},
-            {"title": "Why Deep Sea Divers Cannot Fly For 24 Hours", "category": "Extreme Physics", "hook": "If a commercial diver boards a flight too soon, the nitrogen gas inside their bloodstream will literally boil."},
-            {"title": "Why Bulletproof Glass Shatters From The Inside", "category": "Material Breakdown", "hook": "Bulletproof glass stops high-powered rifle rounds from outside, but shatters from the inside with a pocket hammer."}
+            {"title": "Why High Heels Were Invented For Men", "category": "Fashion Origins", "hook": "High heels were not invented for women. In 1599, they were heavy military combat gear."},
+            {"title": "What Actually Happens During Sleep Paralysis", "category": "Human Biology", "hook": "When you wake up unable to move, your brainstem has literally locked your motor neurons."},
+            {"title": "Why Your Knuckles Make a Loud Pop", "category": "Physical Mechanics", "hook": "Cracking your knuckles doesn't grind your bones. You are collapsing microscopic vacuum bubbles inside your joint fluid."},
+            {"title": "How Medieval People Actually Cleaned Their Teeth", "category": "Lifestyle History", "hook": "Before modern toothbrushes, people rubbed their enamel with linen cloth dipped in crushed bone ashes."},
+            {"title": "Why Cold Drinks Cause Instant Brain Freeze", "category": "Medical Anatomy", "hook": "Drinking ice water too fast activates a nerve cluster behind your palate that tricks your brain into thinking your skull is freezing."},
+            {"title": "Why Walter Hunt Invented The Safety Pin in 3 Hours", "category": "Invention Origins", "hook": "The safety pin holding clothes together worldwide was invented in three hours just to pay off a fifteen-dollar debt."}
         ],
         "analytics": {
             "total_views": "~3,114",
             "retention_score": "94.2%",
-            "top_niche": "Tactile Biology / Science",
+            "top_niche": "Tactile Biology & Lifestyle Origins",
             "optimal_length": "25 - 30s",
             "videos": [
                 {"title": "How tattoo stays permanent.", "views": 1500, "topic": "Human Biology / Immune System", "performance": "TOP_PERFORMER"},
@@ -78,58 +80,50 @@ CHANNEL_PROFILES = {
         }
     },
     "@mainquestcc": {
-        "niche": "Gaming lore, Easter eggs, and unseen mechanics.",
+        "niche": "Movie scenes with a badass character (repurposed).",
         "tracked_channels": [
-            {"handle": "@TheGamer", "name": "TheGamer", "focus": "Secret game details & easter eggs"},
-            {"handle": "@VaryingGamer", "name": "Varying Gaming", "focus": "Gaming physics & what-if experiments"},
-            {"handle": "@GameTheorists", "name": "The Game Theorists", "focus": "Hidden gaming lore & mysteries"},
-            {"handle": "@Oddheader", "name": "oddheader", "focus": "Unseen gaming glitches & mystery rooms"}
+            {"handle": "@TheGamer", "name": "TheGamer", "focus": "Badass Movie & Character Moments"},
+            {"handle": "@VaryingGamer", "name": "Varying Gaming", "focus": "Cinematic Badass Edits & Clips"}
         ],
         "default_topics": [
-            {"title": "Why Minecraft Creepers Fear Cats", "category": "Gaming Lore", "hook": "The most feared mob in Minecraft has one secret phobia programmed into its AI."},
-            {"title": "The Secret Room in GTA 5 Nobody Found", "category": "Unseen Mechanics", "hook": "There is a fully rendered interior locked inside Mount Chiliad that rockstar never deleted."},
-            {"title": "Why Elden Ring Bosses Attack When You Heal", "category": "Boss AI", "hook": "Bosses in Elden Ring aren't reacting to your animation; they read your controller inputs."},
-            {"title": "The Uncut Geometry Hidden Behind Mario 64 Walls", "category": "Game Glitches", "hook": "If you look 1 degree behind the castle doors, the game engine is hiding a void room."},
-            {"title": "How Skyrim Secretly Saves Every Item You Drop", "category": "Game Engines", "hook": "Every single sweet roll you drop is tracked in a hidden merchant chest under the map."},
-            {"title": "The Banned Pokemon Animation That Caused Glitches", "category": "Gaming Secrets", "hook": "One single sprite in Pokemon Red would permanently crash the Game Boy's audio buffer."}
+            {"title": "The Moment He Realized Who He Was Messing With", "category": "Badass Cinema", "hook": "They thought he was an ordinary driver until he locked the doors."},
+            {"title": "When The Villain Completely Outsmarted Everyone", "category": "Cinematic Moments", "hook": "He surrendered on purpose because escaping was step two."},
+            {"title": "The Most Calculated Revenge in Cinema History", "category": "Character Badassery", "hook": "He waited twelve years without saying a single word."}
         ],
         "analytics": {
             "total_views": "~12,480",
             "retention_score": "91.8%",
-            "top_niche": "Gaming Lore & Mechanics",
+            "top_niche": "Cinematic Badass Edits",
             "optimal_length": "28 - 34s",
             "videos": [
-                {"title": "Why Minecraft Creepers Are Terrified of Cats", "views": 6200, "topic": "Minecraft Hidden Lore", "performance": "TOP_PERFORMER"},
-                {"title": "The Secret Room in GTA 5 Nobody Found", "views": 4800, "topic": "GTA 5 Hidden Geometry", "performance": "TOP_PERFORMER"},
-                {"title": "Why Skyrim Doors Take So Long to Load", "views": 1480, "topic": "Game Engine Mechanics", "performance": "AVERAGE"}
+                {"title": "When the quiet character finally snaps", "views": 6200, "topic": "Badass Cinema", "performance": "TOP_PERFORMER"}
             ]
         }
     },
     "@internetchill": {
-        "niche": "AI breakthroughs, Internet culture & future tech.",
+        "niche": "Stories of people and wild, weird, or highly interesting moments in life.",
         "tracked_channels": [
-            {"handle": "@Fireship", "name": "Fireship", "focus": "High-velocity tech code & AI news"},
-            {"handle": "@ColdFusion", "name": "ColdFusion", "focus": "Cutting edge technology & engineering breakthroughs"},
-            {"handle": "@cleoabram", "name": "Cleo Abram", "focus": "Huge Ideas & Optimistic Tech"},
-            {"handle": "@TheVerge", "name": "The Verge", "focus": "Silicon, gadgets, and tech culture"}
+            {"handle": "@afrimaxenglish", "name": "Afrimax English", "focus": "Extraordinary Human Stories & Bizarre Life Conditions"},
+            {"handle": "@wholesomewendy", "name": "Wholesome Wendy", "focus": "High-Retention Wild Life Moments & Human Twists"},
+            {"handle": "@hisystory", "name": "HiSystory", "focus": "Suspenseful Real Stories & Survival Against Odds"},
+            {"handle": "@Bobbie-26", "name": "BOBBIE-26", "focus": "Bizarre True Events & Incredible Human Feats"}
         ],
         "default_topics": [
-            {"title": "How ChatGPT Thinks in High-Dimensional Vectors", "category": "AI Deep Dive", "hook": "AI doesn't understand sentences; it navigates a 12,000-dimensional mathematical universe."},
-            {"title": "The Undersea Cable Powering 99% of the Internet", "category": "Global Infrastructure", "hook": "If 4 fiber optic cables at the bottom of the Atlantic are cut, entire continents go dark."},
-            {"title": "Why AI GPUs Are Running Out of Pure Copper Wire", "category": "Silicon Hardware", "hook": "Nvidia's newest AI superclusters require 2 miles of solid copper cables just to talk to each other."},
-            {"title": "The Mysterious First 50 Lines of Code on the Internet", "category": "Internet History", "hook": "In 1969, the very first internet message crashed the system after just two letters: 'LO'."},
-            {"title": "Why Quantum Computers Must Be Colder Than Space", "category": "Quantum Computing", "hook": "A single stray heat photon can destroy months of quantum calculations in a microsecond."},
-            {"title": "How Dark Web Traffic Disappears Without a Trace", "category": "Cybersecurity", "hook": "On the onion network, not even the servers relaying your packets know where they came from."}
+            {"title": "The Girl Who Fell 2 Miles From a Plane Into The Jungle", "category": "Survival Feat", "hook": "In 1971, a seventeen-year-old girl fell two miles out of an airplane strapped to her seat... and walked out of the Amazon alive."},
+            {"title": "The Man Who Has Not Slept Since 1973", "category": "Bizarre Human Condition", "hook": "After catching a severe fever over fifty years ago, Thai Ngoc stopped sleeping entirely and has worked 24 hours a day ever since."},
+            {"title": "The Soldier Who Kept Fighting 29 Years After WWII Ended", "category": "Wild History", "hook": "Stationed on a remote island, Hiroo Onoda refused to surrender until his commanding officer flew in 29 years later to relieve him."},
+            {"title": "The Commercial Diver Trapped on The Ocean Floor for 38 Minutes", "category": "Extreme Survival", "hook": "Three hundred feet underwater in pitch black freezing sea, his umbilical line severed, leaving him with only five minutes of backup air."},
+            {"title": "The Boy Who Was Raised By Monkeys in The Wild", "category": "Unbelievable Life Story", "hook": "After fleeing into the Ugandan jungle as a young child, he was adopted by a troop of vervet monkeys who taught him how to survive."},
+            {"title": "The Woman Who Survived Being Frozen in Ice For 80 Minutes", "category": "Medical Miracle", "hook": "Her body temperature plummeted to fifty-six degrees and her heart completely stopped, yet doctors brought her back to life with zero brain damage."}
         ],
         "analytics": {
             "total_views": "~24,900",
-            "retention_score": "89.5%",
-            "top_niche": "AI Vectors & Subsea Infrastructure",
-            "optimal_length": "22 - 28s",
+            "retention_score": "95.5%",
+            "top_niche": "Unbelievable True Human Stories",
+            "optimal_length": "28 - 35s",
             "videos": [
-                {"title": "The Undersea Cables Carrying 99% of Internet", "views": 14200, "topic": "Internet Infrastructure", "performance": "TOP_PERFORMER"},
-                {"title": "How Vector Embeddings Actually Work", "views": 8900, "topic": "AI Architecture", "performance": "TOP_PERFORMER"},
-                {"title": "Why Silicon Chips Hit The Heat Wall", "views": 1800, "topic": "Hardware Engineering", "performance": "AVERAGE"}
+                {"title": "The Man Who Outlived His Entire Generation in Solitude", "views": 14200, "topic": "Extraordinary Human Lives", "performance": "TOP_PERFORMER"},
+                {"title": "She Fell Two Miles and Walked Away", "views": 8900, "topic": "Extreme Survival", "performance": "TOP_PERFORMER"}
             ]
         }
     }

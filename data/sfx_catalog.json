@@ -1,0 +1,326 @@
+{
+  "whoosh_snappy": {
+    "id": "whoosh_snappy",
+    "category": "whoosh",
+    "filename": "whoosh_snappy.wav",
+    "rel_path": "data/sfx_bank/whoosh_snappy.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\whoosh_snappy.wav",
+    "duration_ms": 294.2,
+    "peak_offset_ms": 53.4,
+    "description": "Crisp ultra-fast whip swoosh, ideal for rapid scene cuts",
+    "triggers": [
+      "cut",
+      "transition",
+      "swipe",
+      "pass",
+      "whip",
+      "next"
+    ]
+  },
+  "whoosh_smooth": {
+    "id": "whoosh_smooth",
+    "category": "whoosh",
+    "filename": "whoosh_smooth.wav",
+    "rel_path": "data/sfx_bank/whoosh_smooth.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\whoosh_smooth.wav",
+    "duration_ms": 583.9,
+    "peak_offset_ms": 141.2,
+    "description": "Smooth airy swoosh, ideal for cinematic perspective shifts",
+    "triggers": [
+      "turn",
+      "rotate",
+      "pan",
+      "fly",
+      "shift",
+      "glide"
+    ]
+  },
+  "whoosh_whip": {
+    "id": "whoosh_whip",
+    "category": "whoosh",
+    "filename": "whoosh_whip.wav",
+    "rel_path": "data/sfx_bank/whoosh_whip.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\whoosh_whip.wav",
+    "duration_ms": 443.9,
+    "peak_offset_ms": 93.7,
+    "description": "Punchy air whip whoosh, ideal for dramatic scene transitions",
+    "triggers": [
+      "speed",
+      "rush",
+      "sweep",
+      "dash",
+      "zoom"
+    ]
+  },
+  "impact_sub_drop": {
+    "id": "impact_sub_drop",
+    "category": "impact",
+    "filename": "impact_sub_drop.wav",
+    "rel_path": "data/sfx_bank/impact_sub_drop.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\impact_sub_drop.wav",
+    "duration_ms": 1200.0,
+    "peak_offset_ms": 238.3,
+    "description": "Heavy saturated sub-bass drop, ideal for 0.0s viral hook punch",
+    "triggers": [
+      "hook",
+      "drop",
+      "bass",
+      "heavy",
+      "shock",
+      "ground"
+    ]
+  },
+  "impact_cinematic_boom": {
+    "id": "impact_cinematic_boom",
+    "category": "impact",
+    "filename": "impact_cinematic_boom.wav",
+    "rel_path": "data/sfx_bank/impact_cinematic_boom.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\impact_cinematic_boom.wav",
+    "duration_ms": 1400.0,
+    "peak_offset_ms": 91.2,
+    "description": "Massive cinematic explosion boom with low-end rumble",
+    "triggers": [
+      "boom",
+      "explode",
+      "blast",
+      "shatter",
+      "crisis",
+      "disaster"
+    ]
+  },
+  "impact_punch_thud": {
+    "id": "impact_punch_thud",
+    "category": "impact",
+    "filename": "impact_punch_thud.wav",
+    "rel_path": "data/sfx_bank/impact_punch_thud.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\impact_punch_thud.wav",
+    "duration_ms": 1000.0,
+    "peak_offset_ms": 77.9,
+    "description": "Iconic crisp punch hit with immediate attack",
+    "triggers": [
+      "hit",
+      "punch",
+      "thud",
+      "strike",
+      "slam",
+      "impact"
+    ]
+  },
+  "click_shutter_snap": {
+    "id": "click_shutter_snap",
+    "category": "click_accent",
+    "filename": "click_shutter_snap.wav",
+    "rel_path": "data/sfx_bank/click_shutter_snap.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\click_shutter_snap.wav",
+    "duration_ms": 322.2,
+    "peak_offset_ms": 117.2,
+    "description": "Crisp high-frequency camera snap, ideal for freeze-frames and key stats",
+    "triggers": [
+      "photo",
+      "shutter",
+      "snapshot",
+      "picture",
+      "frame",
+      "look"
+    ]
+  },
+  "click_mouse_tactile": {
+    "id": "click_mouse_tactile",
+    "category": "click_accent",
+    "filename": "click_mouse_tactile.wav",
+    "rel_path": "data/sfx_bank/click_mouse_tactile.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\click_mouse_tactile.wav",
+    "duration_ms": 280.1,
+    "peak_offset_ms": 17.4,
+    "description": "Subtle tactile click, ideal for UI highlights, buttons, and text pop",
+    "triggers": [
+      "click",
+      "tap",
+      "select",
+      "press",
+      "touch",
+      "toggle"
+    ]
+  },
+  "click_mechanical": {
+    "id": "click_mechanical",
+    "category": "click_accent",
+    "filename": "click_mechanical.wav",
+    "rel_path": "data/sfx_bank/click_mechanical.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\click_mechanical.wav",
+    "duration_ms": 500.0,
+    "peak_offset_ms": 52.7,
+    "description": "Double mechanical click, ideal for tactile switches and steps",
+    "triggers": [
+      "switch",
+      "lock",
+      "gear",
+      "step",
+      "device",
+      "button"
+    ]
+  },
+  "pop_suction": {
+    "id": "pop_suction",
+    "category": "pop_bubble",
+    "filename": "pop_suction.wav",
+    "rel_path": "data/sfx_bank/pop_suction.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\pop_suction.wav",
+    "duration_ms": 554.9,
+    "peak_offset_ms": 70.1,
+    "description": "Clean suction pop, ideal for microscopic cells, detachment, liquids",
+    "triggers": [
+      "suction",
+      "detach",
+      "cell",
+      "bacteria",
+      "bubble",
+      "pull"
+    ]
+  },
+  "pop_cork": {
+    "id": "pop_cork",
+    "category": "pop_bubble",
+    "filename": "pop_cork.wav",
+    "rel_path": "data/sfx_bank/pop_cork.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\pop_cork.wav",
+    "duration_ms": 687.4,
+    "peak_offset_ms": 33.1,
+    "description": "Hollow cork pop, ideal for releases, opens, bursts, bubbles",
+    "triggers": [
+      "cork",
+      "open",
+      "bottle",
+      "burst",
+      "release",
+      "pop"
+    ]
+  },
+  "pop_bubble_clean": {
+    "id": "pop_bubble_clean",
+    "category": "pop_bubble",
+    "filename": "pop_bubble_clean.wav",
+    "rel_path": "data/sfx_bank/pop_bubble_clean.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\pop_bubble_clean.wav",
+    "duration_ms": 500.0,
+    "peak_offset_ms": 18.7,
+    "description": "Bright bubble pop, ideal for sudden appearances, icons, ideas",
+    "triggers": [
+      "idea",
+      "appear",
+      "spark",
+      "dot",
+      "molecule",
+      "drop"
+    ]
+  },
+  "ding_service_bell": {
+    "id": "ding_service_bell",
+    "category": "ding_bell",
+    "filename": "ding_service_bell.wav",
+    "rel_path": "data/sfx_bank/ding_service_bell.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\ding_service_bell.wav",
+    "duration_ms": 506.8,
+    "peak_offset_ms": 14.4,
+    "description": "Crisp high metal bell chime, ideal for correct answers or revelations",
+    "triggers": [
+      "ding",
+      "correct",
+      "truth",
+      "bell",
+      "secret",
+      "answer"
+    ]
+  },
+  "ding_cash_register": {
+    "id": "ding_cash_register",
+    "category": "ding_bell",
+    "filename": "ding_cash_register.wav",
+    "rel_path": "data/sfx_bank/ding_cash_register.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\ding_cash_register.wav",
+    "duration_ms": 1000.0,
+    "peak_offset_ms": 559.0,
+    "description": "Bright coin ting / cash register hit, ideal for money, price, profit",
+    "triggers": [
+      "money",
+      "cash",
+      "dollar",
+      "cost",
+      "rich",
+      "profit",
+      "value"
+    ]
+  },
+  "ding_modern_chime": {
+    "id": "ding_modern_chime",
+    "category": "ding_bell",
+    "filename": "ding_modern_chime.wav",
+    "rel_path": "data/sfx_bank/ding_modern_chime.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\ding_modern_chime.wav",
+    "duration_ms": 792.4,
+    "peak_offset_ms": 288.8,
+    "description": "Clean modern alert chime, ideal for notifications, messages, warnings",
+    "triggers": [
+      "alert",
+      "notice",
+      "ping",
+      "message",
+      "warning",
+      "chime"
+    ]
+  },
+  "riser_clock_tick": {
+    "id": "riser_clock_tick",
+    "category": "riser_tension",
+    "filename": "riser_clock_tick.wav",
+    "rel_path": "data/sfx_bank/riser_clock_tick.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\riser_clock_tick.wav",
+    "duration_ms": 719.4,
+    "peak_offset_ms": 46.7,
+    "description": "Rapid rhythmic clock ticks, ideal for countdowns, time pressure, tests",
+    "triggers": [
+      "clock",
+      "tick",
+      "time",
+      "seconds",
+      "wait",
+      "hurry"
+    ]
+  },
+  "riser_tension_build": {
+    "id": "riser_tension_build",
+    "category": "riser_tension",
+    "filename": "riser_tension_build.wav",
+    "rel_path": "data/sfx_bank/riser_tension_build.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\riser_tension_build.wav",
+    "duration_ms": 1500.0,
+    "peak_offset_ms": 1201.4,
+    "description": "Ascending pitch riser, ideal for building suspense before a climax",
+    "triggers": [
+      "build",
+      "rise",
+      "tension",
+      "suspense",
+      "climax",
+      "danger"
+    ]
+  },
+  "riser_reverse_suction": {
+    "id": "riser_reverse_suction",
+    "category": "riser_tension",
+    "filename": "riser_reverse_suction.wav",
+    "rel_path": "data/sfx_bank/riser_reverse_suction.wav",
+    "full_path": "C:\\Users\\dawit\\Videos\\Youtube Channels\\internetchill\\pipeline\\data\\sfx_bank\\riser_reverse_suction.wav",
+    "duration_ms": 1500.0,
+    "peak_offset_ms": 1164.7,
+    "description": "Reverse whoosh suction tension, ideal for suspenseful zoom or draw-in",
+    "triggers": [
+      "draw",
+      "pull",
+      "vacuum",
+      "reverse",
+      "inward",
+      "incoming"
+    ]
+  }
+}

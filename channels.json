@@ -7,7 +7,7 @@
     "videos": 3,
     "avatar_url": "https://yt3.googleusercontent.com/fxbHrw7VvwAnMS7zjaemboLgEbOuWXa99MeUcYzdj5LPp2FHd4r6skSqf8cN-lFbeZNU-XjLig=s900-c-k-c0x00ffffff-no-rj",
     "top_video": "3,205",
-    "niche": "Shorts"
+    "niche": "How-to and origins of the human body, fashion, lifestyle, and physical mechanics."
   },
   "user_channels": [
     {
@@ -18,17 +18,7 @@
       "videos": 3,
       "avatar_url": "https://yt3.googleusercontent.com/fxbHrw7VvwAnMS7zjaemboLgEbOuWXa99MeUcYzdj5LPp2FHd4r6skSqf8cN-lFbeZNU-XjLig=s900-c-k-c0x00ffffff-no-rj",
       "top_video": "3,205",
-      "niche": "Shorts"
-    },
-    {
-      "id": "uc_1790910184",
-      "name": "MainQuest",
-      "handle": "@MainQuestCC",
-      "subscribers": "7",
-      "videos": 3,
-      "avatar_url": "https://yt3.googleusercontent.com/68W-HbYgayCMsJmGeADVCv4KvNzvMkKKdFUvOTzE92vk5PEd_yO_s20Zsx4lrzBKZf7rNeMVCg=s900-c-k-c0x00ffffff-no-rj",
-      "top_video": "1.5K",
-      "niche": "Shorts"
+      "niche": "How-to and origins of the human body, fashion, lifestyle, and physical mechanics."
     },
     {
       "id": "uc_1790910376",
@@ -38,110 +28,116 @@
       "videos": 1,
       "avatar_url": "https://yt3.googleusercontent.com/z4FeD5Mv0WE2vuFOVrY0za3l-ojDwSe00i-EUVqUFQiXZ83iGycGQxptsd5hklOhUoPCfbCKUA4=s900-c-k-c0x00ffffff-no-rj",
       "top_video": "1,326",
-      "niche": "Shorts"
+      "niche": "Stories of people and wild, weird, or highly interesting moments in life."
+    },
+    {
+      "id": "uc_1790910184",
+      "name": "MainQuest",
+      "handle": "@MainQuestCC",
+      "subscribers": "7",
+      "videos": 3,
+      "avatar_url": "https://yt3.googleusercontent.com/68W-HbYgayCMsJmGeADVCv4KvNzvMkKKdFUvOTzE92vk5PEd_yO_s20Zsx4lrzBKZf7rNeMVCg=s900-c-k-c0x00ffffff-no-rj",
+      "top_video": "1.5K",
+      "niche": "Movie scenes with a badass character (repurposed)."
     }
   ],
   "tracked_channels": [
     {
       "handle": "@zackdfilms",
-      "name": "zackdfilms",
-      "focus": "Tactile Mise-en-sc\u00e8ne & How Things Work"
+      "name": "Zack D. Films",
+      "focus": "Tactile 3D Anatomical & Physical Mechanics"
     },
     {
-      "handle": "@Veritasium",
-      "name": "Veritasium",
-      "focus": "Counter-intuitive science & physics"
-    },
-    {
-      "handle": "@TheActionLab",
-      "name": "The Action Lab",
-      "focus": "Hands-on material science & weird substances"
-    },
-    {
-      "handle": "@Kurzgesagt",
-      "name": "Kurzgesagt",
-      "focus": "Microscopic biology & existential questions"
+      "handle": "@simplihowww",
+      "name": "Simplihowww",
+      "focus": "3D Human Body & Curiosity How-Tos"
     },
     {
       "handle": "@theoutliners",
-      "name": "theoutliners",
-      "focus": "Science Trivia",
-      "channel_id": "UCnyYE7Gv1M2bonzGv7_gLRA",
-      "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj"
+      "name": "The Outliners",
+      "focus": "Science, Lifestyle & Origin Trivia"
+    },
+    {
+      "handle": "@SimpleHistory",
+      "name": "Simple History",
+      "focus": "History & Origins of Everyday Things"
+    },
+    {
+      "handle": "@zeckfelms",
+      "name": "Zeck Felms",
+      "focus": "3D What-If & Tactile Physical Scenarios"
+    },
+    {
+      "handle": "@nykentertain",
+      "name": "NYKentertain",
+      "focus": "Animated Survival & Body Scenarios"
     }
   ],
   "tracked_by_channel": {
-    "@mainquestcc": [
+    "@newyrr": [
       {
-        "handle": "@TheGamer",
-        "name": "TheGamer",
-        "focus": "Secret game details & easter eggs"
+        "handle": "@zackdfilms",
+        "name": "Zack D. Films",
+        "focus": "Tactile 3D Anatomical & Physical Mechanics"
       },
       {
-        "handle": "@VaryingGamer",
-        "name": "Varying Gaming",
-        "focus": "Gaming physics & what-if experiments"
+        "handle": "@simplihowww",
+        "name": "Simplihowww",
+        "focus": "3D Human Body & Curiosity How-Tos"
       },
       {
-        "handle": "@GameTheorists",
-        "name": "The Game Theorists",
-        "focus": "Hidden gaming lore & mysteries"
+        "handle": "@theoutliners",
+        "name": "The Outliners",
+        "focus": "Science, Lifestyle & Origin Trivia"
       },
       {
-        "handle": "@Oddheader",
-        "name": "oddheader",
-        "focus": "Unseen gaming glitches & mystery rooms"
+        "handle": "@SimpleHistory",
+        "name": "Simple History",
+        "focus": "History & Origins of Everyday Things"
+      },
+      {
+        "handle": "@zeckfelms",
+        "name": "Zeck Felms",
+        "focus": "3D What-If & Tactile Physical Scenarios"
+      },
+      {
+        "handle": "@nykentertain",
+        "name": "NYKentertain",
+        "focus": "Animated Survival & Body Scenarios"
       }
     ],
     "@internetchill": [
       {
-        "handle": "@Fireship",
-        "name": "Fireship",
-        "focus": "High-velocity tech code & AI news"
+        "handle": "@afrimaxenglish",
+        "name": "Afrimax English",
+        "focus": "Extraordinary Human Stories & Bizarre Life Conditions"
       },
       {
-        "handle": "@ColdFusion",
-        "name": "ColdFusion",
-        "focus": "Cutting edge technology & engineering breakthroughs"
+        "handle": "@wholesomewendy",
+        "name": "Wholesome Wendy",
+        "focus": "High-Retention Wild Life Moments & Human Twists"
       },
       {
-        "handle": "@cleoabram",
-        "name": "Cleo Abram",
-        "focus": "Huge Ideas & Optimistic Tech"
+        "handle": "@hisystory",
+        "name": "HiSystory",
+        "focus": "Suspenseful Real Stories & Survival Against Odds"
       },
       {
-        "handle": "@TheVerge",
-        "name": "The Verge",
-        "focus": "Silicon, gadgets, and tech culture"
+        "handle": "@Bobbie-26",
+        "name": "BOBBIE-26",
+        "focus": "Bizarre True Events & Incredible Human Feats"
       }
     ],
-    "@newyrr": [
+    "@mainquestcc": [
       {
-        "handle": "@zackdfilms",
-        "name": "zackdfilms",
-        "focus": "Tactile Mise-en-sc\u00e8ne & How Things Work"
+        "handle": "@TheGamer",
+        "name": "TheGamer",
+        "focus": "Badass Movie & Character Moments"
       },
       {
-        "handle": "@Veritasium",
-        "name": "Veritasium",
-        "focus": "Counter-intuitive science & physics"
-      },
-      {
-        "handle": "@TheActionLab",
-        "name": "The Action Lab",
-        "focus": "Hands-on material science & weird substances"
-      },
-      {
-        "handle": "@Kurzgesagt",
-        "name": "Kurzgesagt",
-        "focus": "Microscopic biology & existential questions"
-      },
-      {
-        "handle": "@theoutliners",
-        "name": "theoutliners",
-        "focus": "Science Trivia",
-        "channel_id": "UCnyYE7Gv1M2bonzGv7_gLRA",
-        "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj"
+        "handle": "@VaryingGamer",
+        "name": "Varying Gaming",
+        "focus": "Cinematic Badass Edits & Clips"
       }
     ]
   }
