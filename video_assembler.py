@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from config import Config
+from sfx_manager import sfx_manager
 
 class VideoAssembler:
     """
@@ -330,46 +331,69 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             ]
             subprocess.run(cmd_concat_re, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
 
-        # 5. Burn subtitles & optional BGM mix
-        # In FFmpeg on Windows, colon and backslash in ass path must be escaped
+        # 5. Burn subtitles & mix audio (Narration + Local SFX timeline + optional BGM)
         escaped_ass = str(ass_sub_path).replace("\\", "/").replace(":", "\\:")
+        
+        # Build intelligent sound design timeline from local user SFX library
+        sfx_timeline = sfx_manager.build_scene_sfx_cues(manifest.get("scenes", []))
+        print(f"[Assembler] Layering {len(sfx_timeline)} local SFX cues across video timeline...")
 
+        cmd_inputs = ["-i", str(stitched_raw).replace("\\", "/")]
+        filter_parts = []
+        mix_inputs = ["[0:a]"]
+        input_counter = 1
+
+        # Add each SFX cue with its millisecond delay and appropriate volume
+        for idx, ev in enumerate(sfx_timeline):
+            sfx_file = ev.get("file")
+            if sfx_file and os.path.exists(sfx_file):
+                cmd_inputs.extend(["-i", str(Path(sfx_file).resolve()).replace("\\", "/")])
+                delay_ms = int(round(ev.get("offset_seconds", 0.0) * 1000))
+                vol = ev.get("volume", 0.3)
+                filter_parts.append(f"[{input_counter}:a]aresample=44100,adelay={delay_ms}|{delay_ms},volume={vol}[sfx{idx}]")
+                mix_inputs.append(f"[sfx{idx}]")
+                input_counter += 1
+
+        # Mix optional background music (BGM)
         if bgm_path and os.path.exists(bgm_path):
             clean_bgm = str(Path(bgm_path).resolve()).replace("\\", "/")
             print(f"[Assembler] Mixing BGM track: {clean_bgm}")
-            cmd_burn = [
-                "ffmpeg", "-y",
-                "-i", str(stitched_raw).replace("\\", "/"),
-                "-i", clean_bgm,
-                "-filter_complex",
-                f"[0:v]ass='{escaped_ass}'[v];[1:a]volume=0.15[bgm];[0:a][bgm]amix=inputs=2:duration=first:dropout_transition=2[a]",
-                "-map", "[v]",
-                "-map", "[a]",
-                "-c:v", "libx264",
-                "-preset", "fast",
-                "-crf", "18",
-                "-c:a", "aac",
-                "-b:a", "192k",
-                str(final_output_path).replace("\\", "/")
-            ]
-        else:
-            cmd_burn = [
-                "ffmpeg", "-y",
-                "-i", str(stitched_raw).replace("\\", "/"),
-                "-vf", f"ass='{escaped_ass}'",
-                "-c:v", "libx264",
-                "-preset", "fast",
-                "-crf", "18",
-                "-c:a", "aac",
-                "-b:a", "192k",
-                str(final_output_path).replace("\\", "/")
-            ]
+            cmd_inputs.extend(["-i", clean_bgm])
+            filter_parts.append(f"[{input_counter}:a]aresample=44100,volume=0.15[bgm]")
+            mix_inputs.append("[bgm]")
+            input_counter += 1
 
-        print("[Assembler] Burning animated CapCut captions and rendering final Short...")
+        # Combine all audio tracks into [a_out]
+        if len(mix_inputs) > 1:
+            mix_str = "".join(mix_inputs) + f"amix=inputs={len(mix_inputs)}:duration=first:dropout_transition=2[a_out]"
+            filter_parts.append(mix_str)
+            audio_map = "[a_out]"
+        else:
+            audio_map = "0:a"
+
+        # Video filter with ASS subtitle burning
+        filter_parts.append(f"[0:v]ass='{escaped_ass}'[v_out]")
+        filter_complex_str = ";".join(filter_parts)
+
+        cmd_burn = [
+            "ffmpeg", "-y",
+            *cmd_inputs,
+            "-filter_complex", filter_complex_str,
+            "-map", "[v_out]",
+            "-map", audio_map,
+            "-c:v", "libx264",
+            "-preset", "fast",
+            "-crf", "18",
+            "-c:a", "aac",
+            "-b:a", "192k",
+            str(final_output_path).replace("\\", "/")
+        ]
+
+        print("[Assembler] Burning animated CapCut captions and rendering final Short with full SFX design...")
         try:
             subprocess.run(cmd_burn, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         except Exception as e:
-            print(f"[Assembler] ass filter burn failed: {e}. Trying subtitles fallback...")
+            print(f"[Assembler] Filter complex burn failed: {e}. Trying simple subtitles fallback...")
             cmd_burn_fb = [
                 "ffmpeg", "-y",
                 "-i", str(stitched_raw).replace("\\", "/"),

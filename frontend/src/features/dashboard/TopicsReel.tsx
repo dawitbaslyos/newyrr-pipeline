@@ -6,34 +6,34 @@ import type { TopicSuggestion } from '../../types';
 
 const DEFAULT_TOPICS: TopicSuggestion[] = [
   {
-    title: "Why Glass Is Secretly a Moving Liquid",
-    category: "Material Science",
-    hook: "Every window in your house is slowly dripping downward."
+    title: "Why Astronauts Lose Their Fingernails",
+    category: "Extreme Biology",
+    hook: "When astronauts work outside the space station, their fingernails can literally pop off in their gloves."
   },
   {
-    title: "Why Human Bones Do Not Shatter Under Trucks",
-    category: "Biology / Physics",
-    hook: "Ounce for ounce, human bone is stronger than titanium steel."
+    title: "What Happens If You Swallow a Fish Bone",
+    category: "Body Horrors",
+    hook: "Swallowing a tiny needle-sharp fish bone doesn't just hurt—it can migrate directly through your throat tissue."
   },
   {
-    title: "The Reason You Can't Tickle Yourself",
-    category: "Neurology",
-    hook: "Your brain cancels sensations before your fingers even touch your skin."
+    title: "Why Alcatraz Only Gave Burning Hot Showers",
+    category: "Bizarre Realities",
+    hook: "Alcatraz prison forced inmates to take steaming hot showers, and the reason was pure calculated warfare."
   },
   {
-    title: "He Turned Sand Into Barcodes",
-    category: "Tech Inventions",
-    hook: "The laser scanner at checkout doesn't read the black lines."
+    title: "Why You Must Never Pop Danger Triangle Pimples",
+    category: "Medical Anatomy",
+    hook: "Popping a pimple inside this tiny facial zone can send lethal bacteria straight into your brain veins."
   },
   {
-    title: "Why Water Cuts Through Solid Steel",
-    category: "Fluid Dynamics",
-    hook: "Water pressurized to 60,000 PSI acts like an indestructible razor."
+    title: "Why Deep Sea Divers Cannot Fly For 24 Hours",
+    category: "Extreme Physics",
+    hook: "If a commercial diver boards a flight too soon, the nitrogen gas inside their bloodstream will literally boil."
   },
   {
-    title: "How Your Brain Erases Your Blinks",
-    category: "Human Vision",
-    hook: "You go blind for 44 minutes every single day without realizing it."
+    title: "Why Bulletproof Glass Shatters From The Inside",
+    category: "Material Breakdown",
+    hook: "Bulletproof glass stops high-powered rifle rounds from outside, but shatters from the inside with a pocket hammer."
   }
 ];
 

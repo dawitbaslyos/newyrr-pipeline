@@ -77,6 +77,7 @@ class Config:
     OUTPUT_DIR: Path = BASE_DIR / "output"
     PROJECTS_DIR: Path = BASE_DIR / "projects"
     USED_DIR: Path = PROJECT_ROOT / "used"
+    SFX_DIR: Path = Path(os.getenv("SFX_DIR", r"C:\Users\dawit\Videos\Editing Source\Video SoundEffects"))
 
 # Ensure runtime directories exist
 Config.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -58,12 +58,12 @@ CHANNEL_PROFILES = {
             {"handle": "@Kurzgesagt", "name": "Kurzgesagt", "focus": "Microscopic biology & existential questions"}
         ],
         "default_topics": [
-            {"title": "Why Glass Is Secretly a Moving Liquid", "category": "Material Science", "hook": "Every window in your house is slowly dripping downward."},
-            {"title": "Why Human Bones Do Not Shatter Under Trucks", "category": "Biology / Physics", "hook": "Ounce for ounce, human bone is stronger than titanium steel."},
-            {"title": "The Reason You Can't Tickle Yourself", "category": "Neurology", "hook": "Your brain cancels sensations before your fingers even touch your skin."},
-            {"title": "He Turned Sand Into Barcodes", "category": "Tech Inventions", "hook": "The laser scanner at checkout doesn't read the black lines."},
-            {"title": "Why Water Cuts Through Solid Steel", "category": "Fluid Dynamics", "hook": "Water pressurized to 60,000 PSI acts like an indestructible razor."},
-            {"title": "How Your Brain Erases Your Blinks", "category": "Human Vision", "hook": "You go blind for 44 minutes every single day without realizing it."}
+            {"title": "Why Astronauts Lose Their Fingernails", "category": "Extreme Biology", "hook": "When astronauts work outside the space station, their fingernails can literally pop off in their gloves."},
+            {"title": "What Happens If You Swallow a Fish Bone", "category": "Body Horrors", "hook": "Swallowing a tiny needle-sharp fish bone doesn't just hurt—it can migrate directly through your throat tissue."},
+            {"title": "Why Alcatraz Only Gave Burning Hot Showers", "category": "Bizarre Realities", "hook": "Alcatraz prison forced inmates to take steaming hot showers, and the reason was pure calculated warfare."},
+            {"title": "Why You Must Never Pop Danger Triangle Pimples", "category": "Medical Anatomy", "hook": "Popping a pimple inside this tiny facial zone can send lethal bacteria straight into your brain veins."},
+            {"title": "Why Deep Sea Divers Cannot Fly For 24 Hours", "category": "Extreme Physics", "hook": "If a commercial diver boards a flight too soon, the nitrogen gas inside their bloodstream will literally boil."},
+            {"title": "Why Bulletproof Glass Shatters From The Inside", "category": "Material Breakdown", "hook": "Bulletproof glass stops high-powered rifle rounds from outside, but shatters from the inside with a pocket hammer."}
         ],
         "analytics": {
             "total_views": "~3,114",
@@ -470,24 +470,33 @@ class ChannelManager:
         competitor_context = competitor_tracker.get_competitor_context_for_llm(tracked_channels)
         performance_context = youtube_analytics.get_prompt_context(handle)
 
-        prompt = f"""You are an elite YouTube Shorts content director and algorithmic strategist for {name} ({handle}).
-Channel Niche & Theme: '{niche}'.
-Aesthetic & Narrative Standard: Zack D Films Mise-en-scène (Tactile set building, State 0 anticipation, physical breakdown / catalyst, zero timestamps, seamless grammatical loop).
+        prompt = f"""You are an elite viral YouTube Shorts director and narrative architect for {name} ({handle}).
+Channel Theme: '{niche}'.
+Style Benchmark: Zack D. Films, Veritasium, The Action Lab.
 
 {performance_context}
 
 {competitor_context}
 
+MANDATORY VIRAL TOPIC CRITERIA:
+Do NOT generate generic trivia, broad school science, or bland "did you know" facts.
+Every single topic MUST follow one of these 3 high-velocity conversion archetypes:
+1. **Visceral Human Anatomy & Medical Horrors**: Bizarre body reactions, accidental swallowing, cellular warfare, pain reflexes, physical body phenomena (e.g., 'What Happens If You Swallow a Fish Bone', 'Why Astronauts Lose Their Fingernails', 'Why Your Skin Peels After Severe Sunburn', 'What Happens When You Step On A Rusty Nail').
+2. **Extreme Institutional Rules & Strange Realities**: Bizarre, high-stakes real-world procedures (e.g., 'Why Alcatraz Only Gave Prisoners Hot Showers', 'Why Deep Sea Divers Cannot Fly For 24 Hours', 'Why Airplane Tires Don't Burst on Landing').
+3. **Counter-Intuitive Material & Mechanical Breakdown**: Extreme forces acting on everyday objects (e.g., 'Why Water at 60,000 PSI Cuts Through Titanium', 'Why Bulletproof Glass Shatters on The Inside', 'How Tattoos Stay Trapped In Skin Forever').
+
 TASK:
-Based on our channel's real winning patterns and the trending concepts from tracked competitors, generate 6 brand new, high-velocity YouTube Short concepts.
-Each concept MUST have an immediate 1.5-second scroll-stopping tactile hook (State 0 anticipation).
+Generate 6 brand new, high-velocity YouTube Short concepts that guarantee a 85%+ retention rate.
+Each topic MUST have an immediate 1.5-second scroll-stopping State 0 hook sentence.
+
 Return JSON ONLY matching:
 {{
   "topics": [
     {{
       "title": "Punchy 5-7 word title",
-      "category": "Niche Category",
-      "hook": "1.5s immediate shock opening sentence"
+      "category": "Body Anatomy | Extreme Physics | Bizarre Rules",
+      "hook": "Visceral 1.5s immediate contradiction or shock opening sentence",
+      "archetype": "Visceral Anatomy | High-Stakes Rule | Material Breakdown"
     }}
   ]
 }}"""
