@@ -371,9 +371,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             mix_inputs.append("[bgm]")
             input_counter += 1
 
-        # Combine all audio tracks into [a_out]
+        # Combine all audio tracks into [a_out] WITHOUT altering or scaling the narrator audio
         if len(mix_inputs) > 1:
-            mix_str = "".join(mix_inputs) + f"amix=inputs={len(mix_inputs)}:duration=first:dropout_transition=2[a_out]"
+            # normalize=0 and dropout_transition=0 ensures the narrator's generated voice is 100% untouched and unscaled
+            mix_str = "".join(mix_inputs) + f"amix=inputs={len(mix_inputs)}:duration=first:dropout_transition=0:normalize=0[a_out]"
             filter_parts.append(mix_str)
             audio_map = "[a_out]"
         else:
