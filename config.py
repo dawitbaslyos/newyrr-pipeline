@@ -41,8 +41,8 @@ class Config:
     
     # LLM & Scripting (OpenRouter)
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
-    OPENROUTER_MODEL: str = _saved_settings.get("llm_model") or os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
-    OPENROUTER_FALLBACK_MODEL: str = os.getenv("OPENROUTER_FALLBACK_MODEL", "openai/gpt-4o-mini")
+    OPENROUTER_MODEL: str = _saved_settings.get("llm_model") or os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-5.5")
+    OPENROUTER_FALLBACK_MODEL: str = os.getenv("OPENROUTER_FALLBACK_MODEL", "deepseek/deepseek-v4.1-flash")
     
     # Active Models from Settings Modal
     ACTIVE_IMAGE_MODEL: str = _saved_settings.get("image_model", "krea/krea-2-medium-turbo")

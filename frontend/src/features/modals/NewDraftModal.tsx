@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '../../stores/useStudioStore';
-import { X, Sparkles } from 'lucide-react';
+import { X, Sparkles, Link2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const NewDraftModal: React.FC = () => {
@@ -9,6 +9,7 @@ export const NewDraftModal: React.FC = () => {
   const [aspect, setAspect] = useState<'9:16' | '16:9'>('9:16');
   const [artStyle, setArtStyle] = useState(settings.art_style || 'photo_35mm');
   const [voice, setVoice] = useState(settings.tts_voice || 'Charon');
+  const [referenceUrl, setReferenceUrl] = useState('');
   const [isWriting, setIsWriting] = useState(false);
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export const NewDraftModal: React.FC = () => {
       setVoice(settings.tts_voice || 'Charon');
       const prefilled = window.sessionStorage.getItem('prefilledTopic');
       const prefAspect = window.sessionStorage.getItem('newDraftAspect') as '9:16' | '16:9';
+      const prefRef = window.sessionStorage.getItem('prefilledReferenceUrl');
       if (prefilled) {
         setTopic(prefilled);
         window.sessionStorage.removeItem('prefilledTopic');
@@ -24,6 +26,10 @@ export const NewDraftModal: React.FC = () => {
       if (prefAspect) {
         setAspect(prefAspect);
         window.sessionStorage.removeItem('newDraftAspect');
+      }
+      if (prefRef) {
+        setReferenceUrl(prefRef);
+        window.sessionStorage.removeItem('prefilledReferenceUrl');
       }
     }
   }, [isNewDraftModalOpen, settings]);
@@ -43,13 +49,15 @@ export const NewDraftModal: React.FC = () => {
           topic: topic.trim(), 
           aspect_ratio: aspect,
           art_style: artStyle,
-          tts_voice: voice
+          tts_voice: voice,
+          reference_url: referenceUrl.trim() || undefined
         })
       });
       if (res.ok) {
         const data = await res.json();
         setModal('newDraft', false);
         setTopic('');
+        setReferenceUrl('');
         fetchProjects();
         useStudioStore.setState({ activeProject: data, activeSceneIdx: 0, isEditorOpen: true });
         openEditor(data.project_name);
@@ -96,6 +104,32 @@ export const NewDraftModal: React.FC = () => {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 className="w-full bg-[#07090e] border border-[#1f2736] rounded-xl p-3 text-xs text-slate-100 outline-none focus:border-cyan-400 resize-none leading-relaxed"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Link2 className="w-3 h-3 text-cyan-400" />
+                  <span>Cadence Reference Short</span>
+                  <span className="text-[10px] text-slate-500 font-normal lowercase">(optional)</span>
+                </label>
+                {referenceUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setReferenceUrl('')}
+                    className="text-[10px] text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <input
+                type="text"
+                placeholder="https://www.youtube.com/shorts/... (clones viral pacing & WPM)"
+                value={referenceUrl}
+                onChange={(e) => setReferenceUrl(e.target.value)}
+                className="w-full bg-[#07090e] border border-[#1f2736] rounded-xl px-3 py-2 text-xs text-slate-100 placeholder:text-slate-600 outline-none focus:border-cyan-400"
               />
             </div>
 
@@ -154,6 +188,7 @@ export const NewDraftModal: React.FC = () => {
                   <option value="cover_gta_v">🎮 GTA V Polished Cover Art</option>
                   <option value="paint_tenebrism">🖌️ Tenebrism (Dramatic Chiaroscuro)</option>
                   <option value="toon_rick_and_morty">🛸 Rick and Morty Sci-Fi Cartoon</option>
+                  <option value="toon_doodle_minimal">✏️ Minimalist Doodle (Practical Psychology)</option>
                 </optgroup>
               </select>
             </div>

@@ -44,6 +44,7 @@ class DraftRequest(BaseModel):
     aspect_ratio: str = "9:16"
     art_style: Optional[str] = None
     tts_voice: Optional[str] = None
+    reference_url: Optional[str] = None
 
 class ProjectActionRequest(BaseModel):
     project_name: str
@@ -381,7 +382,13 @@ def get_project(project_name: str):
 @app.post("/api/project/create-draft")
 def create_draft(req: DraftRequest):
     try:
-        manifest = orchestrator.create_draft(req.topic, req.aspect_ratio, req.art_style, req.tts_voice)
+        manifest = orchestrator.create_draft(
+            topic=req.topic,
+            aspect_ratio=req.aspect_ratio,
+            art_style=req.art_style,
+            tts_voice=req.tts_voice,
+            reference_url=req.reference_url
+        )
         return get_project(manifest["project_name"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -577,52 +584,68 @@ def api_repurpose_render(req: RepurposeRenderRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ----------------- Reference Ingestion & Blueprint APIs -----------------
+class ReferenceIngestRequest(BaseModel):
+    url: str
+
+@app.post("/api/reference/ingest")
+def api_reference_ingest(req: ReferenceIngestRequest):
+    try:
+        from transcript_service import transcript_service
+        result = transcript_service.ingest_reference(req.url)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 _feed_cache: Dict[str, Any] = {"timestamp": 0, "videos": []}
 
+@app.get("/api/channels/shorts-feed")
 @app.get("/api/repurpose/competitor-feed")
-def api_repurpose_competitor_feed(handle: Optional[str] = None, refresh: bool = False):
+def api_channels_shorts_feed(handle: Optional[str] = None, refresh: bool = False):
     global _feed_cache
     now = time.time()
     try:
+        data = channel_mgr.get_data()
+        tracked = data.get("tracked_channels", [])
+        avatar_map = {ch.get("handle", "").lower().strip(): ch.get("avatar_url", "") for ch in tracked}
+
         if not refresh and (now - _feed_cache.get("timestamp", 0) < 600) and _feed_cache.get("videos"):
             all_videos = _feed_cache["videos"]
         else:
             from repurpose.tracker import fetch_videos_for_handle_or_id
-            data = channel_mgr.get_data()
-            tracked = data.get("tracked_channels", [])
             all_videos = []
             for ch in tracked:
                 h = ch.get("handle")
                 if h:
                     vids = fetch_videos_for_handle_or_id(h)
-                    for v in vids[:6]:
+                    for v in vids[:8]:
                         v["channel_name"] = ch.get("name", h)
                         v["channel_handle"] = h
+                        v["avatar_url"] = ch.get("avatar_url") or avatar_map.get(h.lower().strip(), "")
                         all_videos.append(v)
             _feed_cache = {"timestamp": now, "videos": all_videos}
             
+        for v in all_videos:
+            if not v.get("avatar_url"):
+                v["avatar_url"] = avatar_map.get(v.get("channel_handle", "").lower().strip(), "")
+
         if handle and handle.strip():
             norm = handle.lower().strip()
             return [v for v in all_videos if v.get("channel_handle", "").lower().strip() == norm]
         return all_videos
     except Exception as e:
-        print(f"[Competitor Feed Error]: {e}")
+        print(f"[Shorts Feed Error]: {e}")
         return []
 
 @app.get("/", response_class=HTMLResponse)
 def serve_ui():
     react_index = FRONTEND_DIST / "index.html"
-    if react_index.exists():
-        with open(react_index, "r", encoding="utf-8") as f:
-            return f.read()
-    html_file = Path(__file__).resolve().parent / "index.html"
-    with open(html_file, "r", encoding="utf-8") as f:
-        return f.read()
-
-@app.get("/legacy", response_class=HTMLResponse)
-def serve_legacy_ui():
-    html_file = Path(__file__).resolve().parent / "index.html"
-    with open(html_file, "r", encoding="utf-8") as f:
+    if not react_index.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="React frontend build not found. Please run 'npm run build' inside the frontend directory."
+        )
+    with open(react_index, "r", encoding="utf-8") as f:
         return f.read()
 
 if __name__ == "__main__":

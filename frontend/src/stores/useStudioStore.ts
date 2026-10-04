@@ -113,7 +113,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     handle: '@Newyrr',
     subscribers: '8',
     videos: 3,
-    niche: 'Shorts science. How and what if moments.'
+    niche: 'How-to and origins of the human body, fashion, lifestyle, and physical mechanics.'
   },
   userChannels: [],
   trackedChannels: [],
@@ -124,12 +124,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   trashProjects: [],
 
   settings: {
-    llm_model: 'openai/gpt-4o-mini',
+    llm_model: 'anthropic/claude-sonnet-5.5',
     image_model: 'krea/krea-2-medium-turbo',
     video_provider: 'bytedance/seedance-2.0-mini',
     tts_model: 'google/gemini-3.8-flash-lite-tts',
     tts_voice: 'Charon',
-    art_style: 'Hyper-Realistic Cinematic Film'
+    art_style: 'render_unreal'
   },
 
   isSettingsOpen: false,

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStudioStore } from './stores/useStudioStore';
 import { Header } from './features/header/Header';
 import { ChannelHub } from './features/dashboard/ChannelHub';
-import { TopicsReel } from './features/dashboard/TopicsReel';
 import { TrackedChannelsReel } from './features/dashboard/TrackedChannelsReel';
+import { TrackedShortsFeed } from './features/dashboard/TrackedShortsFeed';
 import { ProjectsGrid } from './features/dashboard/ProjectsGrid';
 import { AnalyticsView } from './features/analytics/AnalyticsView';
 import { BottomNavDock } from './features/navigation/BottomNavDock';
@@ -31,6 +31,8 @@ export const App: React.FC = () => {
     fetchSettings
   } = useStudioStore();
 
+  const [selectedTrackedChannel, setSelectedTrackedChannel] = useState<string | null>(null);
+
   useEffect(() => {
     fetchSettings();
     fetchChannels();
@@ -51,8 +53,14 @@ export const App: React.FC = () => {
           ) : (
             <div className="flex flex-col gap-6">
               <ChannelHub />
-              <TopicsReel />
-              <TrackedChannelsReel />
+              <TrackedChannelsReel
+                selectedChannelHandle={selectedTrackedChannel}
+                onSelectChannelHandle={setSelectedTrackedChannel}
+              />
+              <TrackedShortsFeed
+                selectedChannelHandle={selectedTrackedChannel}
+                onSelectChannelHandle={setSelectedTrackedChannel}
+              />
             </div>
           )
         )}

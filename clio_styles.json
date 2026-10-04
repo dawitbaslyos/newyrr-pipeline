@@ -166,5 +166,12 @@
     "category": "Cartoon",
     "display": "📺 Bruce Timm Noir (90s Deco Shadows)",
     "prompt": "Iconic 1990s animated series aesthetic, streamlined art-deco silhouettes, bold angular inking, dark moody palette."
+  },
+  "toon_doodle_minimal": {
+    "id": "toon_doodle_minimal",
+    "name": "Minimalist 2D Vector Doodle",
+    "category": "Cartoon",
+    "display": "✏️ Minimalist Doodle (Practical Psychology Style)",
+    "prompt": "Minimalist 2D vector cartoon animation on warm cream paper background, thick bold black ink outlines, rounded stylized character silhouettes, high contrast visual metaphor, clean graphic layout."
   }
 }

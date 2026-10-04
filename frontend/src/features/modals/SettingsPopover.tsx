@@ -12,6 +12,13 @@ export const SettingsPopover: React.FC = () => {
 
   // Cost calculation
   let llmCost = 0.0004;
+  if (localSettings.llm_model.includes('claude')) {
+    llmCost = 0.006;
+  } else if (localSettings.llm_model.includes('deepseek')) {
+    llmCost = 0.0003;
+  } else if (localSettings.llm_model.includes('gemini')) {
+    llmCost = 0.001;
+  }
   let imgCost = 0.075;
   if (localSettings.image_model.includes('3.1-flash') || (localSettings.image_model.includes('banana') && !localSettings.image_model.includes('lite'))) {
     imgCost = 0.010;
@@ -77,10 +84,10 @@ export const SettingsPopover: React.FC = () => {
                 onChange={(e) => setLocalSettings({ ...localSettings, llm_model: e.target.value })}
                 className="w-full bg-[#07090e] border border-[#1f2736] text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-cyan-400 cursor-pointer"
               >
+                <option value="anthropic/claude-sonnet-5.5">Claude 5.5 Sonnet ($0.006 / Short)</option>
+                <option value="deepseek/deepseek-v4.1-flash">DeepSeek V4.1 Flash ($0.0003 / Short)</option>
+                <option value="google/gemini-3.8-flash">Gemini 3.8 Flash ($0.001 / Short)</option>
                 <option value="openai/gpt-4o-mini">GPT-4o Mini ($0.0004 / Short)</option>
-                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet ($0.006 / Short)</option>
-                <option value="deepseek/deepseek-chat">DeepSeek V3 ($0.0003 / Short)</option>
-                <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
               </select>
             </div>
 

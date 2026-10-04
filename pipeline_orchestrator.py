@@ -34,7 +34,7 @@ class VideoPipelineOrchestrator:
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         return f"{slug[:25]}_{timestamp}"
 
-    def create_draft(self, topic: str, aspect_ratio: str = "9:16", art_style: Optional[str] = None, tts_voice: Optional[str] = None, channel_handle: Optional[str] = None, channel_niche: Optional[str] = None) -> Dict[str, Any]:
+    def create_draft(self, topic: str, aspect_ratio: str = "9:16", art_style: Optional[str] = None, tts_voice: Optional[str] = None, channel_handle: Optional[str] = None, channel_niche: Optional[str] = None, reference_url: Optional[str] = None) -> Dict[str, Any]:
         """
         Stage 1: Generates script and scene layout. Does NOT generate frames or videos yet.
         """
@@ -48,8 +48,14 @@ class VideoPipelineOrchestrator:
             handle = channel_handle or "@Newyrr"
             niche = channel_niche or "Shorts science. How and what if moments."
 
-        print(f"[Orchestrator] Creating Draft for Topic: '{topic}' ({aspect_ratio}), Style: {art_style}, Voice: {tts_voice}, Channel: {handle}")
-        script_data = self.script_gen.generate_script(topic, art_style=art_style, channel_handle=handle, channel_niche=niche)
+        print(f"[Orchestrator] Creating Draft for Topic: '{topic}' ({aspect_ratio}), Style: {art_style}, Voice: {tts_voice}, Channel: {handle}, Reference: {reference_url}")
+        script_data = self.script_gen.generate_script(
+            topic,
+            art_style=art_style,
+            channel_handle=handle,
+            channel_niche=niche,
+            reference_url=reference_url
+        )
         project_slug = self.create_project_slug(script_data.get("title", topic))
         project_dir = Config.PROJECTS_DIR / project_slug
         project_dir.mkdir(parents=True, exist_ok=True)
@@ -60,6 +66,7 @@ class VideoPipelineOrchestrator:
             "aspect_ratio": aspect_ratio,
             "art_style": art_style or getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm"),
             "tts_voice": tts_voice or getattr(Config, "ACTIVE_TTS_VOICE", "Charon"),
+            "reference_url": reference_url,
             "title": script_data.get("title"),
             "hook": script_data.get("hook"),
             "loop_connection": script_data.get("loop_connection"),
@@ -71,6 +78,8 @@ class VideoPipelineOrchestrator:
         for scene in script_data.get("scenes", []):
             manifest["scenes"].append({
                 "scene_number": scene["scene_number"],
+                "escalation_level": scene.get("escalation_level", f"Beat {scene['scene_number']}"),
+                "focal_point": scene.get("focal_point", ""),
                 "narration": scene["narration"],
                 "duration_seconds": scene.get("duration_seconds", 5),
                 "flux_image_prompt": scene.get("flux_image_prompt", ""),

@@ -54,7 +54,7 @@ Open your browser to: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 * **`youtube_analytics.py`**: Queries YouTube Data API v3 for `@Newyrr` retention & topic analysis.
 * **`video_assembler.py`**: FFmpeg stitching engine with dynamic bouncing ASS subtitle burn-in.
 * **`pipeline_orchestrator.py`**: Coordinates script -> audio -> image -> video -> assembly.
-* **`app.py` & `index.html`**: FastAPI backend and minimal primitive-first web UI.
+* **`app.py` & `frontend/`**: FastAPI backend and modern React + Vite + TypeScript dashboard.
 * **`projects/`**: Active staging folders holding scene assets for each Short.
 * **`output/`**: Fully rendered, captioned, ready-to-upload YouTube Shorts.
 * **`../used/`**: Archive directory for completed source files (matching your channel convention).

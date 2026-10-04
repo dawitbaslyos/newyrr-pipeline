@@ -80,7 +80,7 @@ class ImageGenerator:
                 art_key = getattr(Config, "ACTIVE_ART_STYLE", "render_unreal")
                 clio_info = getattr(Config, "CLIO_STYLES", {}).get(art_key)
                 if clio_info and clio_info.get("prompt"):
-                    final_prompt = f"{clio_info['prompt']} Subject: {final_prompt}. Uncluttered 9:16 vertical composition, strong single focal point, clean negative space."
+                    final_prompt = f"{clio_info['prompt']} Subject: {final_prompt}. Single clear central focal point, extreme subject isolation, shallow depth of field, clean soft background, zero visual clutter, 9:16 vertical composition."
 
             payload = {
                 "model": model,
@@ -116,7 +116,7 @@ class ImageGenerator:
         # B. Gemini / Nano Banana (via chat/completions)
         enriched_prompt = (
             f"Generate a clean, high-impact vertical {aspect_ratio} visual. "
-            f"Crisp single focal subject, uncluttered composition, cinematic lighting: {prompt}"
+            f"Strict single tactile focal point, extreme subject isolation, shallow depth of field, clean soft background, zero clutter: {prompt}"
         )
         payload = {
             "model": model if "gemini" in model.lower() else "google/gemini-3.1-flash-image",
