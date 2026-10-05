@@ -6,8 +6,10 @@ import type {
   TrackedChannel, 
   TopicSuggestion, 
   EngineSettings, 
-  StudioMode 
+  StudioMode,
+  ShortFeedItem
 } from '../types';
+
 
 interface StudioState {
   // Navigation & Modes
@@ -34,6 +36,13 @@ interface StudioState {
   activeChannel: UserChannel | null;
   userChannels: UserChannel[];
   trackedChannels: TrackedChannel[];
+  selectedTrackedChannel: string | null;
+
+  // Inspiration Shorts Feed
+  shortsFeed: ShortFeedItem[];
+  isShortsLoading: boolean;
+  shortsFormat: 'shorts' | 'videos' | 'all';
+  shortsSort: 'latest' | 'popular' | 'oldest';
 
   // Topics & Analytics
   topics: TopicSuggestion[];
@@ -83,6 +92,13 @@ interface StudioState {
   fetchSettings: () => Promise<void>;
   saveSettings: (settings: EngineSettings) => Promise<void>;
 
+  // Shorts Feed actions
+  setSelectedTrackedChannel: (handle: string | null) => void;
+  setShortsFormat: (format: 'shorts' | 'videos' | 'all') => void;
+  setShortsSort: (sort: 'latest' | 'popular' | 'oldest') => void;
+  fetchShortsFeed: (refresh?: boolean) => Promise<void>;
+
+
   // Modal actions
   setModal: (modalName: string, open: boolean) => void;
   updateActiveScene: (updates: Partial<Scene>) => void;
@@ -117,6 +133,12 @@ export const useStudioStore = create<StudioState>((set, get) => ({
   },
   userChannels: [],
   trackedChannels: [],
+  selectedTrackedChannel: null,
+
+  shortsFeed: [],
+  isShortsLoading: false,
+  shortsFormat: 'shorts',
+  shortsSort: 'latest',
 
   topics: [],
   topicHistory: [],
@@ -270,6 +292,43 @@ export const useStudioStore = create<StudioState>((set, get) => ({
       }
     } catch (e) {
       console.error(e);
+    }
+  },
+
+  setSelectedTrackedChannel: (handle: string | null) => {
+    set({ selectedTrackedChannel: handle });
+  },
+
+  setShortsFormat: (format: 'shorts' | 'videos' | 'all') => {
+    set({ shortsFormat: format });
+    get().fetchShortsFeed(false);
+  },
+
+  setShortsSort: (sort: 'latest' | 'popular' | 'oldest') => {
+    set({ shortsSort: sort });
+    get().fetchShortsFeed(false);
+  },
+
+  fetchShortsFeed: async (refresh = false) => {
+    const { shortsFormat, shortsSort, shortsFeed } = get();
+    if (shortsFeed.length === 0 || refresh) {
+      set({ isShortsLoading: true });
+    }
+    try {
+      const params = new URLSearchParams();
+      if (refresh) params.set('refresh', 'true');
+      if (shortsFormat) params.set('format_type', shortsFormat);
+      if (shortsSort) params.set('sort_by', shortsSort);
+      
+      const res = await fetch(`/api/channels/shorts-feed?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        set({ shortsFeed: data });
+      }
+    } catch (e) {
+      console.error('Failed fetching shorts feed:', e);
+    } finally {
+      set({ isShortsLoading: false });
     }
   },
 

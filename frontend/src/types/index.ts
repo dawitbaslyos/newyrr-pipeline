@@ -24,6 +24,9 @@ export interface Project {
   scenes: Scene[];
   status?: string;
   art_style?: string;
+  project_type?: 'create' | 'repurpose';
+  reference_url?: string;
+  source_video_path?: string;
   caption_y_percent?: number;
   thumbnail_url?: string;
   final_video_url?: string;
@@ -65,3 +68,18 @@ export interface EngineSettings {
   tts_voice: string;
   art_style: string;
 }
+
+export interface ShortFeedItem {
+  id: string;
+  title: string;
+  channel_name: string;
+  channel_handle: string;
+  avatar_url?: string;
+  thumbnail_url: string;
+  video_url: string;
+  published_at?: string;
+  description?: string;
+  is_short?: boolean;
+  view_count?: number;
+}
+

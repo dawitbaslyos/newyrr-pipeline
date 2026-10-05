@@ -650,14 +650,14 @@ export const StudioEditor: React.FC = () => {
                     className="bg-[#0c0f18] hover:bg-[#161b26] border border-cyan-400/40 hover:border-cyan-400 text-cyan-300 text-[11px] font-semibold p-2 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>1. Frames First</span>
+                    <span>{activeProject.project_type === 'repurpose' ? '1. Slice Keyframes' : '1. Frames First'}</span>
                   </button>
                   <button
                     onClick={handleRunAllVideos}
                     className="bg-[#0c0f18] hover:bg-[#161b26] border border-indigo-400/40 hover:border-indigo-400 text-indigo-300 text-[11px] font-semibold p-2 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Film className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>2. Animate All</span>
+                    <span>{activeProject.project_type === 'repurpose' ? '2. Slice Video Clips' : '2. Animate All'}</span>
                   </button>
                 </div>
               </div>
@@ -697,7 +697,7 @@ export const StudioEditor: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <label className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                           <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>2. Still Keyframe Prompt</span>
+                          <span>{activeProject.project_type === 'repurpose' ? '2. Source Keyframe Still' : '2. Still Keyframe Prompt'}</span>
                         </label>
                         
                         {/* Scene-Per-Scene Still Render / Regenerate Button */}
@@ -711,7 +711,7 @@ export const StudioEditor: React.FC = () => {
                           ) : (
                             <RefreshCw className="w-3 h-3 text-cyan-400" />
                           )}
-                          <span>{isRenderingSceneStill ? 'Rendering...' : (currentScene.image_url ? 'Regenerate Still' : 'Render Still')}</span>
+                          <span>{isRenderingSceneStill ? 'Rendering...' : (activeProject.project_type === 'repurpose' ? 'Slice Keyframe' : (currentScene.image_url ? 'Regenerate Still' : 'Render Still'))}</span>
                         </button>
                       </div>
 
@@ -738,7 +738,7 @@ export const StudioEditor: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <label className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                           <VideoIcon className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>3. Motion Guidance (Video)</span>
+                          <span>{activeProject.project_type === 'repurpose' ? '3. Source Video Clip' : '3. Motion Guidance (Video)'}</span>
                         </label>
 
                         {/* Scene-Per-Scene Video Render / Regenerate Button */}
@@ -752,7 +752,7 @@ export const StudioEditor: React.FC = () => {
                           ) : (
                             <RefreshCw className="w-3 h-3 text-indigo-400" />
                           )}
-                          <span>{isRenderingSceneVideo ? 'Animating...' : (currentScene.video_url ? 'Regenerate Video' : 'Animate Scene')}</span>
+                          <span>{isRenderingSceneVideo ? 'Animating...' : (activeProject.project_type === 'repurpose' ? 'Slice Video Clip' : (currentScene.video_url ? 'Regenerate Video' : 'Animate Scene'))}</span>
                         </button>
                       </div>
 

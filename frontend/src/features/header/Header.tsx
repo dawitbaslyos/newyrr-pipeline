@@ -119,18 +119,33 @@ export const Header: React.FC = () => {
 
       {/* Right: Dynamic Model Stack Indicator + Settings Trigger */}
       <div className="flex items-center gap-2.5">
-        <button
-          onClick={() => setModal('settings', true)}
-          title="Active Model Stack (Click to configure)"
-          className="hidden sm:flex items-center gap-2 bg-[#0d111a] hover:bg-[#161b26] border border-[#1f2736] hover:border-cyan-400/50 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-300 transition active:scale-95 shadow-sm cursor-pointer"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-slate-200 font-bold">{getImgShortName()}</span>
-          <span className="text-slate-600">+</span>
-          <span className="text-slate-200 font-bold">{getVidShortName()}</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-cyan-400 font-mono text-[11px] font-semibold">{getVoiceName()}</span>
-        </button>
+        {studioMode === 'repurpose' ? (
+          <button
+            onClick={() => setModal('settings', true)}
+            title="Repurpose Workflow: Local Video Slicer & HyperFrames (Zero OpenRouter AI Model Usage)"
+            className="hidden sm:flex items-center gap-2 bg-[#0e101d] hover:bg-[#15192d] border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-300 transition active:scale-95 shadow-sm cursor-pointer"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="text-indigo-300 font-bold">HyperFrames & Slicer</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-slate-400 font-mono text-[10px]">No OpenRouter</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-cyan-400 font-mono text-[11px] font-semibold">{getVoiceName()}</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => setModal('settings', true)}
+            title="Active Model Stack (Click to configure)"
+            className="hidden sm:flex items-center gap-2 bg-[#0d111a] hover:bg-[#161b26] border border-[#1f2736] hover:border-cyan-400/50 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-300 transition active:scale-95 shadow-sm cursor-pointer"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-slate-200 font-bold">{getImgShortName()}</span>
+            <span className="text-slate-600">+</span>
+            <span className="text-slate-200 font-bold">{getVidShortName()}</span>
+            <span className="text-slate-600">·</span>
+            <span className="text-cyan-400 font-mono text-[11px] font-semibold">{getVoiceName()}</span>
+          </button>
+        )}
 
         <button
           onClick={() => setModal('settings', true)}

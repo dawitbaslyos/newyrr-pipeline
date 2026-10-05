@@ -137,8 +137,15 @@ export const ProjectsGrid: React.FC = () => {
                         Draft
                       </div>
                     )}
-                    <div className="absolute top-2 left-2 bg-black/70 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-300">
-                      {p.aspect_ratio || '9:16'}
+                    <div className="absolute top-2 left-2 flex items-center gap-1">
+                      <span className="bg-black/70 text-[9px] font-bold px-1.5 py-0.5 rounded text-slate-300">
+                        {p.aspect_ratio || '9:16'}
+                      </span>
+                      {p.project_type === 'repurpose' && (
+                        <span className="bg-indigo-950/80 border border-indigo-500/40 text-[9px] font-bold px-1.5 py-0.5 rounded text-indigo-300">
+                          Repurpose
+                        </span>
+                      )}
                     </div>
                   </div>
 

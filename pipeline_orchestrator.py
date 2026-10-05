@@ -12,6 +12,7 @@ from image_runner import ImageGenerator
 from minimax_runner import MiniMaxRunPodClient
 from audio_generator import AudioGenerator
 from openrouter_video import OpenRouterVideoClient
+from repurpose_slicer import repurpose_slicer
 
 class VideoPipelineOrchestrator:
     """
@@ -34,7 +35,17 @@ class VideoPipelineOrchestrator:
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         return f"{slug[:25]}_{timestamp}"
 
-    def create_draft(self, topic: str, aspect_ratio: str = "9:16", art_style: Optional[str] = None, tts_voice: Optional[str] = None, channel_handle: Optional[str] = None, channel_niche: Optional[str] = None, reference_url: Optional[str] = None) -> Dict[str, Any]:
+    def create_draft(
+        self,
+        topic: str,
+        aspect_ratio: str = "9:16",
+        art_style: Optional[str] = None,
+        tts_voice: Optional[str] = None,
+        channel_handle: Optional[str] = None,
+        channel_niche: Optional[str] = None,
+        reference_url: Optional[str] = None,
+        project_type: str = "create"
+    ) -> Dict[str, Any]:
         """
         Stage 1: Generates script and scene layout. Does NOT generate frames or videos yet.
         """
@@ -48,7 +59,7 @@ class VideoPipelineOrchestrator:
             handle = channel_handle or "@Newyrr"
             niche = channel_niche or "Shorts science. How and what if moments."
 
-        print(f"[Orchestrator] Creating Draft for Topic: '{topic}' ({aspect_ratio}), Style: {art_style}, Voice: {tts_voice}, Channel: {handle}, Reference: {reference_url}")
+        print(f"[Orchestrator] Creating Draft for Topic: '{topic}' ({aspect_ratio}), Mode: {project_type}, Style: {art_style}, Voice: {tts_voice}, Channel: {handle}, Reference: {reference_url}")
         script_data = self.script_gen.generate_script(
             topic,
             art_style=art_style,
@@ -60,10 +71,26 @@ class VideoPipelineOrchestrator:
         project_dir = Config.PROJECTS_DIR / project_slug
         project_dir.mkdir(parents=True, exist_ok=True)
 
+        source_video_path = None
+        timeline = []
+        if project_type == "repurpose" and reference_url:
+            try:
+                dest_video = project_dir / "source_video.mp4"
+                source_video_path = repurpose_slicer.download_source_video(reference_url, dest_video)
+                total_dur = repurpose_slicer.get_video_duration(source_video_path)
+                cuts = repurpose_slicer.detect_scenes(source_video_path)
+                num_sc = len(script_data.get("scenes", [])) or 5
+                timeline = repurpose_slicer.calculate_scene_timeline(total_dur, num_sc, cuts)
+                print(f"[Orchestrator] Repurpose Source Ready: {source_video_path} ({total_dur:.1f}s, {len(cuts)} cuts detected)")
+            except Exception as e:
+                print(f"[Orchestrator] Repurpose download warning: {e}")
+
         manifest = {
             "project_name": project_slug,
             "topic": topic,
             "aspect_ratio": aspect_ratio,
+            "project_type": project_type,
+            "source_video_path": str(source_video_path) if source_video_path else None,
             "art_style": art_style or getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm"),
             "tts_voice": tts_voice or getattr(Config, "ACTIVE_TTS_VOICE", "Charon"),
             "reference_url": reference_url,
@@ -75,13 +102,16 @@ class VideoPipelineOrchestrator:
             "scenes": []
         }
 
-        for scene in script_data.get("scenes", []):
+        for idx, scene in enumerate(script_data.get("scenes", [])):
+            sc_timing = timeline[idx] if idx < len(timeline) else {"start": idx * 5.0, "duration": 5.0}
             manifest["scenes"].append({
                 "scene_number": scene["scene_number"],
                 "escalation_level": scene.get("escalation_level", f"Beat {scene['scene_number']}"),
                 "focal_point": scene.get("focal_point", ""),
                 "narration": scene["narration"],
-                "duration_seconds": scene.get("duration_seconds", 5),
+                "duration_seconds": scene.get("duration_seconds", sc_timing.get("duration", 5)),
+                "source_start_time": sc_timing.get("start", idx * 5.0),
+                "source_duration": sc_timing.get("duration", 5.0),
                 "flux_image_prompt": scene.get("flux_image_prompt", ""),
                 "minimax_motion_prompt": scene.get("minimax_motion_prompt", ""),
                 "sfx_cue": scene.get("sfx_cue", "Cinematic"),
@@ -97,11 +127,14 @@ class VideoPipelineOrchestrator:
     def generate_single_scene_frame(self, project_name: str, scene_number: int) -> Dict[str, Any]:
         """
         Generates Keyframe Still + Audio for a single scene and saves immediately.
+        In Repurpose mode: Slices keyframe from source video footage (Zero OpenRouter credits).
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
         width, height = (768, 1344) if manifest.get("aspect_ratio", "9:16") == "9:16" else (1344, 768)
         voice = manifest.get("tts_voice") or getattr(Config, "ACTIVE_TTS_VOICE", "Charon")
+        is_repurpose = manifest.get("project_type") == "repurpose"
+        source_video = manifest.get("source_video_path")
 
         for scene in manifest.get("scenes", []):
             if scene["scene_number"] == scene_number:
@@ -114,12 +147,23 @@ class VideoPipelineOrchestrator:
 
                 # 2. Keyframe Image
                 image_path = project_dir / f"scene_{num:02d}_flux.png"
-                self.image_gen.generate_image(
-                    prompt=scene["flux_image_prompt"],
-                    output_path=str(image_path),
-                    width=width,
-                    height=height
-                )
+                if is_repurpose and source_video and Path(source_video).exists():
+                    print(f"[Orchestrator] Repurpose Workflow: Extracting keyframe from source footage for Scene {num} (Zero OpenRouter)")
+                    start_t = scene.get("source_start_time", (num - 1) * 5.0)
+                    repurpose_slicer.extract_scene_keyframe(
+                        source_video=Path(source_video),
+                        output_image=image_path,
+                        timestamp=start_t + 0.5,
+                        aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                        punch_in=True
+                    )
+                else:
+                    self.image_gen.generate_image(
+                        prompt=scene["flux_image_prompt"],
+                        output_path=str(image_path),
+                        width=width,
+                        height=height
+                    )
                 scene["image_file"] = str(image_path)
                 scene["status"] = "FRAME_READY"
                 break
@@ -134,13 +178,15 @@ class VideoPipelineOrchestrator:
     def generate_frames_for_project(self, project_name: str) -> Dict[str, Any]:
         """
         Stage 2: Generates Keyframe Stills FIRST for all scenes + Audio.
-        Saves manifest incrementally after every scene finishes.
+        In Repurpose mode: Uses local video slicer, zero OpenRouter image models.
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
         width, height = (768, 1344) if manifest.get("aspect_ratio", "9:16") == "9:16" else (1344, 768)
+        is_repurpose = manifest.get("project_type") == "repurpose"
+        source_video = manifest.get("source_video_path")
 
-        print(f"[Orchestrator] Generating Keyframes First for {project_name}...")
+        print(f"[Orchestrator] Generating Keyframes First for {project_name} (Repurpose={is_repurpose})...")
         voice = manifest.get("tts_voice") or getattr(Config, "ACTIVE_TTS_VOICE", "Charon")
         for scene in manifest.get("scenes", []):
             num = scene["scene_number"]
@@ -152,15 +198,25 @@ class VideoPipelineOrchestrator:
 
             # 2. Keyframe Image
             image_path = project_dir / f"scene_{num:02d}_flux.png"
-            self.image_gen.generate_image(
-                prompt=scene["flux_image_prompt"],
-                output_path=str(image_path),
-                width=width,
-                height=height
-            )
+            if is_repurpose and source_video and Path(source_video).exists():
+                print(f"[Orchestrator] Repurpose Workflow: Slicing keyframe for Scene {num} from source")
+                start_t = scene.get("source_start_time", (num - 1) * 5.0)
+                repurpose_slicer.extract_scene_keyframe(
+                    source_video=Path(source_video),
+                    output_image=image_path,
+                    timestamp=start_t + 0.5,
+                    aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                    punch_in=True
+                )
+            else:
+                self.image_gen.generate_image(
+                    prompt=scene["flux_image_prompt"],
+                    output_path=str(image_path),
+                    width=width,
+                    height=height
+                )
             scene["image_file"] = str(image_path)
             scene["status"] = "FRAME_READY"
-            # Incremental save so UI displays completed scene immediately!
             self._save_manifest(project_name, manifest)
 
         manifest["status"] = "FRAMES_READY"
@@ -174,19 +230,32 @@ class VideoPipelineOrchestrator:
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
         width, height = (768, 1344) if manifest.get("aspect_ratio", "9:16") == "9:16" else (1344, 768)
+        is_repurpose = manifest.get("project_type") == "repurpose"
+        source_video = manifest.get("source_video_path")
 
         for scene in manifest.get("scenes", []):
             if scene["scene_number"] == scene_number:
                 prompt = custom_prompt or scene["flux_image_prompt"]
                 scene["flux_image_prompt"] = prompt
                 image_path = project_dir / f"scene_{scene_number:02d}_flux.png"
-                self.image_gen.generate_image(
-                    prompt=prompt,
-                    output_path=str(image_path),
-                    width=width,
-                    height=height,
-                    seed=int(time.time())
-                )
+                if is_repurpose and source_video and Path(source_video).exists():
+                    print(f"[Orchestrator] Repurpose Workflow: Re-extracting keyframe for Scene {scene_number}")
+                    start_t = scene.get("source_start_time", (scene_number - 1) * 5.0)
+                    repurpose_slicer.extract_scene_keyframe(
+                        source_video=Path(source_video),
+                        output_image=image_path,
+                        timestamp=start_t + 1.8,
+                        aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                        punch_in=True
+                    )
+                else:
+                    self.image_gen.generate_image(
+                        prompt=prompt,
+                        output_path=str(image_path),
+                        width=width,
+                        height=height,
+                        seed=int(time.time())
+                    )
                 scene["image_file"] = str(image_path)
                 scene["status"] = "FRAME_READY"
                 break
@@ -208,6 +277,25 @@ class VideoPipelineOrchestrator:
         audio_file = scene.get("audio_file")
         video_file = project_dir / f"scene_{num:02d}_video.mp4"
         scene_duration = int(round(max(4, scene.get("actual_audio_duration", 5))))
+
+        # Repurpose Workflow: Slices segment from source footage with muted audio (Zero OpenRouter video credits!)
+        manifest = self.get_manifest(project_dir.name)
+        if manifest.get("project_type") == "repurpose":
+            source_video = manifest.get("source_video_path")
+            if source_video and Path(source_video).exists():
+                print(f"[Orchestrator] Repurpose Workflow: Slicing video from source footage for Scene {num} (Zero OpenRouter)")
+                start_t = scene.get("source_start_time", (num - 1) * 5.0)
+                repurpose_slicer.slice_scene_video(
+                    source_video=Path(source_video),
+                    output_video=video_file,
+                    start_time=start_t,
+                    duration=scene_duration,
+                    aspect_ratio=aspect_ratio,
+                    punch_in=True
+                )
+                scene["video_file"] = str(video_file)
+                scene["status"] = "VIDEO_READY"
+                return str(video_file)
 
         # 1. MiniMax H3 Max Turbo on RunPod Serverless (if configured and explicit)
         if "runpod" in provider.lower() and self.minimax_client.api_key and self.minimax_client.endpoint_id:

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useStudioStore } from '../../stores/useStudioStore';
-import { X, Sparkles, Link2 } from 'lucide-react';
+import { X, Sparkles, Link2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const NewDraftModal: React.FC = () => {
-  const { isNewDraftModalOpen, setModal, openEditor, fetchProjects, settings } = useStudioStore();
+  const { isNewDraftModalOpen, setModal, openEditor, fetchProjects, settings, studioMode } = useStudioStore();
   const [topic, setTopic] = useState('');
   const [aspect, setAspect] = useState<'9:16' | '16:9'>('9:16');
   const [artStyle, setArtStyle] = useState(settings.art_style || 'photo_35mm');
@@ -50,7 +50,8 @@ export const NewDraftModal: React.FC = () => {
           aspect_ratio: aspect,
           art_style: artStyle,
           tts_voice: voice,
-          reference_url: referenceUrl.trim() || undefined
+          reference_url: referenceUrl.trim() || undefined,
+          project_type: studioMode
         })
       });
       if (res.ok) {
@@ -94,6 +95,15 @@ export const NewDraftModal: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {studioMode === 'repurpose' && (
+              <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-2.5 flex items-center gap-2 text-[11px] text-indigo-200">
+                <RefreshCw className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>
+                  <strong>Repurpose Workflow Active:</strong> Uses video slicing & keyframe extraction under the hood (Zero OpenRouter AI image/video credits).
+                </span>
+              </div>
+            )}
+
             <div>
               <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
                 Topic or Contradiction

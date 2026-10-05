@@ -12,7 +12,19 @@ export const TrackedChannelsReel: React.FC<TrackedChannelsReelProps> = ({
   selectedChannelHandle,
   onSelectChannelHandle,
 }) => {
-  const { trackedChannels, fetchChannels, setModal } = useStudioStore();
+  const {
+    trackedChannels,
+    fetchChannels,
+    setModal,
+    selectedTrackedChannel: storeSelectedHandle,
+    setSelectedTrackedChannel: setStoreSelectedHandle,
+    fetchShortsFeed,
+  } = useStudioStore();
+
+  const [isSyncing, setIsSyncing] = React.useState(false);
+
+  const activeHandle = selectedChannelHandle !== undefined ? selectedChannelHandle : storeSelectedHandle;
+  const selectHandle = onSelectChannelHandle || setStoreSelectedHandle;
 
   const tooltipItems: TooltipItem[] = trackedChannels.map((c) => ({
     id: c.handle,
@@ -23,27 +35,30 @@ export const TrackedChannelsReel: React.FC<TrackedChannelsReelProps> = ({
   }));
 
   const handleAvatarClick = (item: TooltipItem) => {
-    if (!onSelectChannelHandle) return;
-    if (selectedChannelHandle?.toLowerCase() === item.handle?.toLowerCase()) {
-      onSelectChannelHandle(null); // toggle off
+    if (activeHandle?.toLowerCase() === item.handle?.toLowerCase()) {
+      selectHandle(null); // toggle off
     } else {
-      onSelectChannelHandle(item.handle || null);
+      selectHandle(item.handle || null);
     }
   };
 
   const handleSyncRSS = async () => {
+    setIsSyncing(true);
     try {
       await fetch('/api/channels/sync', { method: 'POST' });
       await fetchChannels();
+      await fetchShortsFeed(true);
     } catch (e) {
       console.error('Failed syncing channels:', e);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
   return (
-    <div className="bg-[#0d111a] border border-[#1f2736] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+    <div className="relative z-30 bg-[#0d111a] border border-[#1f2736] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm overflow-visible">
       {/* Left: Tracked label & Animated Tooltip Avatars */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-5 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-6 overflow-visible">
         <div className="flex items-center gap-2 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
             <Users className="w-3.5 h-3.5" />
@@ -59,13 +74,13 @@ export const TrackedChannelsReel: React.FC<TrackedChannelsReelProps> = ({
         </div>
 
         {/* Aceternity Animated Tooltip Row */}
-        <div className="pl-2 sm:pl-0 overflow-x-auto py-1 scrollbar-none">
+        <div className="pl-1 sm:pl-0 overflow-visible py-1">
           {tooltipItems.length === 0 ? (
             <span className="text-xs text-slate-500">No channels tracked yet</span>
           ) : (
             <AnimatedTooltip
               items={tooltipItems}
-              activeId={selectedChannelHandle}
+              activeId={activeHandle}
               onItemClick={handleAvatarClick}
             />
           )}
@@ -76,11 +91,12 @@ export const TrackedChannelsReel: React.FC<TrackedChannelsReelProps> = ({
       <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
         <button
           onClick={handleSyncRSS}
+          disabled={isSyncing}
           title="Sync latest competitor RSS feeds"
-          className="h-8 px-2.5 rounded-xl bg-[#131926] hover:bg-[#1b2333] border border-[#232c3d] text-slate-300 hover:text-cyan-400 text-xs font-medium flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+          className="h-8 px-2.5 rounded-xl bg-[#131926] hover:bg-[#1b2333] border border-[#232c3d] text-slate-300 hover:text-cyan-400 text-xs font-medium flex items-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
         >
-          <Zap className="w-3 h-3 text-cyan-400" />
-          <span>Sync RSS</span>
+          <Zap className={`w-3 h-3 text-cyan-400 ${isSyncing ? 'animate-spin' : ''}`} />
+          <span>{isSyncing ? 'Syncing...' : 'Sync RSS'}</span>
         </button>
 
         <button

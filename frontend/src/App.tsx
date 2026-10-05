@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useStudioStore } from './stores/useStudioStore';
 import { Header } from './features/header/Header';
 import { ChannelHub } from './features/dashboard/ChannelHub';
@@ -17,21 +17,19 @@ import { AddUserChannelModal } from './features/modals/AddUserChannelModal';
 import { SettingsPopover } from './features/modals/SettingsPopover';
 import { NewDraftModal } from './features/modals/NewDraftModal';
 import { TopicHistoryDrawer } from './features/modals/TopicHistoryDrawer';
-import { RepurposeModal } from './features/repurpose/RepurposeModal';
-import { RepurposeFeedView } from './features/dashboard/RepurposeFeedView';
 
 export const App: React.FC = () => {
   const {
     activeTab,
-    studioMode,
     isEditorOpen,
     fetchChannels,
     fetchTopics,
     fetchProjects,
-    fetchSettings
+    fetchSettings,
+    selectedTrackedChannel,
+    setSelectedTrackedChannel
   } = useStudioStore();
 
-  const [selectedTrackedChannel, setSelectedTrackedChannel] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -48,21 +46,17 @@ export const App: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-28 max-w-5xl mx-auto w-full">
         {activeTab === 'channels' && (
-          studioMode === 'repurpose' ? (
-            <RepurposeFeedView />
-          ) : (
-            <div className="flex flex-col gap-6">
-              <ChannelHub />
-              <TrackedChannelsReel
-                selectedChannelHandle={selectedTrackedChannel}
-                onSelectChannelHandle={setSelectedTrackedChannel}
-              />
-              <TrackedShortsFeed
-                selectedChannelHandle={selectedTrackedChannel}
-                onSelectChannelHandle={setSelectedTrackedChannel}
-              />
-            </div>
-          )
+          <div className="flex flex-col gap-6">
+            <ChannelHub />
+            <TrackedChannelsReel
+              selectedChannelHandle={selectedTrackedChannel}
+              onSelectChannelHandle={setSelectedTrackedChannel}
+            />
+            <TrackedShortsFeed
+              selectedChannelHandle={selectedTrackedChannel}
+              onSelectChannelHandle={setSelectedTrackedChannel}
+            />
+          </div>
         )}
 
         {activeTab === 'analytics' && <AnalyticsView />}
@@ -84,7 +78,6 @@ export const App: React.FC = () => {
       <SettingsPopover />
       <NewDraftModal />
       <TopicHistoryDrawer />
-      <RepurposeModal />
     </div>
   );
 };

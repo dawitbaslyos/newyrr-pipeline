@@ -1,13 +1,13 @@
 {
   "active_channel": {
-    "id": "uc_1790910184",
-    "name": "MainQuest",
-    "handle": "@MainQuestCC",
-    "subscribers": "7",
+    "id": "uc_1790834721",
+    "name": "Newyr",
+    "handle": "@Newyrr",
+    "subscribers": "8",
     "videos": 3,
-    "avatar_url": "https://yt3.googleusercontent.com/68W-HbYgayCMsJmGeADVCv4KvNzvMkKKdFUvOTzE92vk5PEd_yO_s20Zsx4lrzBKZf7rNeMVCg=s900-c-k-c0x00ffffff-no-rj",
-    "top_video": "40,694",
-    "niche": "Movie scenes with a badass character (repurposed)."
+    "avatar_url": "https://yt3.googleusercontent.com/fxbHrw7VvwAnMS7zjaemboLgEbOuWXa99MeUcYzdj5LPp2FHd4r6skSqf8cN-lFbeZNU-XjLig=s900-c-k-c0x00ffffff-no-rj",
+    "top_video": "3,205",
+    "niche": "How-to and origins of the human body, fashion, lifestyle, and physical mechanics."
   },
   "user_channels": [
     {
@@ -43,14 +43,46 @@
   ],
   "tracked_channels": [
     {
-      "handle": "@TheGamer",
-      "name": "TheGamer",
-      "focus": "Badass Movie & Character Moments"
+      "handle": "@zackdfilms",
+      "name": "Zack D. Films",
+      "focus": "Tactile 3D Anatomical & Physical Mechanics",
+      "avatar_url": "https://yt3.googleusercontent.com/BmuAho1g50N6CbZc-OP3ievIbXopecRp5xxYwUWEEPNpVaa0afIZn8UoQCYxQQpEDQ5LabHDgg=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UCvz84_Q0BbvZThy75mbd-Dg"
     },
     {
-      "handle": "@VaryingGamer",
-      "name": "Varying Gaming",
-      "focus": "Cinematic Badass Edits & Clips"
+      "handle": "@simplihowww",
+      "name": "Simplihowww",
+      "focus": "3D Human Body & Curiosity How-Tos",
+      "avatar_url": "https://yt3.googleusercontent.com/fpoHWo9agtSX8ihQHRUJZKvCDAFA92GPadutwgkSsG83nX3txCOTXwrd9H61q3o3JiTHe0QyFw=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UCX7HGgF-R4rrIU9KmPncs4w"
+    },
+    {
+      "handle": "@theoutliners",
+      "name": "The Outliners",
+      "focus": "Science, Lifestyle & Origin Trivia",
+      "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UCnyYE7Gv1M2bonzGv7_gLRA"
+    },
+    {
+      "handle": "@SimpleHistory",
+      "name": "Simple History",
+      "focus": "History & Origins of Everyday Things",
+      "avatar_url": "https://yt3.googleusercontent.com/5Vk6YkJqs5VOfYnatFMfYsMilcfjeb-Df6Nqn-lE6hwbDb6oWbBHT_hqQ3LaANN936PlRtaeIzg=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UC510QYlOlKNyhy_zdQxnGYw"
+    },
+    {
+      "handle": "@zeckfelms",
+      "name": "Zeck Felms",
+      "focus": "3D What-If & Tactile Physical Scenarios",
+      "avatar_url": "https://yt3.googleusercontent.com/Cti0idxMCewH911gIJy_kwJrwMBj274zl-kI6PsvnACaKjrxCyHioLkKblkyATn-SLVCQ8PwUYc=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UCPRmoN_Oq-20XBTQfagEOJA"
+    },
+    {
+      "handle": "@nykentertain",
+      "name": "NYKentertain",
+      "focus": "Animated Survival & Body Scenarios",
+      "avatar_url": "https://yt3.googleusercontent.com/tAy5lpmigclX_qiWd1oA8-FiC-o1qvpym4YobRW2MsZSrM06A9HLBVaUcQM2QxPJ92rgqGzc=s900-c-k-c0x00ffffff-no-rj",
+      "id": "UCBNqzxdXbV3Oki_aKtiS5UA"
     }
   ],
   "tracked_by_channel": {
@@ -58,66 +90,84 @@
       {
         "handle": "@zackdfilms",
         "name": "Zack D. Films",
-        "focus": "Tactile 3D Anatomical & Physical Mechanics"
+        "focus": "Tactile 3D Anatomical & Physical Mechanics",
+        "avatar_url": "https://yt3.googleusercontent.com/BmuAho1g50N6CbZc-OP3ievIbXopecRp5xxYwUWEEPNpVaa0afIZn8UoQCYxQQpEDQ5LabHDgg=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UCvz84_Q0BbvZThy75mbd-Dg"
       },
       {
         "handle": "@simplihowww",
         "name": "Simplihowww",
-        "focus": "3D Human Body & Curiosity How-Tos"
+        "focus": "3D Human Body & Curiosity How-Tos",
+        "avatar_url": "https://yt3.googleusercontent.com/fpoHWo9agtSX8ihQHRUJZKvCDAFA92GPadutwgkSsG83nX3txCOTXwrd9H61q3o3JiTHe0QyFw=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UCX7HGgF-R4rrIU9KmPncs4w"
       },
       {
         "handle": "@theoutliners",
         "name": "The Outliners",
-        "focus": "Science, Lifestyle & Origin Trivia"
+        "focus": "Science, Lifestyle & Origin Trivia",
+        "avatar_url": "https://yt3.googleusercontent.com/ytc/AIdro_ny_Wc40YSfi9ThGdoZSZ9AxXXrmB-7EH4_Emgq0t3YoQ=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UCnyYE7Gv1M2bonzGv7_gLRA"
       },
       {
         "handle": "@SimpleHistory",
         "name": "Simple History",
-        "focus": "History & Origins of Everyday Things"
+        "focus": "History & Origins of Everyday Things",
+        "avatar_url": "https://yt3.googleusercontent.com/5Vk6YkJqs5VOfYnatFMfYsMilcfjeb-Df6Nqn-lE6hwbDb6oWbBHT_hqQ3LaANN936PlRtaeIzg=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UC510QYlOlKNyhy_zdQxnGYw"
       },
       {
         "handle": "@zeckfelms",
         "name": "Zeck Felms",
-        "focus": "3D What-If & Tactile Physical Scenarios"
+        "focus": "3D What-If & Tactile Physical Scenarios",
+        "avatar_url": "https://yt3.googleusercontent.com/Cti0idxMCewH911gIJy_kwJrwMBj274zl-kI6PsvnACaKjrxCyHioLkKblkyATn-SLVCQ8PwUYc=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UCPRmoN_Oq-20XBTQfagEOJA"
       },
       {
         "handle": "@nykentertain",
         "name": "NYKentertain",
-        "focus": "Animated Survival & Body Scenarios"
+        "focus": "Animated Survival & Body Scenarios",
+        "avatar_url": "https://yt3.googleusercontent.com/tAy5lpmigclX_qiWd1oA8-FiC-o1qvpym4YobRW2MsZSrM06A9HLBVaUcQM2QxPJ92rgqGzc=s900-c-k-c0x00ffffff-no-rj",
+        "id": "UCBNqzxdXbV3Oki_aKtiS5UA"
       }
     ],
     "@internetchill": [
       {
         "handle": "@afrimaxenglish",
         "name": "Afrimax English",
-        "focus": "Extraordinary Human Stories & Bizarre Life Conditions"
+        "focus": "Extraordinary Human Stories & Bizarre Life Conditions",
+        "avatar_url": "https://yt3.googleusercontent.com/8TI76cDb7Sxv9qWqOvNy-BbEw1oyiYTV_We119EVz9h1ixm7jzzsSL_o0YeAAnYzkPx04EAg=s900-c-k-c0x00ffffff-no-rj"
       },
       {
         "handle": "@wholesomewendy",
         "name": "Wholesome Wendy",
-        "focus": "High-Retention Wild Life Moments & Human Twists"
+        "focus": "High-Retention Wild Life Moments & Human Twists",
+        "avatar_url": "https://yt3.googleusercontent.com/gt_ngSMBxkKlyFnbDlNa9vIEykZL48Wl2jbKfOEKoS6b1359MKIA4oqVcVRRmwBGHYN2fszkunE=s900-c-k-c0x00ffffff-no-rj"
       },
       {
         "handle": "@hisystory",
         "name": "HiSystory",
-        "focus": "Suspenseful Real Stories & Survival Against Odds"
+        "focus": "Suspenseful Real Stories & Survival Against Odds",
+        "avatar_url": "https://yt3.googleusercontent.com/X5PYT8X1ujXkIc-JOPyhMJOisB8pYU9Q5n6zEb3EL7EToZ1q2Gr9QImZs54C3SFMo-d6Fi1SfvA=s900-c-k-c0x00ffffff-no-rj"
       },
       {
         "handle": "@Bobbie-26",
         "name": "BOBBIE-26",
-        "focus": "Bizarre True Events & Incredible Human Feats"
+        "focus": "Bizarre True Events & Incredible Human Feats",
+        "avatar_url": "https://yt3.googleusercontent.com/yiGEnqMKHs78ojyljrb9H1Usf4BFTj5-T9is6fswFnm3VHWomiFHOpGGu0UJGwsZJXCoMHUj=s900-c-k-c0x00ffffff-no-rj"
       }
     ],
     "@mainquestcc": [
       {
         "handle": "@TheGamer",
         "name": "TheGamer",
-        "focus": "Badass Movie & Character Moments"
+        "focus": "Badass Movie & Character Moments",
+        "avatar_url": "https://yt3.googleusercontent.com/C9jN0b0QYjO0-H-232145=s900-c-k-c0x00ffffff-no-rj"
       },
       {
         "handle": "@VaryingGamer",
         "name": "Varying Gaming",
-        "focus": "Cinematic Badass Edits & Clips"
+        "focus": "Cinematic Badass Edits & Clips",
+        "avatar_url": "https://yt3.googleusercontent.com/68W-HbYgayCMsJmGeADVCv4KvNzvMkKKdFUvOTzE92vk5PEd_yO_s20Zsx4lrzBKZf7rNeMVCg=s900-c-k-c0x00ffffff-no-rj"
       }
     ]
   }

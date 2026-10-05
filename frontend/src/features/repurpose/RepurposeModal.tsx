@@ -69,7 +69,7 @@ export const RepurposeModal: React.FC = () => {
     }
   }, [activeTab]);
 
-  if (!isRepurposeModalOpen && studioMode !== 'repurpose') return null;
+  if (!isRepurposeModalOpen) return null;
 
   const loadCompetitorFeed = async () => {
     setIsLoadingFeed(true);

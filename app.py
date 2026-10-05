@@ -45,6 +45,7 @@ class DraftRequest(BaseModel):
     art_style: Optional[str] = None
     tts_voice: Optional[str] = None
     reference_url: Optional[str] = None
+    project_type: Optional[str] = "create"
 
 class ProjectActionRequest(BaseModel):
     project_name: str
@@ -387,7 +388,8 @@ def create_draft(req: DraftRequest):
             aspect_ratio=req.aspect_ratio,
             art_style=req.art_style,
             tts_voice=req.tts_voice,
-            reference_url=req.reference_url
+            reference_url=req.reference_url,
+            project_type=req.project_type or "create"
         )
         return get_project(manifest["project_name"])
     except Exception as e:
@@ -597,42 +599,73 @@ def api_reference_ingest(req: ReferenceIngestRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-_feed_cache: Dict[str, Any] = {"timestamp": 0, "videos": []}
+FEED_CACHE_FILE = Config.BASE_DIR / "data" / "shorts_feed_cache.json"
 
 @app.get("/api/channels/shorts-feed")
 @app.get("/api/repurpose/competitor-feed")
-def api_channels_shorts_feed(handle: Optional[str] = None, refresh: bool = False):
-    global _feed_cache
-    now = time.time()
+def api_channels_shorts_feed(
+    handle: Optional[str] = None,
+    refresh: bool = False,
+    format_type: Optional[str] = None,
+    sort_by: Optional[str] = "latest"
+):
     try:
         data = channel_mgr.get_data()
         tracked = data.get("tracked_channels", [])
         avatar_map = {ch.get("handle", "").lower().strip(): ch.get("avatar_url", "") for ch in tracked}
 
-        if not refresh and (now - _feed_cache.get("timestamp", 0) < 600) and _feed_cache.get("videos"):
-            all_videos = _feed_cache["videos"]
-        else:
+        all_videos = []
+        if not refresh and FEED_CACHE_FILE.exists():
+            try:
+                with open(FEED_CACHE_FILE, "r", encoding="utf-8") as f:
+                    cache_data = json.load(f)
+                    all_videos = cache_data.get("videos", [])
+            except Exception:
+                all_videos = []
+
+        if refresh or not all_videos:
             from repurpose.tracker import fetch_videos_for_handle_or_id
             all_videos = []
             for ch in tracked:
                 h = ch.get("handle")
                 if h:
                     vids = fetch_videos_for_handle_or_id(h)
-                    for v in vids[:8]:
+                    for v in vids[:10]:
                         v["channel_name"] = ch.get("name", h)
                         v["channel_handle"] = h
                         v["avatar_url"] = ch.get("avatar_url") or avatar_map.get(h.lower().strip(), "")
                         all_videos.append(v)
-            _feed_cache = {"timestamp": now, "videos": all_videos}
-            
-        for v in all_videos:
-            if not v.get("avatar_url"):
-                v["avatar_url"] = avatar_map.get(v.get("channel_handle", "").lower().strip(), "")
+            FEED_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(FEED_CACHE_FILE, "w", encoding="utf-8") as f:
+                json.dump({"timestamp": time.time(), "videos": all_videos}, f, indent=2)
 
+        # Ensure avatars are always populated from channel registry
+        for v in all_videos:
+            h = v.get("channel_handle", "").lower().strip()
+            if not v.get("avatar_url") and h in avatar_map:
+                v["avatar_url"] = avatar_map[h]
+
+        # 1. Filter by Channel Handle
+        res = all_videos
         if handle and handle.strip():
             norm = handle.lower().strip()
-            return [v for v in all_videos if v.get("channel_handle", "").lower().strip() == norm]
-        return all_videos
+            res = [v for v in res if v.get("channel_handle", "").lower().strip() == norm]
+
+        # 2. Filter by Format (Shorts vs Videos vs All)
+        if format_type == "shorts":
+            res = [v for v in res if v.get("is_short", True)]
+        elif format_type == "videos":
+            res = [v for v in res if not v.get("is_short", False)]
+
+        # 3. Sort Order
+        if sort_by == "popular":
+            res = sorted(res, key=lambda x: x.get("view_count", 0), reverse=True)
+        elif sort_by == "oldest":
+            res = sorted(res, key=lambda x: str(x.get("published_at", "")))
+        else:  # default latest
+            res = sorted(res, key=lambda x: str(x.get("published_at", "")), reverse=True)
+
+        return res
     except Exception as e:
         print(f"[Shorts Feed Error]: {e}")
         return []

@@ -111,16 +111,16 @@ def fetch_videos_for_handle_or_id(handle_or_id: str, limit: int = 6) -> List[Dic
     # 1. Primary: High-reliability flat extraction via yt-dlp (0 API quota, works on handles & URLs)
     try:
         import yt_dlp
-        target_url = clean
+        base_url = clean
         if not clean.startswith("http"):
             if clean.startswith("@"):
-                target_url = f"https://www.youtube.com/{clean}/videos"
+                base_url = f"https://www.youtube.com/{clean}"
             elif clean.startswith("UC") and len(clean) == 24:
-                target_url = f"https://www.youtube.com/channel/{clean}/videos"
+                base_url = f"https://www.youtube.com/channel/{clean}"
             else:
-                target_url = f"https://www.youtube.com/@{clean}/videos"
-        elif not target_url.endswith("/videos"):
-            target_url = f"{target_url.rstrip('/')}/videos"
+                base_url = f"https://www.youtube.com/@{clean}"
+        else:
+            base_url = clean.split("/videos")[0].split("/shorts")[0].rstrip("/")
 
         ydl_opts = {
             'extract_flat': True,
@@ -128,27 +128,45 @@ def fetch_videos_for_handle_or_id(handle_or_id: str, limit: int = 6) -> List[Dic
             'no_warnings': True,
             'playlist_items': f'1-{limit}'
         }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            res = ydl.extract_info(target_url, download=False)
-            entries = res.get('entries', []) if res else []
-            if entries:
-                videos = []
-                for e in entries:
-                    vid_id = e.get('id')
-                    if not vid_id:
-                        continue
-                    thumb = f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg"
-                    if e.get('thumbnails'):
-                        thumb = e['thumbnails'][-1].get('url', thumb)
-                    videos.append({
-                        "id": vid_id,
-                        "title": e.get('title') or "Untitled Video",
-                        "published_at": e.get('timestamp') or datetime.utcnow().isoformat(),
-                        "thumbnail_url": thumb,
-                        "video_url": e.get('url') or f"https://www.youtube.com/watch?v={vid_id}",
-                        "description": e.get('description', '')
-                    })
-                return videos
+
+        videos = []
+        seen_ids = set()
+        # Scan shorts first (most relevant for studio), then videos tab
+        for tab in ["shorts", "videos"]:
+            tab_url = f"{base_url}/{tab}"
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    res = ydl.extract_info(tab_url, download=False)
+                    entries = res.get('entries', []) if res else []
+                    for e in entries:
+                        vid_id = e.get('id')
+                        if not vid_id or vid_id in seen_ids:
+                            continue
+                        seen_ids.add(vid_id)
+                        thumb = f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg"
+                        if e.get('thumbnails'):
+                            thumb = e['thumbnails'][-1].get('url', thumb)
+                        is_short = (tab == "shorts") or ("#short" in (e.get('title') or '').lower())
+                        video_url = f"https://www.youtube.com/shorts/{vid_id}" if is_short else (e.get('url') or f"https://www.youtube.com/watch?v={vid_id}")
+                        videos.append({
+                            "id": vid_id,
+                            "title": e.get('title') or "Untitled Video",
+                            "published_at": e.get('timestamp') or datetime.utcnow().isoformat(),
+                            "thumbnail_url": thumb,
+                            "video_url": video_url,
+                            "is_short": is_short,
+                            "view_count": e.get('view_count') or 0,
+                            "description": e.get('description', '')
+                        })
+                        if len(videos) >= limit:
+                            break
+            except Exception:
+                pass
+            if len(videos) >= limit:
+                break
+
+        if videos:
+            return videos
     except Exception as e:
         print(f"[Tracker] yt-dlp flat extraction fallback to RSS: {e}")
 

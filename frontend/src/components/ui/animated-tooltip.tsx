@@ -21,6 +21,104 @@ interface AnimatedTooltipProps {
   onItemClick?: (item: TooltipItem) => void;
 }
 
+const TooltipItemBubble: React.FC<{
+  item: TooltipItem;
+  isActive: boolean;
+  isHovered: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick: () => void;
+  translateX: any;
+  rotate: any;
+}> = ({
+  item,
+  isActive,
+  isHovered,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseMove,
+  onClick,
+  translateX,
+  rotate,
+}) => {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div
+      className="relative group cursor-pointer"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseMove={onMouseMove}
+      onClick={onClick}
+    >
+      <AnimatePresence mode="popLayout">
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.7 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: {
+                type: 'spring',
+                stiffness: 260,
+                damping: 10,
+              },
+            }}
+            exit={{ opacity: 0, y: 10, scale: 0.7 }}
+            style={{
+              translateX: translateX,
+              rotate: rotate,
+              whiteSpace: 'nowrap',
+            }}
+            className="absolute -top-14 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center rounded-xl bg-[#0b0f17] border border-[#232d3e] shadow-[0_12px_32px_rgba(0,0,0,0.9),0_0_15px_rgba(0,242,254,0.18)] px-3.5 py-1.5 z-50 pointer-events-none"
+          >
+            {/* Tooltip Pointer Triangle */}
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0b0f17] border-b border-r border-[#232d3e] rotate-45 pointer-events-none" />
+
+            {/* Subtle top glowing hairline */}
+            <div className="absolute inset-x-3 -top-px h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+
+            <div className="font-bold text-white text-xs tracking-tight relative z-10">
+              {item.name}
+            </div>
+            {item.designation && (
+              <div className="text-[10px] text-cyan-400 font-mono mt-0.5 relative z-10">
+                {item.designation}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Avatar Pill / Bubble */}
+      <div
+        className={`relative rounded-full transition-all duration-200 group-hover:scale-110 group-hover:z-30 ${
+          isActive
+            ? 'ring-2 ring-cyan-400 scale-105 z-20 shadow-[0_0_14px_rgba(0,242,254,0.45)]'
+            : 'ring-2 ring-[#07090e] hover:ring-cyan-500/80'
+        }`}
+      >
+        {item.image && !imgError ? (
+          <img
+            src={item.image}
+            alt={item.name}
+            referrerPolicy="no-referrer"
+            loading="eager"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover bg-[#131926] shadow-sm select-none"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-[#1a2333] to-[#0f1420] border border-[#283449] flex items-center justify-center text-xs font-bold text-cyan-300 select-none">
+            {item.name ? item.name.charAt(0).toUpperCase() : '@'}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
   items,
   activeId,
@@ -45,86 +143,25 @@ export const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
   };
 
   return (
-    <div className="flex items-center -space-x-3 sm:-space-x-3.5 py-1">
+    <div className="flex items-center -space-x-3 sm:-space-x-3.5 py-1 overflow-visible">
       {items.map((item) => {
         const isActive = activeId === item.id || activeId === item.handle;
         return (
-          <div
-            className="relative group cursor-pointer"
+          <TooltipItemBubble
             key={item.id || item.name}
+            item={item}
+            isActive={!!isActive}
+            isHovered={hoveredIndex === item.id}
             onMouseEnter={() => setHoveredIndex(item.id)}
             onMouseLeave={() => setHoveredIndex(null)}
             onMouseMove={handleMouseMove}
             onClick={() => onItemClick && onItemClick(item)}
-          >
-            <AnimatePresence mode="popLayout">
-              {hoveredIndex === item.id && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12, scale: 0.6 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: {
-                      type: 'spring',
-                      stiffness: 260,
-                      damping: 10,
-                    },
-                  }}
-                  exit={{ opacity: 0, y: 12, scale: 0.6 }}
-                  style={{
-                    translateX: translateX,
-                    rotate: rotate,
-                    whiteSpace: 'nowrap',
-                  }}
-                  className="absolute -top-16 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center rounded-xl bg-[#0d121c] border border-[#222c3d] shadow-[0_10px_25px_-5px_rgba(0,0,0,0.8),0_0_15px_rgba(0,242,254,0.15)] px-3.5 py-1.5 z-50 pointer-events-none"
-                >
-                  {/* Subtle top indicator bar */}
-                  <div className="absolute inset-x-4 z-30 w-[40%] mx-auto -bottom-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent h-[1.5px]" />
-                  <div className="font-bold text-white text-xs tracking-tight">
-                    {item.name}
-                  </div>
-                  {item.designation && (
-                    <div className="text-[10px] text-cyan-400 font-mono mt-0.5">
-                      {item.designation}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Avatar Pill / Bubble */}
-            <div
-              className={`relative rounded-full transition-all duration-300 group-hover:scale-115 group-hover:z-30 ${
-                isActive
-                  ? 'ring-2 ring-cyan-400 scale-105 z-20 shadow-[0_0_12px_rgba(0,242,254,0.4)]'
-                  : 'ring-2 ring-[#07090e] hover:ring-cyan-500/70'
-              }`}
-            >
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover bg-[#131926] shadow-sm select-none"
-                  onError={(e) => {
-                    // Fallback to initial if image fails
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              ) : null}
-
-              {/* Fallback Initials if image missing or hidden */}
-              <div
-                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-[#1a2333] to-[#0f1420] border border-[#283449] flex items-center justify-center text-xs font-bold text-cyan-300 select-none ${
-                  item.image ? 'hidden' : 'flex'
-                }`}
-              >
-                {item.name ? item.name[0].toUpperCase() : '@'}
-              </div>
-            </div>
-          </div>
+            translateX={translateX}
+            rotate={rotate}
+          />
         );
       })}
     </div>
   );
 };
+
