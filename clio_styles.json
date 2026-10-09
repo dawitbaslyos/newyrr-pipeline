@@ -25,7 +25,7 @@
     "name": "Unreal Engine",
     "category": "3D Render",
     "display": "🧊 Unreal Engine 5 (Raytraced Lumen)",
-    "prompt": "3D cinematic CGI render, Unreal Engine 5 Lumen lighting, smooth tactile surfaces, clean ambient occlusion, crisp single focal point."
+    "prompt": "3D tactile CGI render, Unreal Engine 5 Lumen lighting, smooth stylized physical surfaces, clean matte studio backdrop, crisp rim lighting separation, generous uncluttered negative space, punchy single focal point."
   },
   "render_spiderverse": {
     "id": "render_spiderverse",

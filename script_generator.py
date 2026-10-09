@@ -88,9 +88,10 @@ A watchable, viral Short tells a dynamic story through intentional shot progress
 
 ### 5. KEYFRAME PROMPT ARCHITECTURE ('flux_image_prompt'):
 - **The Storyboard Opening Rule**: This image prompt is the **STARTING POSE (at t=0)** of the shot.
-- It must be a poised, beautifully composed still frame that the video AI model can effortlessly animate.
-- **BANNED IN STILLS**: NEVER describe mid-air frozen motion blur, flying debris frozen in time, disembodied floating objects without an actor, text overlays, subtitles, or split-screens.
-- Focus on ONE clear action/interaction at a time with clean composition and strong character readability.
+- **Hero Prop & Focal Weight (The 60% Rule)**: The primary subject, anatomical mechanism, or prop MUST occupy **55% to 65% of the frame**. Never let the core action shrink into a distant corner!
+- **Clean Background Economy**: The background MUST remain clean, uncluttered, and subordinate (clean matte studio cyclorama backdrop, soft dark vignette, or simplified architectural plane).
+- **STRICT BANS IN STILLS**: NEVER crowd the background with superfluous clutter (stray cables, competing secondary monitors, messy racks, or extra background people). NEVER describe mid-air frozen motion blur, flying debris frozen in time, disembodied floating objects, text overlays, or split-screens.
+- **Silhouette Separation**: Use punchy key lighting and crisp rim/edge lighting so the subject silhouette cleanly carves out against the background plane.
 - **Pacing & Length**: Keep each image prompt concise, precise, and punchy (25–40 words following the formula: shot type + character in starting pose + setting + lighting). Do NOT write bloated paragraphs.
 
 ### 6. MOTION GUIDANCE ('minimax_motion_prompt'):
