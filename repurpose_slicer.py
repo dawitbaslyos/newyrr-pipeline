@@ -48,15 +48,15 @@ class RepurposeSlicer:
         video_id = cls.extract_video_id(video_url_or_id)
         url = f"https://www.youtube.com/watch?v={video_id}"
 
-        print(f"[Repurpose Slicer] Downloading source footage for {video_id}...")
+        print(f"[Repurpose Slicer] Downloading source footage for {video_id} (Best 1080p stream)...")
         ydl_opts = {
-            'format': 'bv*[ext=mp4][height<=1080]+ba[ext=m4a]/b[ext=mp4][height<=1080]/best',
+            'format': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]/best',
             'outtmpl': str(target_path.with_suffix('')) + '.%(ext)s',
             'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
             'extractor_args': {'youtube': {'player_client': ['android', 'ios', 'web']}},
-            'max_filesize': 250 * 1024 * 1024
+            'max_filesize': 350 * 1024 * 1024
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -224,7 +224,7 @@ class RepurposeSlicer:
             "-vf", vf_str,
             "-c:v", "libx264",
             "-preset", "fast",
-            "-crf", "22",
+            "-crf", "18",
             "-an",  # Strip original audio so fresh narration takes over
             "-pix_fmt", "yuv420p",
             str(output_video)

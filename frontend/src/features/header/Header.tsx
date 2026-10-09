@@ -126,7 +126,7 @@ export const Header: React.FC = () => {
             className="hidden sm:flex items-center gap-2 bg-[#0e101d] hover:bg-[#15192d] border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-300 transition active:scale-95 shadow-sm cursor-pointer"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            <span className="text-indigo-300 font-bold">HyperFrames & Slicer</span>
+            <span className="text-indigo-300 font-bold">Motion Canvas & SVG-ORA</span>
             <span className="text-slate-600">·</span>
             <span className="text-slate-400 font-mono text-[10px]">No OpenRouter</span>
             <span className="text-slate-600">·</span>

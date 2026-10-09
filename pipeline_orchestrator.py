@@ -71,47 +71,34 @@ class VideoPipelineOrchestrator:
         project_dir = Config.PROJECTS_DIR / project_slug
         project_dir.mkdir(parents=True, exist_ok=True)
 
-        source_video_path = None
-        timeline = []
-        if project_type == "repurpose" and reference_url:
-            try:
-                dest_video = project_dir / "source_video.mp4"
-                source_video_path = repurpose_slicer.download_source_video(reference_url, dest_video)
-                total_dur = repurpose_slicer.get_video_duration(source_video_path)
-                cuts = repurpose_slicer.detect_scenes(source_video_path)
-                num_sc = len(script_data.get("scenes", [])) or 5
-                timeline = repurpose_slicer.calculate_scene_timeline(total_dur, num_sc, cuts)
-                print(f"[Orchestrator] Repurpose Source Ready: {source_video_path} ({total_dur:.1f}s, {len(cuts)} cuts detected)")
-            except Exception as e:
-                print(f"[Orchestrator] Repurpose download warning: {e}")
-
         manifest = {
             "project_name": project_slug,
             "topic": topic,
             "aspect_ratio": aspect_ratio,
             "project_type": project_type,
-            "source_video_path": str(source_video_path) if source_video_path else None,
+            "source_video_path": None,
             "art_style": art_style or getattr(Config, "ACTIVE_ART_STYLE", "photo_35mm"),
             "tts_voice": tts_voice or getattr(Config, "ACTIVE_TTS_VOICE", "Charon"),
             "reference_url": reference_url,
             "title": script_data.get("title"),
             "hook": script_data.get("hook"),
             "loop_connection": script_data.get("loop_connection"),
+            "master_visual_bible": script_data.get("master_visual_bible", {}),
+            "master_anchor_image": None,
             "caption_y_percent": 72.0,
             "status": "DRAFT_CREATED",
             "scenes": []
         }
 
         for idx, scene in enumerate(script_data.get("scenes", [])):
-            sc_timing = timeline[idx] if idx < len(timeline) else {"start": idx * 5.0, "duration": 5.0}
             manifest["scenes"].append({
                 "scene_number": scene["scene_number"],
                 "escalation_level": scene.get("escalation_level", f"Beat {scene['scene_number']}"),
                 "focal_point": scene.get("focal_point", ""),
                 "narration": scene["narration"],
-                "duration_seconds": scene.get("duration_seconds", sc_timing.get("duration", 5)),
-                "source_start_time": sc_timing.get("start", idx * 5.0),
-                "source_duration": sc_timing.get("duration", 5.0),
+                "duration_seconds": scene.get("duration_seconds", 5),
+                "source_start_time": idx * 5.0,
+                "source_duration": 5.0,
                 "flux_image_prompt": scene.get("flux_image_prompt", ""),
                 "minimax_motion_prompt": scene.get("minimax_motion_prompt", ""),
                 "sfx_cue": scene.get("sfx_cue", "Cinematic"),
@@ -122,7 +109,48 @@ class VideoPipelineOrchestrator:
             })
 
         self._save_manifest(project_slug, manifest)
+
+        # Non-blocking async preparation of source video & PySceneDetect cuts
+        if project_type == "repurpose" and reference_url:
+            def _prep_source_async():
+                try:
+                    dest_video = project_dir / "source_video.mp4"
+                    sv = repurpose_slicer.download_source_video(reference_url, dest_video)
+                    dur = repurpose_slicer.get_video_duration(sv)
+                    cuts = repurpose_slicer.detect_scenes(sv)
+                    num_sc = len(manifest.get("scenes", [])) or 5
+                    tl = repurpose_slicer.calculate_scene_timeline(dur, num_sc, cuts)
+                    cur_man = self.get_manifest(project_slug)
+                    cur_man["source_video_path"] = str(sv)
+                    for i, sc in enumerate(cur_man.get("scenes", [])):
+                        if i < len(tl):
+                            sc["source_start_time"] = tl[i].get("start", i * 5.0)
+                            sc["source_duration"] = tl[i].get("duration", 5.0)
+                    self._save_manifest(project_slug, cur_man)
+                    print(f"[Orchestrator] Repurpose Source Ready (Background): {sv} ({dur:.1f}s, {len(cuts)} cuts detected)")
+                except Exception as ex:
+                    print(f"[Orchestrator] Background repurpose source warning: {ex}")
+
+            import threading
+            threading.Thread(target=_prep_source_async, daemon=True).start()
+
         return manifest
+
+    def _ensure_source_video(self, manifest: Dict[str, Any], project_dir: Path) -> Optional[str]:
+        source = manifest.get("source_video_path")
+        if source and Path(source).exists():
+            return source
+        ref_url = manifest.get("reference_url")
+        if manifest.get("project_type") == "repurpose" and ref_url:
+            try:
+                dest_video = project_dir / "source_video.mp4"
+                source = str(repurpose_slicer.download_source_video(ref_url, dest_video))
+                manifest["source_video_path"] = source
+                self._save_manifest(project_dir.name, manifest)
+                return source
+            except Exception as e:
+                print(f"[Orchestrator] Failed to fetch source video on-demand: {e}")
+        return None
 
     def generate_single_scene_frame(self, project_name: str, scene_number: int) -> Dict[str, Any]:
         """
@@ -134,7 +162,7 @@ class VideoPipelineOrchestrator:
         width, height = (768, 1344) if manifest.get("aspect_ratio", "9:16") == "9:16" else (1344, 768)
         voice = manifest.get("tts_voice") or getattr(Config, "ACTIVE_TTS_VOICE", "Charon")
         is_repurpose = manifest.get("project_type") == "repurpose"
-        source_video = manifest.get("source_video_path")
+        source_video = self._ensure_source_video(manifest, project_dir) if is_repurpose else None
 
         for scene in manifest.get("scenes", []):
             if scene["scene_number"] == scene_number:
@@ -145,27 +173,75 @@ class VideoPipelineOrchestrator:
                 scene["audio_file"] = str(audio_path)
                 scene["actual_audio_duration"] = self.audio_gen.get_audio_duration(str(audio_path))
 
-                # 2. Keyframe Image
+                # 2. Keyframe Image & Programmatic Motion
                 image_path = project_dir / f"scene_{num:02d}_flux.png"
-                if is_repurpose and source_video and Path(source_video).exists():
-                    print(f"[Orchestrator] Repurpose Workflow: Extracting keyframe from source footage for Scene {num} (Zero OpenRouter)")
-                    start_t = scene.get("source_start_time", (num - 1) * 5.0)
-                    repurpose_slicer.extract_scene_keyframe(
-                        source_video=Path(source_video),
-                        output_image=image_path,
-                        timestamp=start_t + 0.5,
+                if is_repurpose:
+                    from engines.mograph_engine import mograph_engine
+                    print(f"[Orchestrator] Programmatic Mograph: Rendering vector scene for Scene {num} (Zero OpenRouter)")
+                    mograph_res = mograph_engine.render_programmatic_scene(
+                        scene_number=num,
+                        prompt=scene.get("flux_image_prompt", "") or scene.get("narration", ""),
+                        narration=scene.get("narration", ""),
+                        duration=float(scene.get("actual_audio_duration") or scene.get("duration_seconds", 4.5)),
+                        output_dir=project_dir,
                         aspect_ratio=manifest.get("aspect_ratio", "9:16"),
-                        punch_in=True
+                        escalation_badge=scene.get("escalation_level")
                     )
+                    mograph_img = mograph_res["image_file"]
+
+                    if source_video and Path(source_video).exists():
+                        print(f"[Orchestrator] Repurpose Hybrid: Compositing Source Frame + Vector Mograph for Scene {num}")
+                        temp_source_frame = project_dir / f"scene_{num:02d}_source_frame.png"
+                        start_t = scene.get("source_start_time", (num - 1) * 5.0)
+                        repurpose_slicer.extract_scene_keyframe(
+                            source_video=Path(source_video),
+                            output_image=temp_source_frame,
+                            timestamp=start_t + 0.5,
+                            aspect_ratio="16:9",
+                            punch_in=True
+                        )
+                        filter_str = (
+                            "[0:v]scale=1080:800:force_original_aspect_ratio=increase,crop=1080:800[top];"
+                            "[1:v]scale=1080:1120:force_original_aspect_ratio=increase,crop=1080:1120[bottom];"
+                            "[top][bottom]vstack[v]"
+                        )
+                        comp_cmd = [
+                            "ffmpeg", "-y",
+                            "-i", str(temp_source_frame),
+                            "-i", str(mograph_img),
+                            "-filter_complex", filter_str,
+                            "-map", "[v]",
+                            "-vframes", "1",
+                            "-q:v", "2",
+                            str(image_path)
+                        ]
+                        subprocess.run(comp_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    else:
+                        import shutil
+                        shutil.copyfile(mograph_img, image_path)
+
+                    scene["image_file"] = str(image_path)
+                    scene["status"] = "FRAME_READY"
                 else:
+                    ref_img = None
+                    if scene_number > 1:
+                        anchor_candidate = manifest.get("master_anchor_image") or (project_dir / "scene_01_flux.png")
+                        if anchor_candidate and Path(anchor_candidate).exists():
+                            ref_img = str(anchor_candidate)
+
                     self.image_gen.generate_image(
                         prompt=scene["flux_image_prompt"],
                         output_path=str(image_path),
                         width=width,
-                        height=height
+                        height=height,
+                        aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                        art_style=manifest.get("art_style"),
+                        reference_image=ref_img
                     )
-                scene["image_file"] = str(image_path)
-                scene["status"] = "FRAME_READY"
+                    scene["image_file"] = str(image_path)
+                    scene["status"] = "FRAME_READY"
+                    if scene_number == 1 and not manifest.get("master_anchor_image"):
+                        manifest["master_anchor_image"] = str(image_path)
                 break
 
         # Check if all frames are ready
@@ -178,13 +254,13 @@ class VideoPipelineOrchestrator:
     def generate_frames_for_project(self, project_name: str) -> Dict[str, Any]:
         """
         Stage 2: Generates Keyframe Stills FIRST for all scenes + Audio.
-        In Repurpose mode: Uses local video slicer, zero OpenRouter image models.
+        In Repurpose mode: Uses local video slicer + programmatic vector mograph composite.
         """
         manifest = self.get_manifest(project_name)
         project_dir = Config.PROJECTS_DIR / project_name
         width, height = (768, 1344) if manifest.get("aspect_ratio", "9:16") == "9:16" else (1344, 768)
         is_repurpose = manifest.get("project_type") == "repurpose"
-        source_video = manifest.get("source_video_path")
+        source_video = self._ensure_source_video(manifest, project_dir) if is_repurpose else None
 
         print(f"[Orchestrator] Generating Keyframes First for {project_name} (Repurpose={is_repurpose})...")
         voice = manifest.get("tts_voice") or getattr(Config, "ACTIVE_TTS_VOICE", "Charon")
@@ -198,23 +274,68 @@ class VideoPipelineOrchestrator:
 
             # 2. Keyframe Image
             image_path = project_dir / f"scene_{num:02d}_flux.png"
-            if is_repurpose and source_video and Path(source_video).exists():
-                print(f"[Orchestrator] Repurpose Workflow: Slicing keyframe for Scene {num} from source")
-                start_t = scene.get("source_start_time", (num - 1) * 5.0)
-                repurpose_slicer.extract_scene_keyframe(
-                    source_video=Path(source_video),
-                    output_image=image_path,
-                    timestamp=start_t + 0.5,
+            if is_repurpose:
+                from engines.mograph_engine import mograph_engine
+                print(f"[Orchestrator] Programmatic Mograph: Batch rendering vector scene {num}")
+                mograph_res = mograph_engine.render_programmatic_scene(
+                    scene_number=num,
+                    prompt=scene.get("flux_image_prompt", "") or scene.get("narration", ""),
+                    narration=scene.get("narration", ""),
+                    duration=float(scene.get("actual_audio_duration") or scene.get("duration_seconds", 4.5)),
+                    output_dir=project_dir,
                     aspect_ratio=manifest.get("aspect_ratio", "9:16"),
-                    punch_in=True
+                    escalation_badge=scene.get("escalation_level")
                 )
+                mograph_img = mograph_res["image_file"]
+
+                if source_video and Path(source_video).exists():
+                    print(f"[Orchestrator] Repurpose Hybrid: Batch compositing Source Frame + Vector Mograph for Scene {num}")
+                    temp_source_frame = project_dir / f"scene_{num:02d}_source_frame.png"
+                    start_t = scene.get("source_start_time", (num - 1) * 5.0)
+                    repurpose_slicer.extract_scene_keyframe(
+                        source_video=Path(source_video),
+                        output_image=temp_source_frame,
+                        timestamp=start_t + 0.5,
+                        aspect_ratio="16:9",
+                        punch_in=True
+                    )
+                    filter_str = (
+                        "[0:v]scale=1080:800:force_original_aspect_ratio=increase,crop=1080:800[top];"
+                        "[1:v]scale=1080:1120:force_original_aspect_ratio=increase,crop=1080:1120[bottom];"
+                        "[top][bottom]vstack[v]"
+                    )
+                    comp_cmd = [
+                        "ffmpeg", "-y",
+                        "-i", str(temp_source_frame),
+                        "-i", str(mograph_img),
+                        "-filter_complex", filter_str,
+                        "-map", "[v]",
+                        "-vframes", "1",
+                        "-q:v", "2",
+                        str(image_path)
+                    ]
+                    subprocess.run(comp_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                else:
+                    import shutil
+                    shutil.copyfile(mograph_img, image_path)
             else:
+                ref_img = None
+                if num > 1:
+                    anchor_candidate = manifest.get("master_anchor_image") or (project_dir / "scene_01_flux.png")
+                    if anchor_candidate and Path(anchor_candidate).exists():
+                        ref_img = str(anchor_candidate)
+
                 self.image_gen.generate_image(
                     prompt=scene["flux_image_prompt"],
                     output_path=str(image_path),
                     width=width,
-                    height=height
+                    height=height,
+                    aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                    art_style=manifest.get("art_style"),
+                    reference_image=ref_img
                 )
+                if num == 1 and not manifest.get("master_anchor_image"):
+                    manifest["master_anchor_image"] = str(image_path)
             scene["image_file"] = str(image_path)
             scene["status"] = "FRAME_READY"
             self._save_manifest(project_name, manifest)
@@ -238,24 +359,68 @@ class VideoPipelineOrchestrator:
                 prompt = custom_prompt or scene["flux_image_prompt"]
                 scene["flux_image_prompt"] = prompt
                 image_path = project_dir / f"scene_{scene_number:02d}_flux.png"
-                if is_repurpose and source_video and Path(source_video).exists():
-                    print(f"[Orchestrator] Repurpose Workflow: Re-extracting keyframe for Scene {scene_number}")
-                    start_t = scene.get("source_start_time", (scene_number - 1) * 5.0)
-                    repurpose_slicer.extract_scene_keyframe(
-                        source_video=Path(source_video),
-                        output_image=image_path,
-                        timestamp=start_t + 1.8,
+                if is_repurpose:
+                    from engines.mograph_engine import mograph_engine
+                    print(f"[Orchestrator] Programmatic Mograph: Re-rendering vector scene for Scene {scene_number}")
+                    mograph_res = mograph_engine.render_programmatic_scene(
+                        scene_number=scene_number,
+                        prompt=prompt or scene.get("narration", ""),
+                        narration=scene.get("narration", ""),
+                        duration=float(scene.get("actual_audio_duration") or scene.get("duration_seconds", 4.5)),
+                        output_dir=project_dir,
                         aspect_ratio=manifest.get("aspect_ratio", "9:16"),
-                        punch_in=True
+                        escalation_badge=scene.get("escalation_level")
                     )
+                    mograph_img = mograph_res["image_file"]
+
+                    if source_video and Path(source_video).exists():
+                        temp_source_frame = project_dir / f"scene_{scene_number:02d}_source_frame.png"
+                        start_t = scene.get("source_start_time", (scene_number - 1) * 5.0)
+                        repurpose_slicer.extract_scene_keyframe(
+                            source_video=Path(source_video),
+                            output_image=temp_source_frame,
+                            timestamp=start_t + 1.2,
+                            aspect_ratio="16:9",
+                            punch_in=True
+                        )
+                        filter_str = (
+                            "[0:v]scale=1080:800:force_original_aspect_ratio=increase,crop=1080:800[top];"
+                            "[1:v]scale=1080:1120:force_original_aspect_ratio=increase,crop=1080:1120[bottom];"
+                            "[top][bottom]vstack[v]"
+                        )
+                        comp_cmd = [
+                            "ffmpeg", "-y",
+                            "-i", str(temp_source_frame),
+                            "-i", str(mograph_img),
+                            "-filter_complex", filter_str,
+                            "-map", "[v]",
+                            "-vframes", "1",
+                            "-q:v", "2",
+                            str(image_path)
+                        ]
+                        subprocess.run(comp_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    else:
+                        import shutil
+                        shutil.copyfile(mograph_img, image_path)
                 else:
+                    ref_img = None
+                    if scene_number > 1:
+                        anchor_candidate = manifest.get("master_anchor_image") or (project_dir / "scene_01_flux.png")
+                        if anchor_candidate and Path(anchor_candidate).exists():
+                            ref_img = str(anchor_candidate)
+
                     self.image_gen.generate_image(
                         prompt=prompt,
                         output_path=str(image_path),
                         width=width,
                         height=height,
-                        seed=int(time.time())
+                        aspect_ratio=manifest.get("aspect_ratio", "9:16"),
+                        seed=int(time.time()),
+                        art_style=manifest.get("art_style"),
+                        reference_image=ref_img
                     )
+                    if scene_number == 1:
+                        manifest["master_anchor_image"] = str(image_path)
                 scene["image_file"] = str(image_path)
                 scene["status"] = "FRAME_READY"
                 break
@@ -281,21 +446,58 @@ class VideoPipelineOrchestrator:
         # Repurpose Workflow: Slices segment from source footage with muted audio (Zero OpenRouter video credits!)
         manifest = self.get_manifest(project_dir.name)
         if manifest.get("project_type") == "repurpose":
-            source_video = manifest.get("source_video_path")
+            source_video = self._ensure_source_video(manifest, project_dir)
+            from engines.mograph_engine import mograph_engine
+
+            print(f"[Orchestrator] Programmatic Mograph: Rendering vector video for Scene {num} (Zero OpenRouter)")
+            mograph_res = mograph_engine.render_programmatic_scene(
+                scene_number=num,
+                prompt=scene.get("flux_image_prompt", "") or scene.get("narration", ""),
+                narration=scene.get("narration", ""),
+                duration=float(scene_duration),
+                output_dir=project_dir,
+                aspect_ratio=aspect_ratio,
+                escalation_badge=scene.get("escalation_level")
+            )
+            mograph_vid = mograph_res["video_file"]
+
             if source_video and Path(source_video).exists():
-                print(f"[Orchestrator] Repurpose Workflow: Slicing video from source footage for Scene {num} (Zero OpenRouter)")
+                print(f"[Orchestrator] Repurpose Compositor: Merging Source Footage + Mograph for Scene {num}")
+                temp_source_clip = project_dir / f"scene_{num:02d}_source_clip.mp4"
                 start_t = scene.get("source_start_time", (num - 1) * 5.0)
                 repurpose_slicer.slice_scene_video(
                     source_video=Path(source_video),
-                    output_video=video_file,
+                    output_video=temp_source_clip,
                     start_time=start_t,
                     duration=scene_duration,
-                    aspect_ratio=aspect_ratio,
+                    aspect_ratio="16:9",
                     punch_in=True
                 )
-                scene["video_file"] = str(video_file)
-                scene["status"] = "VIDEO_READY"
-                return str(video_file)
+
+                # Split Screen Composite (Top 800px Source Video, Bottom 1120px Mograph)
+                filter_str = (
+                    "[0:v]scale=1080:800:force_original_aspect_ratio=increase,crop=1080:800,pad=1080:800:0:0:color=black[top];"
+                    "[1:v]scale=1080:1120:force_original_aspect_ratio=increase,crop=1080:1120[bottom];"
+                    "[top][bottom]vstack[v]"
+                )
+                comp_cmd = [
+                    "ffmpeg", "-y",
+                    "-i", str(temp_source_clip),
+                    "-i", str(mograph_vid),
+                    "-filter_complex", filter_str,
+                    "-map", "[v]",
+                    "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+                    "-pix_fmt", "yuv420p",
+                    str(video_file)
+                ]
+                subprocess.run(comp_cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            else:
+                import shutil
+                shutil.copyfile(mograph_vid, video_file)
+
+            scene["video_file"] = str(video_file)
+            scene["status"] = "VIDEO_READY"
+            return str(video_file)
 
         # 1. MiniMax H3 Max Turbo on RunPod Serverless (if configured and explicit)
         if "runpod" in provider.lower() and self.minimax_client.api_key and self.minimax_client.endpoint_id:
@@ -423,6 +625,26 @@ class VideoPipelineOrchestrator:
                 if motion_prompt is not None:
                     scene["minimax_motion_prompt"] = motion_prompt
                 break
+        self._save_manifest(project_name, manifest)
+        return manifest
+
+    def update_project_metadata(
+        self,
+        project_name: str,
+        art_style: Optional[str] = None,
+        title: Optional[str] = None,
+        caption_y_percent: Optional[float] = None
+    ) -> Dict[str, Any]:
+        """
+        Updates project-level settings (e.g. art direction style, title, subtitle position).
+        """
+        manifest = self.get_manifest(project_name)
+        if art_style is not None:
+            manifest["art_style"] = art_style
+        if title is not None:
+            manifest["title"] = title
+        if caption_y_percent is not None:
+            manifest["caption_y_percent"] = caption_y_percent
         self._save_manifest(project_name, manifest)
         return manifest
 

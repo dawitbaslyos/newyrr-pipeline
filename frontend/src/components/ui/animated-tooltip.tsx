@@ -70,9 +70,8 @@ const TooltipItemBubble: React.FC<{
             style={{
               translateX: translateX,
               rotate: rotate,
-              whiteSpace: 'nowrap',
             }}
-            className="absolute -top-14 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center rounded-xl bg-[#0b0f17] border border-[#232d3e] shadow-[0_12px_32px_rgba(0,0,0,0.9),0_0_15px_rgba(0,242,254,0.18)] px-3.5 py-1.5 z-50 pointer-events-none"
+            className="absolute -top-14 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center rounded-xl bg-[#0b0f17] border border-[#232d3e] shadow-[0_12px_32px_rgba(0,0,0,0.95),0_0_15px_rgba(0,242,254,0.22)] px-3 py-1.5 z-[9999] pointer-events-none min-w-max text-center select-none"
           >
             {/* Tooltip Pointer Triangle */}
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0b0f17] border-b border-r border-[#232d3e] rotate-45 pointer-events-none" />
@@ -80,11 +79,11 @@ const TooltipItemBubble: React.FC<{
             {/* Subtle top glowing hairline */}
             <div className="absolute inset-x-3 -top-px h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
-            <div className="font-bold text-white text-xs tracking-tight relative z-10">
+            <div className="font-bold text-white text-xs tracking-tight whitespace-nowrap relative z-10">
               {item.name}
             </div>
             {item.designation && (
-              <div className="text-[10px] text-cyan-400 font-mono mt-0.5 relative z-10">
+              <div className="text-[10px] text-cyan-400 font-mono mt-0.5 whitespace-nowrap relative z-10">
                 {item.designation}
               </div>
             )}
@@ -129,11 +128,11 @@ export const AnimatedTooltip: React.FC<AnimatedTooltipProps> = ({
   const x = useMotionValue(0);
 
   const rotate = useSpring(
-    useTransform(x, [-100, 100], [-45, 45]),
+    useTransform(x, [-100, 100], [-5, 5]),
     springConfig
   );
   const translateX = useSpring(
-    useTransform(x, [-100, 100], [-50, 50]),
+    useTransform(x, [-100, 100], [-8, 8]),
     springConfig
   );
 

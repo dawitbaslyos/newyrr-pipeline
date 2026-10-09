@@ -20,7 +20,11 @@ import {
   RefreshCw,
   Sliders,
   Type,
-  CheckCircle2
+  CheckCircle2,
+  Copy,
+  Check,
+  UploadCloud,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -58,6 +62,13 @@ export const StudioEditor: React.FC = () => {
   const [viewLayer, setViewLayer] = useState<'video' | 'image'>('video');
   const [showCaptions, setShowCaptions] = useState(true);
   const [generationProgress, setGenerationProgress] = useState<number>(-1);
+
+  // Manual Video Upload & RunPod Batching states
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isDraggingVideo, setIsDraggingVideo] = useState(false);
+  const [copiedMotionPrompt, setCopiedMotionPrompt] = useState(false);
+  const [copiedAllPrompts, setCopiedAllPrompts] = useState(false);
+  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const dragRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,33 +160,62 @@ export const StudioEditor: React.FC = () => {
     };
   }, [isPlaying, activeSceneIdx, currentScene?.audio_url, scenes.length]);
 
-  // Progressive Batch Execution: All Frames First (Scene-by-scene stream)
+  // Progressive Batch Execution: All Frames First (Scene-by-scene stream with resilience)
   const handleRunAllFrames = async () => {
     setIsShimmering(true);
     setGenerationProgress(5);
     const total = scenes.length || 5;
+    const failedScenes: number[] = [];
     setShimmerText(`Rendering Keyframe 1 of ${total}...`);
     try {
       for (let i = 1; i <= total; i++) {
         setShimmerText(`Rendering Keyframe & Audio (${i} of ${total})...`);
-        const res = await fetch('/api/project/generate-scene-frame', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            project_name: activeProject.project_name,
-            scene_number: i
-          })
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          useStudioStore.setState({ activeProject: updated });
-        } else {
-          const errData = await res.json().catch(() => ({ detail: `Failed generating frame for Scene ${i}` }));
-          throw new Error(errData.detail || `Failed generating frame for Scene ${i}`);
+        let success = false;
+        let lastErr = '';
+
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            if (attempt > 1) {
+              setShimmerText(`Retrying Keyframe ${i} (${attempt}/2)...`);
+              await new Promise((r) => setTimeout(r, 1500));
+            }
+            const res = await fetch('/api/project/generate-scene-frame', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                project_name: activeProject.project_name,
+                scene_number: i
+              })
+            });
+            if (res.ok) {
+              const updated = await res.json();
+              useStudioStore.setState({ activeProject: updated });
+              success = true;
+              break;
+            } else {
+              const errData = await res.json().catch(() => ({ detail: `Scene ${i} error` }));
+              lastErr = errData.detail || `Failed generating frame for Scene ${i}`;
+            }
+          } catch (netErr: any) {
+            lastErr = netErr?.message || String(netErr);
+          }
         }
+
+        if (!success) {
+          failedScenes.push(i);
+          console.error(`Scene ${i} failed after 2 attempts: ${lastErr}`);
+        }
+
         setGenerationProgress(Math.round((i / total) * 100));
+        // Add gentle buffer between batch scene requests to avoid upstream rate limits
+        if (i < total) {
+          await new Promise((r) => setTimeout(r, 800));
+        }
       }
       fetchProjects();
+      if (failedScenes.length > 0) {
+        alert(`Frames rendered, but Scene(s) ${failedScenes.join(', ')} failed to complete. You can click 'Render Still' directly on those scenes to re-try.`);
+      }
     } catch (e) {
       alert('Failed generating frames: ' + e);
     } finally {
@@ -293,6 +333,90 @@ export const StudioEditor: React.FC = () => {
     }
   };
 
+  // Update Project Art Direction Style
+  const handleUpdateArtStyle = async (newStyle: string) => {
+    if (!activeProject) return;
+    try {
+      const res = await fetch('/api/project/update-metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_name: activeProject.project_name,
+          art_style: newStyle
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        useStudioStore.setState({ activeProject: updated });
+        fetchProjects();
+      }
+    } catch (e) {
+      console.error('Failed to update art style: ', e);
+    }
+  };
+
+  // Manual Video Upload (RunPod spot / local rendered MP4)
+  const handleUploadSceneVideo = async (file: File) => {
+    if (!file || !activeProject || !currentScene) return;
+    setIsUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append('project_name', activeProject.project_name);
+      formData.append('scene_number', currentScene.scene_number.toString());
+      formData.append('file', file);
+
+      const res = await fetch('/api/project/upload-scene-video', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        useStudioStore.setState({ activeProject: updated });
+        fetchProjects();
+      } else {
+        const errData = await res.json().catch(() => ({ detail: 'Failed uploading video' }));
+        alert(errData.detail || 'Failed uploading video');
+      }
+    } catch (e) {
+      alert('Upload error: ' + e);
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
+  // Copy Single Motion Prompt to Clipboard
+  const handleCopyMotionPrompt = () => {
+    if (!currentScene?.minimax_motion_prompt) return;
+    navigator.clipboard.writeText(currentScene.minimax_motion_prompt);
+    setCopiedMotionPrompt(true);
+    setTimeout(() => setCopiedMotionPrompt(false), 2000);
+  };
+
+  // Copy All Scene Prompts for RunPod ComfyUI batching
+  const handleCopyAllMotionPrompts = () => {
+    if (!scenes.length) return;
+    const text = scenes.map((s, idx) => {
+      const num = s.scene_number || idx + 1;
+      const imgName = `scene_${num.toString().padStart(2, '0')}_flux.png`;
+      return `=== SCENE ${num.toString().padStart(2, '0')} ===\nStill Keyframe: ${imgName}\nDuration: ${s.duration_seconds || 5}s\nNarration: ${s.narration || ''}\nMotion Prompt: ${s.minimax_motion_prompt || ''}\n`;
+    }).join('\n');
+    navigator.clipboard.writeText(text);
+    setCopiedAllPrompts(true);
+    setTimeout(() => setCopiedAllPrompts(false), 2000);
+  };
+
+  // 1-Click RunPod Batch Package Download (.zip)
+  const handleDownloadRunPodZip = () => {
+    if (!activeProject) return;
+    const url = `/api/project/${encodeURIComponent(activeProject.project_name)}/runpod-package/zip`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${activeProject.project_name}_runpod_batch.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-[#07090e] flex flex-col font-sans select-none overflow-hidden h-screen w-screen">
       {/* 1. Studio Top Bar (Clean & Screen Adaptive) */}
@@ -307,9 +431,16 @@ export const StudioEditor: React.FC = () => {
           </button>
           
           <div className="flex flex-col overflow-hidden">
-            <span className="text-xs sm:text-sm font-bold truncate text-slate-100 max-w-[200px] sm:max-w-xs md:max-w-md">
-              {activeProject.title || activeProject.project_name}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-bold truncate text-slate-100 max-w-[180px] sm:max-w-xs md:max-w-md">
+                {activeProject.title || activeProject.project_name}
+              </span>
+              {activeProject.art_style && activeProject.project_type !== 'repurpose' && (
+                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 font-semibold truncate max-w-[150px]">
+                  🎨 {activeProject.art_style.replace(/_/g, ' ')}
+                </span>
+              )}
+            </div>
             {activeProject.hook && (
               <span className="text-[10px] text-slate-400 truncate hidden md:inline">
                 {activeProject.hook}
@@ -562,8 +693,19 @@ export const StudioEditor: React.FC = () => {
                       Draft
                     </div>
                   )}
-                  <div className="absolute top-1 left-1 bg-black/80 px-1.5 py-0.2 rounded text-[8px] font-bold text-slate-200">
-                    #{s.scene_number}
+                  <div className="absolute top-1 left-1 flex items-center gap-1">
+                    <span className="bg-black/85 backdrop-blur-xs px-1.5 py-0.2 rounded text-[8px] font-bold text-slate-200 border border-slate-700/60">
+                      #{s.scene_number}
+                    </span>
+                    {s.scene_number === 1 ? (
+                      <span className="bg-amber-500/90 text-black px-1 py-0.2 rounded text-[7px] font-black uppercase tracking-wider shadow" title="Master Visual Anchor">
+                        ⚓ ANCHOR
+                      </span>
+                    ) : (
+                      <span className="bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 px-1 py-0.2 rounded text-[7px] font-bold" title="Locked to Scene 1 Anchor">
+                        🔗
+                      </span>
+                    )}
                   </div>
                   {s.video_url && (
                     <div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-cyan-400 shadow-sm" title="Video Ready" />
@@ -650,14 +792,34 @@ export const StudioEditor: React.FC = () => {
                     className="bg-[#0c0f18] hover:bg-[#161b26] border border-cyan-400/40 hover:border-cyan-400 text-cyan-300 text-[11px] font-semibold p-2 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>{activeProject.project_type === 'repurpose' ? '1. Slice Keyframes' : '1. Frames First'}</span>
+                    <span>{activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? '1. Slice Keyframes' : '1. Render Vectors') : '1. Frames First'}</span>
                   </button>
                   <button
                     onClick={handleRunAllVideos}
                     className="bg-[#0c0f18] hover:bg-[#161b26] border border-indigo-400/40 hover:border-indigo-400 text-indigo-300 text-[11px] font-semibold p-2 rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm"
                   >
                     <Film className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>{activeProject.project_type === 'repurpose' ? '2. Slice Video Clips' : '2. Animate All'}</span>
+                    <span>{activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? '2. Slice Video Clips' : '2. Render Mograph') : '2. Animate All'}</span>
+                  </button>
+                </div>
+
+                {/* RunPod / Spot Instance Batch Toolkit */}
+                <div className="pt-1.5 border-t border-[#1f2736]/60 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={handleDownloadRunPodZip}
+                    title="Download all generated still keyframes and motion prompts in a .zip for RunPod batching"
+                    className="bg-[#10141f] hover:bg-[#171f30] border border-cyan-500/30 hover:border-cyan-400 text-slate-200 hover:text-cyan-300 text-[10px] font-semibold p-1.5 rounded-lg flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
+                  >
+                    <Download className="w-3 h-3 text-cyan-400" />
+                    <span>RunPod Batch (.zip)</span>
+                  </button>
+                  <button
+                    onClick={handleCopyAllMotionPrompts}
+                    title="Copy all scene motion prompts formatted for RunPod batch queue"
+                    className="bg-[#10141f] hover:bg-[#171f30] border border-indigo-500/30 hover:border-indigo-400 text-slate-200 hover:text-indigo-300 text-[10px] font-semibold p-1.5 rounded-lg flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer"
+                  >
+                    {copiedAllPrompts ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-indigo-400" />}
+                    <span>{copiedAllPrompts ? 'Prompts Copied!' : 'Copy All Prompts'}</span>
                   </button>
                 </div>
               </div>
@@ -666,6 +828,33 @@ export const StudioEditor: React.FC = () => {
               <div className="flex-1 p-3.5 flex flex-col gap-4 overflow-y-auto">
                 {activeSubTab === 'prompts' ? (
                   <>
+                    {/* Master Visual Bible (Character & World Continuity) */}
+                    {activeProject.master_visual_bible?.master_subject && (
+                      <div className="bg-[#0c0f18] border border-amber-500/30 rounded-2xl p-3 flex flex-col gap-1.5 shadow-sm">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                          <span className="flex items-center gap-1.5">
+                            <span>⚓ Master Visual Bible</span>
+                          </span>
+                          <span className="text-[9px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/40">
+                            Continuity Lock
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-300 leading-tight">
+                          <span className="font-semibold text-slate-400">Protagonist:</span> {activeProject.master_visual_bible.master_subject}
+                        </div>
+                        {activeProject.master_visual_bible.environment && (
+                          <div className="text-[11px] text-slate-300 leading-tight">
+                            <span className="font-semibold text-slate-400">Environment:</span> {activeProject.master_visual_bible.environment}
+                          </div>
+                        )}
+                        {activeProject.master_visual_bible.color_palette && (
+                          <div className="text-[10px] text-slate-400 leading-tight">
+                            <span className="font-semibold text-slate-500">Palette:</span> {activeProject.master_visual_bible.color_palette}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Prompt 1: Narration Script */}
                     <div className="bg-[#07090e] border border-[#1f2736] rounded-2xl p-3 flex flex-col gap-2">
                       <div className="flex items-center justify-between">
@@ -697,7 +886,7 @@ export const StudioEditor: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <label className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                           <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>{activeProject.project_type === 'repurpose' ? '2. Source Keyframe Still' : '2. Still Keyframe Prompt'}</span>
+                          <span>{activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? '2. Source Keyframe Still' : '2. SVG Vector Graphic') : '2. Still Keyframe Prompt'}</span>
                         </label>
                         
                         {/* Scene-Per-Scene Still Render / Regenerate Button */}
@@ -711,9 +900,72 @@ export const StudioEditor: React.FC = () => {
                           ) : (
                             <RefreshCw className="w-3 h-3 text-cyan-400" />
                           )}
-                          <span>{isRenderingSceneStill ? 'Rendering...' : (activeProject.project_type === 'repurpose' ? 'Slice Keyframe' : (currentScene.image_url ? 'Regenerate Still' : 'Render Still'))}</span>
+                          <span>{isRenderingSceneStill ? 'Rendering...' : (activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? 'Slice Keyframe' : 'Render Vector') : (currentScene.image_url ? 'Regenerate Still' : 'Render Still'))}</span>
                         </button>
                       </div>
+
+                      {/* Art Direction Style Selector & Feedback */}
+                      {activeProject.project_type !== 'repurpose' && (
+                        <div className="flex items-center justify-between bg-[#0c0f18] px-2.5 py-1.5 rounded-xl border border-[#1f2736]">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-cyan-400" />
+                            <span>Style:</span>
+                          </span>
+                          <select
+                            value={activeProject.art_style || 'photo_35mm'}
+                            onChange={(e) => handleUpdateArtStyle(e.target.value)}
+                            className="bg-transparent text-[11px] font-semibold text-cyan-300 outline-none cursor-pointer border-none text-right max-w-[210px]"
+                          >
+                            <optgroup label="Cinematic & Photography" className="bg-[#0c0f18] text-slate-200">
+                              <option value="photo_35mm">📸 35mm Photography</option>
+                              <option value="photo_surveillance">📸 Surveillance Camera</option>
+                              <option value="photo_wes_anderson">📸 Wes Anderson</option>
+                            </optgroup>
+                            <optgroup label="3D Render & Animation" className="bg-[#0c0f18] text-slate-200">
+                              <option value="render_unreal">🧊 Unreal Engine 5</option>
+                              <option value="render_spiderverse">🧊 Spider-Verse</option>
+                              <option value="render_coraline">🧊 Coraline Stop-Motion</option>
+                              <option value="design_lego_hybrid">🧱 LEGO Minifigure</option>
+                              <option value="design_minecraft">⛏️ Minecraft Cinematic</option>
+                            </optgroup>
+                            <optgroup label="Graphic & Comic Art" className="bg-[#0c0f18] text-slate-200">
+                              <option value="design_butcher_billy">🎨 Butcher Billy Pop</option>
+                              <option value="comic_franco_belgian">📖 Franco-Belgian Comic</option>
+                              <option value="comic_hellboy">📖 Hellboy Noir</option>
+                              <option value="comic_vintage">📖 Vintage 1970s Comic</option>
+                              <option value="digital_xray">🩻 X-Ray Forensic</option>
+                              <option value="digital_blacklight">💡 UV Neon Glow</option>
+                              <option value="digital_gris_grimly">🎭 Gris Grimly Dark</option>
+                              <option value="cover_gta_v">🎮 GTA V Cover Art</option>
+                              <option value="cover_interplay_shadow">🌑 Shadow Contrast</option>
+                              <option value="cover_glossy">✨ Editorial Magazine</option>
+                              <option value="paint_tenebrism">🖌️ Tenebrism Chiaroscuro</option>
+                              <option value="paint_hyperrealism">🖌️ Hyperrealism Oil</option>
+                              <option value="paint_chiaroscuro">🖌️ Renaissance Painting</option>
+                              <option value="toon_rick_and_morty">🛸 Rick and Morty</option>
+                              <option value="toon_gravity_falls">🌲 Gravity Falls</option>
+                              <option value="toon_bruce_timm">🦇 Bruce Timm Animated</option>
+                              <option value="toon_doodle_minimal">✏️ Minimalist Doodle</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Continuity Anchor Indicator */}
+                      {currentScene.scene_number === 1 ? (
+                        <div className="text-[10px] bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
+                          <span className="font-bold">⚓ Master Anchor (Scene 1):</span> Sets visual identity, wardrobe, and environment for all subsequent scenes.
+                        </div>
+                      ) : (
+                        <div className="text-[10px] bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 rounded-xl px-2.5 py-1.5 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <span>🔗 <strong>Locked to Scene 1:</strong> Inheriting visual anchor reference</span>
+                          </span>
+                          <span className="text-[9px] bg-cyan-900/60 border border-cyan-400/30 text-cyan-200 px-1.5 py-0.2 rounded font-mono">
+                            Krea 2 Ref Active
+                          </span>
+                        </div>
+                      )}
 
                       <textarea
                         rows={3}
@@ -733,27 +985,39 @@ export const StudioEditor: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Prompt 3: Video Motion Guidance + Single Scene Regenerate */}
+                    {/* Prompt 3: Video Motion Guidance + Single Scene Regenerate & Manual Drop-in */}
                     <div className="bg-[#07090e] border border-[#1f2736] rounded-2xl p-3 flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <label className="text-[11px] font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
                           <VideoIcon className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>{activeProject.project_type === 'repurpose' ? '3. Source Video Clip' : '3. Motion Guidance (Video)'}</span>
+                          <span>{activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? '3. Source Video Clip' : '3. Programmatic Motion') : '3. Motion Guidance (Video)'}</span>
                         </label>
 
-                        {/* Scene-Per-Scene Video Render / Regenerate Button */}
-                        <button
-                          disabled={isRenderingSceneVideo}
-                          onClick={handleRerollSceneVideo}
-                          className="bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-400/40 text-indigo-300 text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition active:scale-95 cursor-pointer disabled:opacity-50"
-                        >
-                          {isRenderingSceneVideo ? (
-                            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-                          ) : (
-                            <RefreshCw className="w-3 h-3 text-indigo-400" />
-                          )}
-                          <span>{isRenderingSceneVideo ? 'Animating...' : (activeProject.project_type === 'repurpose' ? 'Slice Video Clip' : (currentScene.video_url ? 'Regenerate Video' : 'Animate Scene'))}</span>
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {/* Copy Motion Prompt Button */}
+                          <button
+                            onClick={handleCopyMotionPrompt}
+                            title="Copy this scene's motion prompt for RunPod ComfyUI"
+                            className="bg-[#10141f] hover:bg-[#161d2c] border border-indigo-400/30 hover:border-indigo-400 text-slate-300 hover:text-indigo-300 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                          >
+                            {copiedMotionPrompt ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-indigo-400" />}
+                            <span>{copiedMotionPrompt ? 'Copied' : 'Copy'}</span>
+                          </button>
+
+                          {/* Scene-Per-Scene Video Render / Regenerate Button */}
+                          <button
+                            disabled={isRenderingSceneVideo}
+                            onClick={handleRerollSceneVideo}
+                            className="bg-indigo-950/70 hover:bg-indigo-900 border border-indigo-400/40 text-indigo-300 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 transition active:scale-95 cursor-pointer disabled:opacity-50"
+                          >
+                            {isRenderingSceneVideo ? (
+                              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+                            ) : (
+                              <RefreshCw className="w-3 h-3 text-indigo-400" />
+                            )}
+                            <span>{isRenderingSceneVideo ? 'Animating...' : (activeProject.project_type === 'repurpose' ? (activeProject.source_video_path ? 'Slice Clip' : 'Render Mograph') : (currentScene.video_url ? 'Regen Video' : 'Animate Scene'))}</span>
+                          </button>
+                        </div>
                       </div>
 
                       <textarea
@@ -764,10 +1028,62 @@ export const StudioEditor: React.FC = () => {
                         className="w-full bg-[#0c0f18] border border-[#1f2736] rounded-xl p-2.5 text-xs text-slate-100 outline-none focus:border-indigo-400 resize-none leading-relaxed"
                       />
 
+                      {/* Manual Video Drop-in (RunPod Spot / Local MP4) */}
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); setIsDraggingVideo(true); }}
+                        onDragLeave={() => setIsDraggingVideo(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingVideo(false);
+                          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                            handleUploadSceneVideo(e.dataTransfer.files[0]);
+                          }
+                        }}
+                        onClick={() => videoFileInputRef.current?.click()}
+                        className={`border border-dashed rounded-xl p-2.5 flex flex-col items-center justify-center gap-1 transition cursor-pointer text-center ${
+                          isDraggingVideo 
+                            ? 'border-indigo-400 bg-indigo-950/40 ring-2 ring-indigo-400/30' 
+                            : 'border-[#222a3a] hover:border-indigo-400/60 bg-[#0a0d14]/70 hover:bg-[#0f1420]'
+                        }`}
+                      >
+                        <input
+                          ref={videoFileInputRef}
+                          type="file"
+                          accept="video/mp4,video/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleUploadSceneVideo(e.target.files[0]);
+                            }
+                          }}
+                        />
+
+                        {isUploadingVideo ? (
+                          <div className="flex items-center gap-2 py-1 text-indigo-300 text-xs font-semibold">
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping" />
+                            <span>Uploading & Slotting Scene Video...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-1.5 text-slate-300 text-[11px] font-medium">
+                              <UploadCloud className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Drop RunPod / Spot Instance MP4 here</span>
+                              <span className="text-[10px] text-slate-500">(or click to browse)</span>
+                            </div>
+                            <span className="text-[9px] text-slate-400">
+                              Generate on RunPod ComfyUI → Drop MP4 here to save API cost
+                            </span>
+                          </>
+                        )}
+                      </div>
+
                       {currentScene.video_url && (
-                        <div className="flex items-center gap-2 pt-1 border-t border-[#1f2736]/60">
+                        <div className="flex items-center justify-between pt-1 border-t border-[#1f2736]/60">
                           <span className="text-[10px] text-cyan-400 flex items-center gap-1 font-semibold">
-                            <CheckCircle2 className="w-3 h-3" /> Video Clip Rendered
+                            <CheckCircle2 className="w-3 h-3" /> Scene Video Active
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-mono">
+                            {currentScene.actual_video_duration ? `${currentScene.actual_video_duration.toFixed(1)}s` : '5.0s'}
                           </span>
                         </div>
                       )}

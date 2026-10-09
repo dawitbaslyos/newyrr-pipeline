@@ -168,40 +168,61 @@ export const NewDraftModal: React.FC = () => {
             </div>
 
             {/* Visual Style Selection */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Art Direction Style
-              </label>
-              <select
-                value={artStyle}
-                onChange={(e) => setArtStyle(e.target.value)}
-                className="w-full bg-[#07090e] border border-[#1f2736] text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-cyan-400 cursor-pointer"
-              >
-                <optgroup label="Cinematic & Photography">
-                  <option value="photo_35mm">📸 35mm Photography (Kodak Realism)</option>
-                  <option value="photo_surveillance">📸 Surveillance Camera (CCTV Mystery)</option>
-                  <option value="photo_wes_anderson">📸 Wes Anderson (Pastel Symmetry)</option>
-                </optgroup>
-                <optgroup label="3D Render & Animation">
-                  <option value="render_unreal">🧊 Unreal Engine 5 (Raytraced Lumen)</option>
-                  <option value="render_spiderverse">🧊 Spider-Verse (Halftone Kinetic)</option>
-                  <option value="render_coraline">🧊 Coraline Stop-Motion (Tactile Macro)</option>
-                  <option value="design_lego_hybrid">🧱 LEGO Minifigure & Set Style</option>
-                  <option value="design_minecraft">⛏️ Minecraft Voxel Cinematic</option>
-                </optgroup>
-                <optgroup label="Graphic & Comic Art">
-                  <option value="design_butcher_billy">🎨 Butcher Billy (Punk Pop Graphic)</option>
-                  <option value="comic_franco_belgian">📖 Franco-Belgian Comic (Moebius Line)</option>
-                  <option value="comic_hellboy">📖 Hellboy Style (Mignola Noir)</option>
-                  <option value="comic_vintage">📖 Vintage 1970s Comic</option>
-                  <option value="digital_xray">🩻 X-Ray Forensic Glow</option>
-                  <option value="cover_gta_v">🎮 GTA V Polished Cover Art</option>
-                  <option value="paint_tenebrism">🖌️ Tenebrism (Dramatic Chiaroscuro)</option>
-                  <option value="toon_rick_and_morty">🛸 Rick and Morty Sci-Fi Cartoon</option>
-                  <option value="toon_doodle_minimal">✏️ Minimalist Doodle (Practical Psychology)</option>
-                </optgroup>
-              </select>
-            </div>
+            {studioMode === 'repurpose' ? (
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Visual Engine Treatment</span>
+                  <span className="text-[10px] text-emerald-400 font-medium">Zero AI Diffusion Credits</span>
+                </label>
+                <select
+                  value={artStyle}
+                  onChange={(e) => setArtStyle(e.target.value)}
+                  className="w-full bg-[#07090e] border border-[#1f2736] text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-indigo-400 cursor-pointer"
+                >
+                  <option value="video_slice_kinetic">✂️ Smart Source Slicing + Punch-In (Reference Video Footage)</option>
+                  <option value="vector_explainer">📐 SVG-ORA Modular Vector Graphics (Code Explainer)</option>
+                  <option value="motion_canvas">🎨 Motion Canvas Kinetic Infographic (Zero Diffusion)</option>
+                </select>
+                <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                  Diffusion image models (Flux, Unreal Engine, 35mm) are bypassed in Repurpose mode.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Art Direction Style
+                </label>
+                <select
+                  value={artStyle}
+                  onChange={(e) => setArtStyle(e.target.value)}
+                  className="w-full bg-[#07090e] border border-[#1f2736] text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-cyan-400 cursor-pointer"
+                >
+                  <optgroup label="Cinematic & Photography">
+                    <option value="photo_35mm">📸 35mm Photography (Kodak Realism)</option>
+                    <option value="photo_surveillance">📸 Surveillance Camera (CCTV Mystery)</option>
+                    <option value="photo_wes_anderson">📸 Wes Anderson (Pastel Symmetry)</option>
+                  </optgroup>
+                  <optgroup label="3D Render & Animation">
+                    <option value="render_unreal">🧊 Unreal Engine 5 (Raytraced Lumen)</option>
+                    <option value="render_spiderverse">🧊 Spider-Verse (Halftone Kinetic)</option>
+                    <option value="render_coraline">🧊 Coraline Stop-Motion (Tactile Macro)</option>
+                    <option value="design_lego_hybrid">🧱 LEGO Minifigure & Set Style</option>
+                    <option value="design_minecraft">⛏️ Minecraft Voxel Cinematic</option>
+                  </optgroup>
+                  <optgroup label="Graphic & Comic Art">
+                    <option value="design_butcher_billy">🎨 Butcher Billy (Punk Pop Graphic)</option>
+                    <option value="comic_franco_belgian">📖 Franco-Belgian Comic (Moebius Line)</option>
+                    <option value="comic_hellboy">📖 Hellboy Style (Mignola Noir)</option>
+                    <option value="comic_vintage">📖 Vintage 1970s Comic</option>
+                    <option value="digital_xray">🩻 X-Ray Forensic Glow</option>
+                    <option value="cover_gta_v">🎮 GTA V Polished Cover Art</option>
+                    <option value="paint_tenebrism">🖌️ Tenebrism (Dramatic Chiaroscuro)</option>
+                    <option value="toon_rick_and_morty">🛸 Rick and Morty Sci-Fi Cartoon</option>
+                    <option value="toon_doodle_minimal">✏️ Minimalist Doodle (Practical Psychology)</option>
+                  </optgroup>
+                </select>
+              </div>
+            )}
 
             {/* TTS Voice Selection */}
             <div className="flex flex-col gap-1">
@@ -213,6 +234,12 @@ export const NewDraftModal: React.FC = () => {
                 onChange={(e) => setVoice(e.target.value)}
                 className="w-full bg-[#07090e] border border-[#1f2736] text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-cyan-400 cursor-pointer"
               >
+                <optgroup label="Microsoft Edge Neural (100% Free • High-Fidelity)">
+                  <option value="en-US-ChristopherNeural">Christopher (Natural Documentary Male)</option>
+                  <option value="en-US-GuyNeural">Guy (Casual YouTube Creator Male)</option>
+                  <option value="en-US-JennyNeural">Jenny (Expressive Narrative Female)</option>
+                  <option value="en-US-AriaNeural">Aria (High-Paced Informative Female)</option>
+                </optgroup>
                 <optgroup label="Google Gemini Flash (OpenRouter)">
                   <option value="Charon">Charon (Deep Documentary • Authoritative)</option>
                   <option value="Puck">Puck (Fast Storyteller • Viral Pacing)</option>
@@ -223,12 +250,6 @@ export const NewDraftModal: React.FC = () => {
                 <optgroup label="Deepgram Flux (OpenRouter Free)">
                   <option value="flux-cliff-en">Flux Cliff (Gritty Baritone Narrator)</option>
                   <option value="flux-perseus-en">Flux Perseus (Dynamic Explainer)</option>
-                </optgroup>
-                <optgroup label="Microsoft Edge Neural (Free High-Fidelity)">
-                  <option value="en-US-ChristopherNeural">Christopher (Natural Documentary)</option>
-                  <option value="en-US-GuyNeural">Guy (Casual YouTube Creator)</option>
-                  <option value="en-US-JennyNeural">Jenny (Expressive Narrative Female)</option>
-                  <option value="en-US-AriaNeural">Aria (High-Paced Informative Female)</option>
                 </optgroup>
               </select>
             </div>
@@ -246,8 +267,17 @@ export const NewDraftModal: React.FC = () => {
                 disabled={isWriting}
                 className="bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs px-4 py-2 rounded-xl transition shadow active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{isWriting ? 'Writing Screenplay...' : 'Create Draft'}</span>
+                {isWriting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Writing Screenplay & Pacing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Create Draft</span>
+                  </>
+                )}
               </button>
             </div>
           </form>

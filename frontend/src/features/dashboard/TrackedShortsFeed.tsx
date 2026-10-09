@@ -11,7 +11,6 @@ import {
   Flame, 
   Calendar, 
   ChevronDown, 
-  X,
   Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +25,6 @@ export const TrackedShortsFeed: React.FC<TrackedShortsFeedProps> = ({
   onSelectChannelHandle,
 }) => {
   const { 
-    trackedChannels, 
     setModal,
     shortsFeed,
     isShortsLoading,
@@ -63,10 +61,6 @@ export const TrackedShortsFeed: React.FC<TrackedShortsFeedProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleClearChannelFilter = () => {
-    selectFilter(null);
-  };
-
   const handleRecreate = (short: ShortFeedItem) => {
     // Strip emojis or extra hashtags for cleaner topic prompt
     const cleanTitle = short.title
@@ -86,10 +80,6 @@ export const TrackedShortsFeed: React.FC<TrackedShortsFeedProps> = ({
         (s) => s.channel_handle?.toLowerCase().trim() === activeChannelFilter.toLowerCase().trim()
       )
     : shortsFeed;
-
-  const activeSoloChannel = trackedChannels.find(
-    (c) => c.handle.toLowerCase().trim() === activeChannelFilter?.toLowerCase().trim()
-  );
 
   const formatRelativeTime = (isoString?: string) => {
     if (!isoString) return '';
@@ -122,20 +112,6 @@ export const TrackedShortsFeed: React.FC<TrackedShortsFeedProps> = ({
           <span className="text-[10px] text-slate-500 font-mono">
             {filteredItems.length} posts
           </span>
-
-          {/* Active Solo Channel Filter Indicator */}
-          {activeSoloChannel && (
-            <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 px-2 py-0.5 rounded-full text-[11px] font-semibold animate-in fade-in zoom-in-95">
-              <span>Solo: <strong>{activeSoloChannel.name}</strong></span>
-              <button
-                onClick={handleClearChannelFilter}
-                className="w-3.5 h-3.5 rounded-full hover:bg-cyan-500/20 text-cyan-400 flex items-center justify-center cursor-pointer transition active:scale-90"
-                title="Clear filter (show all channels)"
-              >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Right: Format Segmented Trigger + Sort Dropdown + Refresh */}
@@ -265,16 +241,16 @@ export const TrackedShortsFeed: React.FC<TrackedShortsFeedProps> = ({
         <div className="rounded-2xl bg-[#0d121c] border border-[#1f2736] p-8 text-center flex flex-col items-center justify-center gap-2">
           <Film className="w-8 h-8 text-slate-600 mb-1" />
           <p className="text-sm font-semibold text-slate-300">
-            {activeSoloChannel ? `No posts found for ${activeSoloChannel.name}` : 'No inspiration posts found'}
+            {activeChannelFilter ? 'No posts found for this channel' : 'No inspiration posts found'}
           </p>
           <p className="text-xs text-slate-500">
-            {activeSoloChannel 
-              ? 'Try clearing the solo filter or hit the refresh button to re-fetch.'
+            {activeChannelFilter 
+              ? 'Try selecting all channels or hit the refresh button to re-fetch.'
               : 'Hit the refresh button to re-fetch the latest channel feeds.'}
           </p>
-          {activeSoloChannel && (
+          {activeChannelFilter && (
             <button
-              onClick={handleClearChannelFilter}
+              onClick={() => selectFilter(null)}
               className="mt-2 text-xs text-cyan-400 hover:underline cursor-pointer"
             >
               Show all tracked channels

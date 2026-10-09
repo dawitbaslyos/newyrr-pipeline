@@ -178,8 +178,8 @@ class CompetitorTracker:
                 continue
 
             cached_entry = cache.get(handle, {})
-            # Refresh if older than 3 hours or force
-            if not force and cached_entry and (now - cached_entry.get("updated_at", 0) < 10800):
+            # Refresh if older than 3 hours or force or if videos list is empty
+            if not force and cached_entry and cached_entry.get("videos") and (now - cached_entry.get("updated_at", 0) < 10800):
                 results[handle] = cached_entry.get("videos", [])
                 continue
 

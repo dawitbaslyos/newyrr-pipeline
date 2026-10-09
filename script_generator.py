@@ -5,6 +5,7 @@ import requests
 from typing import Dict, Any, Optional
 from config import Config
 from youtube_analytics import YouTubeAnalyticsManager
+from jev_decision_engine import jev_engine
 
 # ─────────────────────────────────────────────────────────────────────────────
 # THE POV ESCALATOR & FOCAL-POINT STORYTELLING ENGINE
@@ -54,21 +55,56 @@ Do NOT write third-person Wikipedia summaries. You MUST use active immersion and
 * Zero exclamation marks.
 * Cold, relentless, intelligent, authoritative delivery (150–200 WPM cadence).
 
-### 3. THE VISUAL ENGINE DIRECTIVES: SINGLE TACTILE FOCAL POINT
-Every scene's visual prompt MUST enforce the **Single Focal Point Rule** (proven by @zackdfilms and @LoadedDiceShorts):
-- **Isolate ONE Central Focal Subject**: Every shot must feature exactly ONE physical object, character action, or organ interaction in razor-sharp focus.
-- **Zero Visual Clutter**: BANNED: wide chaotic crowd shots with multiple competing elements, messy rooms, or generic decorative backgrounds.
-- **Extreme Subject Isolation**: Shallow depth of field (bokeh background), soft tactile ambient lighting, vertical 9:16 mobile framing.
-- **Action-State Synchrony**: The visual must physically demonstrate the EXACT verb or physical friction spoken in that beat (e.g. white suture thread pulling skin edges, surveillance monitor displaying suspect dossier, police car smashing banquet wall).
+### 3. CINEMATOGRAPHY & STORYBOARDING BLUEPRINT:
+You are not just writing text; you are the **Director of Photography** and **Lead Storyboard Artist**.
+DO NOT generate repetitive extreme macro close-ups for every scene!
+A watchable, viral Short tells a dynamic story through intentional shot progression:
 
-### 4. KEYFRAME PROMPT ARCHITECTURE ('flux_image_prompt'):
-- **Formula**: `[Macro / Extreme Close-Up / Framing] centered strictly on [Single Focal Subject performing this beat's kinetic physical action], [soft blurred minimalist background], [lighting signature]. Single clear central focal point, extreme subject isolation, shallow depth of field, zero visual clutter, clean vertical 9:16 mobile composition.`
-- **BANNED BUZZWORDS**: NEVER write "hyperrealistic", "4k", "trending on artstation", "halftone patterns", "abstract glowing lines", or meta phrases like "prompt for flux". Keep it purely physical and tangible.
+- **Scene 1 (The Hook & Establishing World - Medium or Wide-Medium Shot)**:
+  * MUST establish the **Main Character or Protagonist** in their authentic atmospheric environment or dilemma.
+  * Example: If the video is about medieval teeth cleaning, Scene 1 MUST show a grubby medieval peasant sitting on a rustic bench in a candlelit apothecary, clutching his jaw in agony with relatable facial expression.
+  * Instantly connects with human curiosity, humor, and world-building.
 
-### 5. MOTION GUIDANCE ('minimax_motion_prompt'):
-- Direct the **physical kinetics of the single focal subject**, NOT the camera.
-- **Formula**: `The [single focal subject] [actively physically deforms / breaks / releases fluid / moves with momentum], [secondary physical particle/fluid reaction], fixed static camera frame.`
-- **STRICT PROHIBITION**: NEVER include timestamps ("At 0.00 seconds", "[00:15]") or camera panning/zooming.
+- **Scene 2 (The Apparatus / Inciting Encounter - Medium Close-Up)**:
+  * Frames the character interacting with, or recoiling from, the bizarre tool, object, or antagonist (e.g. the grim barber-surgeon presenting a rusted iron scraper).
+
+- **Scene 3 (The Friction / Tactical Macro - Close-Up / Macro)**:
+  * NOW zoom into the intense tactile friction, contact, or scientific mechanism (the rusted iron tool scraping yellowed calcified enamel, or acidic bubbles dissolving bone).
+
+- **Scene 4 (The Reaction / Breaking Point - Medium Dynamic Reaction)**:
+  * Captures the character's visceral reaction, comedic shock, or catastrophic material failure.
+
+- **Scene 5+ (The Climax & Seamless Loop - Medium / Wide Resolution)**:
+  * Delivers the surprising conclusion or ironic twist, cleanly framing the resolution and setting up the infinite grammatical loop!
+
+### 4. THE SINGLE-SUBJECT / SINGLE-REALITY LAW (MANDATORY CONTINUITY):
+- **Master Protagonist & World Lock**: Scene 1 establishes the **Master Visual Anchor** (the exact recurring character, physical features, hair, wardrobe, and atmospheric setting).
+- **Absolute Style & Identity Stability**: In Scenes 2 to N, you MUST PRESERVE the exact same character and world!
+  * NEVER mutate between visual styles mid-video (e.g. do NOT morph from 3D CGI Unreal render into a 2D Pixar cartoon or medical stock X-ray void).
+  * If the video explains bodily mechanics (e.g. knuckle cracking, stitches, swallowing), maintain the SAME protagonist in the SAME room performing the action, reacting, or receiving the procedure.
+- **Continuity Prompt Anchor Formula (Scenes 2 to N)**:
+  Every `flux_image_prompt` for Scene 2, 3, 4, etc. MUST explicitly begin with:
+  `"Featuring the same character ({{master_subject}}) in {{environment}}: [shot type and starting pose/interaction], clean 9:16 vertical composition..."`
+
+### 5. KEYFRAME PROMPT ARCHITECTURE ('flux_image_prompt'):
+- **The Storyboard Opening Rule**: This image prompt is the **STARTING POSE (at t=0)** of the shot.
+- It must be a poised, beautifully composed still frame that the video AI model can effortlessly animate.
+- **BANNED IN STILLS**: NEVER describe mid-air frozen motion blur, flying debris frozen in time, disembodied floating objects without an actor, text overlays, subtitles, or split-screens.
+- Focus on ONE clear action/interaction at a time with clean composition and strong character readability.
+- **Pacing & Length**: Keep each image prompt concise, precise, and punchy (25–40 words following the formula: shot type + character in starting pose + setting + lighting). Do NOT write bloated paragraphs.
+
+### 6. MOTION GUIDANCE ('minimax_motion_prompt'):
+- This prompt acts as the **Video Animator & Director**. It tells the video model what physical kinetics begin to unfold FROM the starting keyframe.
+- **Formula**: `[Character / Subject] [performs specific kinetic movement, changes facial expression, or operates object], [environmental reaction or subtle camera tracking], cinematic motion momentum.`
+- **STRICT PROHIBITION**: NEVER include timestamps ("At 0.00 seconds", "[00:15]") or static freezes.
+
+### 7. DYNAMIC SCENE PACING:
+- Tailor the scene count (typically **4 to 7 scenes**) to match the narrative tension and escalation.
+- Target short total runtime: 30 to 55 seconds.
+
+### 8. STRICT JSON HYGIENE (CRITICAL):
+- Never insert unescaped double quotes inside strings. Always use single quotes ('like this') if you must quote a term.
+- Never include unescaped raw newlines inside string values.
 
 ---
 
@@ -77,60 +113,65 @@ You MUST output ONLY valid JSON matching this exact schema:
   "title": "5-7 word compelling title with one relevant emoji",
   "hook": "Opening hook line from Scene 1",
   "master_visual_bible": {{
-    "master_subject": "Precise description of the single persistent focal subject/character/organ",
-    "environment": "Unified spatial background and setting",
-    "color_palette": "Specific 3-color harmony and lighting tone"
+    "master_subject": "Precise description of the recurring character/protagonist, physical appearance, and clothing",
+    "environment": "Unified atmospheric setting across scenes",
+    "color_palette": "Specific color harmony and cinematic lighting tone"
   }},
-  "loop_connection": "Explanation of how Scene 5 grammatically flows into Scene 1",
+  "loop_connection": "Explanation of how the final scene grammatically bridges back to Scene 1",
   "scenes": [
     {{
       "scene_number": 1,
       "escalation_level": "Level 1: The Setup & Immersion Hook",
-      "focal_point": "Single physical subject/interaction being captured in extreme clarity",
+      "shot_type": "Medium Establishing Shot",
+      "focal_point": "Character in starting pose within environment",
       "duration_seconds": 5,
       "narration": "12-16 words of immersive second-person or visceral hook narration",
-      "flux_image_prompt": "Macro/Framing shot centered strictly on [Single Focal Subject], soft blurred background, clean lighting. Single clear central focal point, extreme subject isolation, shallow depth of field, zero clutter, 9:16 vertical composition...",
-      "minimax_motion_prompt": "Physical kinetic momentum and material deformation of the single focal subject, fixed static camera frame...",
+      "flux_image_prompt": "Medium shot of [Character in starting pose] in [Atmospheric setting], [Lighting]. Clean 9:16 vertical composition...",
+      "minimax_motion_prompt": "The character [performs starting kinetic movement / expresses emotion], cinematic motion...",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 2,
       "escalation_level": "Level 2: Ground Reality & First Friction",
-      "focal_point": "Single physical subject/interaction showing first sign of tension",
+      "shot_type": "Medium Close-Up",
+      "focal_point": "Character interacting with tool/apparatus",
       "duration_seconds": 5,
-      "narration": "12-16 words explaining the initial mechanism or first suspicion",
-      "flux_image_prompt": "Clean cutaway shot maintaining the exact single focal subject in extreme clarity...",
-      "minimax_motion_prompt": "Physical kinetic action of the focal subject, fixed static camera frame...",
+      "narration": "12-16 words introducing the bizarre mechanism or apparatus",
+      "flux_image_prompt": "Medium close-up maintaining [Character] interacting with [Tool/Apparatus]...",
+      "minimax_motion_prompt": "Character kinetic interaction with tool, fixed cinematic frame...",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 3,
       "escalation_level": "Level 3: The Stakes Escalator Spike",
-      "focal_point": "Single physical subject/interaction where pressure doubles",
+      "shot_type": "Close-Up / Tactical Macro",
+      "focal_point": "Tactile friction or mechanism point",
       "duration_seconds": 5,
-      "narration": "12-16 words on the escalating crisis, surveillance, or biological cascade",
-      "flux_image_prompt": "Extreme macro or dramatic framing isolating the pressure point of the focal subject...",
-      "minimax_motion_prompt": "Physical fluid or mechanical reaction of the focal subject, fixed static camera frame...",
+      "narration": "12-16 words on the escalating physical friction or reaction",
+      "flux_image_prompt": "Tactile close-up isolating the physical friction point...",
+      "minimax_motion_prompt": "Physical kinetic reaction and deformation, cinematic motion...",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 4,
       "escalation_level": "Level 4: The Breaking Point",
-      "focal_point": "Single physical subject/interaction at peak tension or critical threshold",
+      "shot_type": "Medium Dynamic Reaction",
+      "focal_point": "Character reaction or catastrophic threshold",
       "duration_seconds": 5,
-      "narration": "12-16 words on the breaking point or critical dilemma",
-      "flux_image_prompt": "High-contrast dramatic shot maintaining subject continuity and intense focal clarity...",
-      "minimax_motion_prompt": "Kinetic reaction or physical threshold event, fixed static camera frame...",
+      "narration": "12-16 words on the breaking point or dramatic reaction",
+      "flux_image_prompt": "Medium dynamic shot of [Character] in shock/reaction...",
+      "minimax_motion_prompt": "Dynamic physical reaction and recoil, cinematic frame...",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 5,
-      "escalation_level": "Level 5: The Cherry on Top Payoff",
-      "focal_point": "Single physical subject/interaction revealing the final payoff",
+      "escalation_level": "Level 5: The Dopamine Payoff",
+      "shot_type": "Medium Punchline / Loop",
+      "focal_point": "Final resolution framing",
       "duration_seconds": 5,
-      "narration": "12-16 words revealing the paradoxical twist and ending on the infinite loop bridge",
-      "flux_image_prompt": "Final resolution framing of the single focal subject in clean composition...",
-      "minimax_motion_prompt": "Final physical momentum completing the loop, fixed static camera frame...",
+      "narration": "12-16 words revealing the paradoxical twist and ending on the loop bridge",
+      "flux_image_prompt": "Final resolution framing of [Character] in environment...",
+      "minimax_motion_prompt": "Final physical momentum completing the loop, cinematic motion...",
       "sfx_cue": "Specific tactile sound design cue"
     }}
   ]
@@ -203,6 +244,7 @@ class ScriptGenerator:
 
         # Fetch performance intelligence
         analytics_context = self.analytics.get_prompt_context(handle)
+        comp_context = ""
         try:
             from competitor_tracker import competitor_tracker
             from channel_manager import channel_mgr
@@ -211,6 +253,14 @@ class ScriptGenerator:
             full_context = f"{analytics_context}\n\n{comp_context}"
         except Exception:
             full_context = analytics_context
+
+        # Call Jev System-1 Decision Engine for sub-second topic analysis and pacing
+        jev_meta = {}
+        try:
+            jev_meta = jev_engine.evaluate_topic_and_pacing(topic, comp_context)
+            print(f"[Script Generator] Jev System-1 Decision: Archetype={jev_meta.get('recommended_archetype')}, Scenes={jev_meta.get('recommended_scene_count')}, WPM={jev_meta.get('target_wpm')}, Score={jev_meta.get('virality_score')}")
+        except Exception as ex:
+            print(f"[Script Generator] Jev Decision Engine bypassed: {ex}")
 
         art_key = art_style or getattr(Config, "ACTIVE_ART_STYLE", "render_unreal")
         clio_info = getattr(Config, "CLIO_STYLES", {}).get(art_key)
@@ -250,10 +300,21 @@ class ScriptGenerator:
             except Exception as e:
                 print(f"[Script Generator] Reference ingest warning: {e}")
 
+        scene_count = jev_meta.get("recommended_scene_count", 5) if jev_meta else 5
+        target_wpm = jev_meta.get("target_wpm", 180) if jev_meta else 180
+        hook_angle = jev_meta.get("hook_angle", "Visceral role or bodily stakes immersion") if jev_meta else "Visceral role or bodily stakes immersion"
+
+        jev_brief = (
+            f"\n\n## JEV SYSTEM-1 DIRECTIVES:\n"
+            f"- Recommended Scene Count: {scene_count} scenes (scale narrative escalation smoothly across {scene_count} scenes)\n"
+            f"- Target Spoken Cadence: {target_wpm} WPM (~12-16 words per scene)\n"
+            f"- Strategic Hook Angle: {hook_angle}\n"
+        )
+
         user_prompt = (
-            f"Produce an elite 5-scene viral Short for this topic: '{topic}'.\n"
-            f"Enforce the POV Escalator 5-level stakes ladder, strict single tactile focal points, "
-            f"and uncluttered 9:16 vertical composition.{ref_context}"
+            f"Produce an elite {scene_count}-scene viral Short for this topic: '{topic}'.\n"
+            f"Enforce the POV Escalator stakes ladder, Single-Subject / Single-Reality Law (Scene 1 defines protagonist and setting; Scenes 2-{scene_count} preserve them identically), "
+            f"and uncluttered 9:16 vertical composition.{jev_brief}{ref_context}"
         )
 
         headers = {
@@ -270,12 +331,21 @@ class ScriptGenerator:
                 {"role": "user", "content": user_prompt}
             ],
             "temperature": 0.7,
-            "max_tokens": 2048,
+            "max_tokens": 8192,
             "response_format": {"type": "json_object"}
         }
 
-        models_to_try = [self.model, "anthropic/claude-sonnet-5.5", "deepseek/deepseek-v4.1-flash", "google/gemini-3.8-flash", "openai/gpt-4o-mini"]
-        # Deduplicate models
+        # Claude 5.5 / 4.5 are prioritary master directors
+        preferred_model = self.model or getattr(Config, "OPENROUTER_MODEL", "anthropic/claude-sonnet-5.5")
+        models_to_try = [
+            preferred_model,
+            "anthropic/claude-sonnet-5.5",
+            "anthropic/claude-opus-5.5",
+            "anthropic/claude-haiku-5.5",
+            "anthropic/claude-sonnet-4.5",
+            "openai/gpt-4o-mini",
+            "google/gemini-2.5-flash"
+        ]
         seen = set()
         clean_models = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
 
@@ -293,8 +363,46 @@ class ScriptGenerator:
 
                     if res.status_code == 200:
                         data = res.json()
-                        content = data["choices"][0]["message"]["content"]
-                        script_data = json.loads(content)
+                        choices = data.get("choices", [])
+                        if not choices:
+                            continue
+                        content = choices[0].get("message", {}).get("content")
+                        if not content:
+                            continue
+
+                        cleaned = content.strip()
+                        if cleaned.startswith("```json"):
+                            cleaned = cleaned[7:]
+                        elif cleaned.startswith("```"):
+                            cleaned = cleaned[3:]
+                        if cleaned.endswith("```"):
+                            cleaned = cleaned[:-3]
+                        cleaned = cleaned.strip()
+
+                        s_idx = cleaned.find("{")
+                        e_idx = cleaned.rfind("}")
+                        if s_idx != -1 and e_idx != -1:
+                            cleaned = cleaned[s_idx:e_idx+1]
+
+                        try:
+                            script_data = json.loads(cleaned, strict=False)
+                        except Exception:
+                            try:
+                                import dirtyjson
+                                script_data = dict(dirtyjson.loads(cleaned))
+                                if "scenes" in script_data:
+                                    script_data["scenes"] = [dict(s) for s in script_data["scenes"]]
+                                if "master_visual_bible" in script_data:
+                                    script_data["master_visual_bible"] = dict(script_data["master_visual_bible"])
+                            except Exception:
+                                # Attempt repair of unescaped quotes or trailing commas
+                                repaired = re.sub(r',\s*([\]}])', r'\1', cleaned)
+                                try:
+                                    script_data = json.loads(repaired, strict=False)
+                                except Exception:
+                                    repaired2 = re.sub(r'[\r\n\t]+', ' ', repaired)
+                                    script_data = json.loads(repaired2, strict=False)
+
                         self._sanitize_prompts(script_data)
                         return script_data
                     else:
@@ -327,7 +435,11 @@ class ScriptGenerator:
             "hyperrealistic"
         ]
 
-        for scene in script_data.get("scenes", []):
+        master_bible = script_data.get("master_visual_bible", {})
+        master_subject = master_bible.get("master_subject", "").strip()
+        master_env = master_bible.get("environment", "").strip()
+
+        for idx, scene in enumerate(script_data.get("scenes", [])):
             # 1. Clean Keyframe Image Prompt
             f_prompt = scene.get("flux_image_prompt", "")
             for phrase in forbidden_image_phrases:
@@ -336,6 +448,14 @@ class ScriptGenerator:
             f_prompt = re.sub(r'^[,.\s]+', '', f_prompt)
             if f_prompt and f_prompt[0].islower():
                 f_prompt = f_prompt[0].upper() + f_prompt[1:]
+
+            # 1b. Single-Subject / Continuity Enforcement for Scenes 2 to N
+            if idx > 0 and master_subject:
+                lower_p = f_prompt.lower()
+                # Check if prompt already establishes protagonist continuity
+                if "same character" not in lower_p and "same protagonist" not in lower_p and master_subject.lower()[:15] not in lower_p:
+                    f_prompt = f"Featuring the same character ({master_subject}) in {master_env}: {f_prompt}"
+
             scene["flux_image_prompt"] = f_prompt
 
             # 2. Clean Motion Prompt: Strip timestamps and camera panning
@@ -353,6 +473,30 @@ class ScriptGenerator:
             narration = scene.get("narration", "")
             narration = narration.replace("!", ".").replace("  ", " ").strip()
             scene["narration"] = narration
+
+        # Jev System-1 QC Continuity Gatekeeper & Auto-Healer
+        if master_subject:
+            try:
+                continuity_result = jev_engine.verify_continuity_gate(master_bible, script_data.get("scenes", []))
+                script_data["continuity_qc"] = continuity_result
+                print(f"[Script Generator] Jev Continuity Gate Result: {continuity_result.get('continuity_passed')} (flagged: {continuity_result.get('flagged_scenes')})")
+
+                # If Jev flagged any scene for continuity deviation, auto-heal its prompt
+                flagged = continuity_result.get("flagged_scenes", [])
+                if flagged and not continuity_result.get("continuity_passed"):
+                    for s_num in flagged:
+                        for sc in script_data.get("scenes", []):
+                            if sc.get("scene_number") == s_num:
+                                orig = sc.get("flux_image_prompt", "")
+                                # Ensure prompt strictly re-anchors the protagonist and room without genre shifting
+                                if "same character" not in orig.lower():
+                                    sc["flux_image_prompt"] = (
+                                        f"Featuring the same character ({master_subject}) in {master_env}, "
+                                        f"maintaining strict single-reality visual continuity: {orig}"
+                                    )
+                                    print(f"[Script Generator] Jev Auto-Healed Scene {s_num} for continuity.")
+            except Exception as e:
+                print(f"[Script Generator] Continuity QC check bypassed: {e}")
 
     def _get_fallback_script(self, topic: str, archetype: str) -> Dict[str, Any]:
         """Provides instant high-quality zero-API fallback scripts matching the archetype."""

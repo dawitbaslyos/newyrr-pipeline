@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Mograph Scene</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #07090e;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Impact", sans-serif;
+    }
+
+    #stage {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 45%, #131c2e 0%, #07090e 70%);
+    }
+
+    /* Ambient Glow */
+    .glow-orb {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+    }
+
+    /* SVG Diagram Container */
+    #svg-container {
+      width: 580px;
+      height: 580px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Kinetic Headline Badge */
+    #badge-container {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      z-index: 20;
+    }
+
+    .pill-tag {
+      background: rgba(0, 242, 254, 0.12);
+      border: 2px solid rgba(0, 242, 254, 0.4);
+      color: #00f2fe;
+      padding: 10px 28px;
+      border-radius: 9999px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .main-title {
+      color: #ffffff;
+      font-size: 64px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.15;
+      max-width: 860px;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      text-transform: uppercase;
+    }
+
+    .highlight-text {
+      color: #ffd000;
+    }
+  </style>
+
+  <!-- Load Local GSAP -->
+  <script src="./node_modules/gsap/dist/gsap.min.js"></script>
+</head>
+<body>
+  <div id="stage">
+    <div class="glow-orb" id="orb"></div>
+
+    <div id="svg-container">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer Rotating Radar Ring -->
+        <circle id="radar-ring" cx="100" cy="100" r="85" stroke="#1f2d45" stroke-width="4" stroke-dasharray="12 8" />
+        <circle id="core-glow" cx="100" cy="100" r="70" fill="rgba(0, 242, 254, 0.08)" stroke="#00f2fe" stroke-width="5" />
+        
+        <!-- Animated Core Pulse -->
+        <circle id="pulse-dot" cx="100" cy="100" r="30" fill="#00f2fe" />
+        
+        <!-- Diagnostic Target Lines -->
+        <line id="line-h" x1="15" y1="100" x2="185" y2="100" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" />
+        <line id="line-v" x1="100" y1="15" x2="100" y2="185" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" />
+
+        <!-- Accent Rings -->
+        <circle id="accent-ring" cx="100" cy="100" r="50" stroke="#ffd000" stroke-width="3" stroke-dasharray="6 6" />
+      </svg>
+    </div>
+
+    <div id="badge-container">
+      <div class="pill-tag" id="tag">Extreme Physics</div>
+      <h1 class="main-title" id="title">
+        The Pressure <span class="highlight-text">Multiplies 10x</span>
+      </h1>
+    </div>
+  </div>
+
+  <script>
+    // Create Deterministic GSAP Timeline
+    const tl = gsap.timeline({ paused: true });
+
+    tl.fromTo("#pulse-dot", 
+      { scale: 0.2, transformOrigin: "center center", opacity: 0 },
+      { scale: 1.2, opacity: 1, duration: 0.8, ease: "back.out(2)" }
+    )
+    .fromTo("#radar-ring", 
+      { rotation: 0, transformOrigin: "center center" },
+      { rotation: 180, duration: 3.0, ease: "none" }, 0
+    )
+    .fromTo("#accent-ring", 
+      { rotation: 0, transformOrigin: "center center" },
+      { rotation: -120, duration: 3.0, ease: "none" }, 0
+    )
+    .fromTo("#tag",
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.3
+    )
+    .fromTo("#title",
+      { y: 40, opacity: 0, scale: 0.9 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "power4.out" }, 0.5
+    )
+    .to("#pulse-dot", {
+      scale: 1.6,
+      fill: "#ffd000",
+      duration: 0.7,
+      ease: "power2.inOut",
+      yoyo: true,
+      repeat: 1
+    }, 1.2)
+    .to("#core-glow", {
+      stroke: "#ffd000",
+      duration: 0.7
+    }, 1.2);
+
+    // Global timeline seeker for headless puppeteer frame grabber
+    window.seekTimeline = function(timeSeconds) {
+      tl.seek(timeSeconds);
+    };
+
+    // Ready flag
+    window.__ready = true;
+  </script>
+</body>
+</html>

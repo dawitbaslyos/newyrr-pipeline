@@ -66,7 +66,20 @@ class AudioGenerator:
             except Exception as e:
                 print(f"[Audio Generator] OpenAI TTS error: {e}...")
 
-        # 4. Fallback timed audio
+        # 4. Edge-TTS Free Studio Narration (Christopher, Guy, etc.)
+        try:
+            from repurpose.tts import generate_narration
+            edge_voice = "christopher"
+            if voice and any(k in voice.lower() for k in ["guy", "jenny", "eric", "brian", "christopher"]):
+                edge_voice = voice.lower()
+            res = generate_narration(text, output_path, voice_key=edge_voice)
+            if res and os.path.exists(res) and os.path.getsize(res) > 1000:
+                print(f"[Audio Generator] Fallback to Edge-TTS ({edge_voice}) succeeded!")
+                return res
+        except Exception as e:
+            print(f"[Audio Generator] Edge-TTS fallback warning: {e}...")
+
+        # 5. Fallback timed audio
         return self._generate_fallback_audio(text, output_path)
 
     def _call_openrouter_google_tts(self, text: str, output_path: str, model: str, voice: str) -> Optional[str]:

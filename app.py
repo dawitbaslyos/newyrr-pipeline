@@ -2,9 +2,10 @@ import os
 import json
 import time
 import shutil
+import zipfile
 from pathlib import Path
 from typing import Dict, Any, Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -87,6 +88,12 @@ class AssembleRequest(BaseModel):
 class ThumbnailRequest(BaseModel):
     project_name: str
     headline: Optional[str] = None
+
+class UpdateProjectMetadataRequest(BaseModel):
+    project_name: str
+    art_style: Optional[str] = None
+    title: Optional[str] = None
+    caption_y_percent: Optional[float] = None
 
 class AddChannelRequest(BaseModel):
     handle: str
@@ -455,6 +462,20 @@ def save_scene(req: SaveSceneRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Update project-level metadata (e.g. art direction style, title, subtitle position)
+@app.post("/api/project/update-metadata")
+def update_project_metadata(req: UpdateProjectMetadataRequest):
+    try:
+        manifest = orchestrator.update_project_metadata(
+            req.project_name,
+            art_style=req.art_style,
+            title=req.title,
+            caption_y_percent=req.caption_y_percent
+        )
+        return get_project(req.project_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Stage 3: Render Videos (Seedance 2.0 / MiniMax H3)
 @app.post("/api/project/render-videos")
 def render_videos(req: ProjectActionRequest):
@@ -463,6 +484,129 @@ def render_videos(req: ProjectActionRequest):
         return get_project(req.project_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/project/upload-scene-video")
+async def upload_scene_video(
+    project_name: str = Form(...),
+    scene_number: int = Form(...),
+    file: UploadFile = File(...)
+):
+    """
+    Manual Video Drop-In (RunPod / Local MP4):
+    Uploads a creator-generated video for a specific scene, saves it directly to
+    projects/{project_name}/scene_{num:02d}_video.mp4, updates manifest, and extracts a keyframe still.
+    """
+    project_dir = Config.PROJECTS_DIR / project_name
+    if not project_dir.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    target_video = project_dir / f"scene_{scene_number:02d}_video.mp4"
+    with open(target_video, "wb") as f:
+        content = await file.read()
+        f.write(content)
+
+    manifest_file = project_dir / "manifest.json"
+    if not manifest_file.exists():
+        raise HTTPException(status_code=404, detail="Project manifest not found")
+
+    with open(manifest_file, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    # Extract keyframe still if missing
+    still_target = project_dir / f"scene_{scene_number:02d}_flux.png"
+    if not still_target.exists():
+        cmd = [
+            "ffmpeg", "-y",
+            "-ss", "0.5",
+            "-i", str(target_video),
+            "-vframes", "1",
+            "-q:v", "2",
+            str(still_target)
+        ]
+        import subprocess
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    for scene in manifest.get("scenes", []):
+        if scene["scene_number"] == scene_number:
+            scene["video_file"] = str(target_video)
+            scene["status"] = "VIDEO_READY"
+            if still_target.exists():
+                scene["image_file"] = str(still_target)
+
+    # Check if all scenes are ready
+    if all(s.get("video_file") and Path(s["video_file"]).exists() for s in manifest.get("scenes", [])):
+        manifest["status"] = "VIDEOS_READY"
+
+    with open(manifest_file, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
+    return get_project(project_name)
+
+@app.get("/api/project/{project_name}/runpod-package")
+def get_runpod_package(project_name: str):
+    """
+    Returns structured data for batch execution on RunPod instances.
+    """
+    manifest_path = Config.PROJECTS_DIR / project_name / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    pkg = {
+        "project_name": project_name,
+        "title": manifest.get("title", ""),
+        "scenes": []
+    }
+    for s in manifest.get("scenes", []):
+        num = s["scene_number"]
+        img_name = Path(s["image_file"]).name if s.get("image_file") else f"scene_{num:02d}_flux.png"
+        pkg["scenes"].append({
+            "scene_number": num,
+            "filename": f"scene_{num:02d}_video.mp4",
+            "image_filename": img_name,
+            "image_url": f"/static_projects/{project_name}/{img_name}",
+            "motion_prompt": s.get("minimax_motion_prompt", ""),
+            "duration": s.get("duration_seconds", 5),
+            "narration": s.get("narration", "")
+        })
+    return pkg
+
+@app.get("/api/project/{project_name}/runpod-package/zip")
+def download_runpod_package_zip(project_name: str):
+    """
+    Generates a downloadable ZIP file containing all keyframe still images
+    and a motion_prompts.txt file for easy batch execution on RunPod.
+    """
+    project_dir = Config.PROJECTS_DIR / project_name
+    manifest_path = project_dir / "manifest.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Project not found")
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    zip_path = project_dir / f"{project_name}_runpod_batch.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+        txt_lines = [f"RUNPOD BATCH PACKAGE FOR: {manifest.get('title', project_name)}\n" + "="*50 + "\n"]
+        for s in manifest.get("scenes", []):
+            num = s["scene_number"]
+            prompt = s.get("minimax_motion_prompt", "")
+            img_file = s.get("image_file")
+            txt_lines.append(f"--- SCENE {num:02d} ---")
+            txt_lines.append(f"Video Output: scene_{num:02d}_video.mp4")
+            txt_lines.append(f"Duration: {s.get('duration_seconds', 5)}s")
+            txt_lines.append(f"Narration: {s.get('narration', '')}")
+            txt_lines.append(f"Motion Prompt: {prompt}\n")
+
+            if img_file and Path(img_file).exists():
+                z.write(img_file, arcname=Path(img_file).name)
+        z.writestr("motion_prompts.txt", "\n".join(txt_lines))
+
+    return FileResponse(
+        str(zip_path),
+        media_type="application/zip",
+        filename=f"{project_name}_runpod_batch.zip"
+    )
 
 # Stage 4: Assemble Final Video with Custom Caption Placement Y% and BGM
 @app.post("/api/project/assemble")

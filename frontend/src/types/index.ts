@@ -12,7 +12,15 @@ export interface Scene {
   audio_file?: string;
   audio_url?: string;
   actual_audio_duration?: number;
+  actual_video_duration?: number;
+  duration_seconds?: number;
   sfx_cue?: string;
+}
+
+export interface MasterVisualBible {
+  master_subject?: string;
+  environment?: string;
+  color_palette?: string;
 }
 
 export interface Project {
@@ -32,6 +40,8 @@ export interface Project {
   final_video_url?: string;
   deleted_at?: number;
   days_left?: number;
+  master_visual_bible?: MasterVisualBible;
+  master_anchor_image?: string;
 }
 
 export interface UserChannel {
