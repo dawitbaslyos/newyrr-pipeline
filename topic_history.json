@@ -1,5 +1,143 @@
 [
   {
+    "title": "Why Bellybuttons Collect Lint 🤔",
+    "category": "Anatomical Anomaly",
+    "hook": "Ever wondered why your bellybutton gets fuzzy?",
+    "core_mechanism": "Explores the unique structure of the navel that traps fibers from clothing due to its intricately folded shape.",
+    "visual_hook_scene": "Close-up CGI of a bellybutton collecting various fiber particles in slow motion, revealing the folds and crevices.",
+    "virality_score": 9.3,
+    "why_it_works": "Taps into an everyday mystery everyone notices but rarely understands.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "Secret Behind Elevator Close Buttons 😮",
+    "category": "Hidden Design Secret",
+    "hook": "What if that button you press does nothing?",
+    "core_mechanism": "Reveals how many elevator close buttons are placebo, designed to give passengers a sense of control.",
+    "visual_hook_scene": "3D rendering of an elevator control panel, with focus on circuit board where the button leads to nowhere.",
+    "virality_score": 9.5,
+    "why_it_works": "Challenges the viewer's confidence in everyday interactions, creating surprise.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "The Dangers of Holding a Yawn 😨",
+    "category": "Morbid Survival",
+    "hook": "Why stopping a yawn could be risky!",
+    "core_mechanism": "Explains potential jaw injuries and increased pressure in inner ears caused by suppressing yawns.",
+    "visual_hook_scene": "Cross-section 3D visualization of a person's head showing pressure buildup in the jaw and ear.",
+    "virality_score": 9.3,
+    "why_it_works": "Turns a mundane experience into a conceivable danger, playing on fear and surprise.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "Liquid Nitrogen vs. Everyday Objects 💥",
+    "category": "Material Breakdown",
+    "hook": "Watch ordinary items shatter in extreme cold!",
+    "core_mechanism": "Demonstrates the brittleness induced by rapid cooling, causing materials to fail spectacularly.",
+    "visual_hook_scene": "Slow-motion CGI of objects plunged into liquid nitrogen, followed by shattering impact.",
+    "virality_score": 9.4,
+    "why_it_works": "Delivers shock value through dramatic transformations of the familiar.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "Don't Ignore That Foot Cramp! 😰",
+    "category": "Morbid Survival",
+    "hook": "Could a simple foot cramp be a warning?",
+    "core_mechanism": "Explores the link between persistent cramps and underlying health issues such as dehydration or circulation problems.",
+    "visual_hook_scene": "Anatomical 3D rendering showing a muscle contraction and blood flow in the foot.",
+    "virality_score": 9.3,
+    "why_it_works": "Instills anxiety by revealing possible serious implications of a common discomfort.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "Extreme Pressure: Crushing Diamonds 💎",
+    "category": "Material Breakdown",
+    "hook": "Witness the force that shatters the unbreakable!",
+    "core_mechanism": "Illustrates the immense force required to crush diamonds, highlighting their crystalline structure.",
+    "visual_hook_scene": "Slow-motion CGI of a diamond subjected to extreme pressure, fracturing under hydraulic forces.",
+    "virality_score": 9.5,
+    "why_it_works": "Captures fascination through dramatic visualization of force defying expectations.",
+    "created_at": "Oct 09, 2026 - 21:11"
+  },
+  {
+    "title": "Why Soda Cans Have Dimpled Bottoms 🥫",
+    "category": "Hidden Design Secret",
+    "hook": "The bottom of a soda can looks like a weak dent, but it is actually holding back a force strong enough to burst it.",
+    "core_mechanism": "Carbonated drinks hold dissolved CO2 that pushes outward at several atmospheres of pressure. The domed bottom is a curved structure that spreads that pressure evenly across the metal like an arch in a bridge, so force travels through the curve rather than concentrating at a flat, weak edge. The same geometry helps cans stack and resist deformation, and the aluminum is thinned and shaped to keep the pressure within its tested limit.",
+    "visual_hook_scene": "A close-up 3D cutaway of an aluminum can base. Internal CO2 bubbles press outward, and the dome visibly flexes and redistributes glowing force lines along its curve while a flat-bottomed comparison can bursts.",
+    "virality_score": 8.7,
+    "why_it_works": "It hijacks an object everyone has held a thousand times and flips it into an engineering marvel, delivering an instant 'I never noticed that' moment.",
+    "created_at": "Oct 09, 2026 - 21:01"
+  },
+  {
+    "title": "Why Pill Bottles Need Two Hands 💊",
+    "category": "Hidden Design Secret",
+    "hook": "That stubborn pill cap is designed to make you fail on the first try, and it is doing it on purpose.",
+    "core_mechanism": "Child-resistant caps use a locking mechanism of internal lugs or tabs that sit against the bottle neck ring. Pushing down compresses the cap and lifts those lugs past the locking ledge, and only then can the twist rotate it free. Without pressing down first, the lugs stay trapped against the ring, so a single-hand twist simply grinds against a block.",
+    "visual_hook_scene": "A translucent 3D pill bottle cap with internal lugs visible. A finger presses down, the lugs slide up and out of their ledge, and the cap rotates while a child-sized hand demonstrates the failed single twist.",
+    "virality_score": 8.2,
+    "why_it_works": "Everyone has battled this cap, so the reveal that the struggle is intentional gives instant validation and a satisfying 'so that is how it works' payoff.",
+    "created_at": "Oct 09, 2026 - 21:01"
+  },
+  {
+    "title": "Why Bike Spokes Pull Instead Of Push 🚲",
+    "category": "Hidden Design Secret",
+    "hook": "The thin wires on a bicycle wheel are not holding the rider up by pushing; they are hanging the entire frame from above.",
+    "core_mechanism": "Bicycle wheels are built as tension structures. The spokes are pre-tightened so that they are always pulling the hub and rim together, and the rim's weight is supported by the upper spokes stretching while the lower spokes slacken. Thin spokes would buckle instantly under compression, so the whole wheel works like a suspended bridge held up by pulling forces rather than pushing ones.",
+    "visual_hook_scene": "A 3D wheel with a rider's weight pressing down on the hub. The top spokes glow and visibly stretch like taut strings, while the bottom spokes slacken, and a comparison wire bends under a simulated push.",
+    "virality_score": 8.3,
+    "why_it_works": "The intuition that thin wire should be weak collides with the reveal that it is stronger because it is pulled, creating a satisfying 'wait, how is that holding' double-take.",
+    "created_at": "Oct 09, 2026 - 21:01"
+  },
+  {
+    "title": "Why Drowning Victims Never Scream For Help 🌊",
+    "category": "Morbid Survival",
+    "hook": "The person drowning in front of you may be silently struggling right in plain sight, unable to make a single sound.",
+    "core_mechanism": "When the airway is threatened, the body's breathing reflex takes absolute priority over voluntary actions. The victim's arms press down against the water to lift the mouth for air, leaving no capacity to speak, wave, or call out. Their head often tilts back with the mouth barely clearing the surface, and the struggle appears quiet because the body is focused entirely on breathing.",
+    "visual_hook_scene": "A 3D pool cutaway showing a swimmer vertical in the water, mouth at the surface. Arms press sideways and downward with muscle highlights, while the lungs glow as oxygen runs low and the breathing reflex overrides a waving hand.",
+    "virality_score": 9.1,
+    "why_it_works": "It delivers a chilling, practical revelation that violates the Hollywood image of drowning, making viewers feel an urgent need to recognize the signs.",
+    "created_at": "Oct 09, 2026 - 21:01"
+  },
+  {
+    "title": "Why Your Tongue Glues to Freezing Metal 👅❄️",
+    "category": "Material Breakdown",
+    "hook": "Licking a freezing iron pole instantly locks your tongue in place, and pulling away rips off tissue.",
+    "core_mechanism": "Rapid thermal conductivity of iron drawing heat out of moisture 400x faster than air, flash-freezing saliva.",
+    "visual_hook_scene": "Macro 3D simulation of saliva moisture turning into ice crystals locking into metal pores within 0.1 seconds.",
+    "virality_score": 9.1,
+    "why_it_works": "Classic childhood warning with fascinating thermal physics."
+  },
+  {
+    "title": "Why Airplane Windows Have a Tiny Hole ✈️🕳️",
+    "category": "Hidden Design Secret",
+    "hook": "Every passenger window has a tiny drilled hole, and if it wasn't there, the outer glass would shatter.",
+    "core_mechanism": "Bleed hole balancing cabin atmospheric pressure against freezing low-pressure outside air.",
+    "visual_hook_scene": "3D cutaway of three-pane acrylic airplane window showing air pressure vectors flowing through the micro-orifice.",
+    "virality_score": 8.9,
+    "why_it_works": "Everyone has noticed this tiny hole on flights and wondered if it's dangerous."
+  },
+  {
+    "title": "Why UK Plugs Have a Fake Safety Pin 🔌",
+    "category": "Hidden Design Secret",
+    "hook": "The longest pin on a UK plug carries no electricity, and it's the most important one.",
+    "core_mechanism": "In a UK Type G plug, the earth pin is longer and made of plastic-sheathed or brass-reinforced material, and it exists to push open the shutters on the live and neutral sockets. The earth pin enters first and mechanically unlocks the shutters, so a child's finger, key or paperclip can't reach the live contacts, because poking one slot alone does not open it. The longer earth pin also guarantees the earth connection is made before the live pins touch, and breaks last on removal.",
+    "visual_hook_scene": "A 3D X-ray cutaway of a wall socket with glowing red live contacts hidden behind spring-loaded plastic shutters. A kid's toy key jabs into the live slot and bounces off. A plug then slides in, the longer earth pin shoves a wedge sideways, both shutters pop open in unison, and the live pins slide into the contacts.",
+    "virality_score": 8.8,
+    "why_it_works": "It's an object everyone has handled, with a hidden purpose that is easy to grasp and feels slightly like a secret defense mechanism.",
+    "created_at": "Oct 09, 2026 - 20:54"
+  },
+  {
+    "title": "Why Hyperventilating Before Diving Can Kill 🏊",
+    "category": "Morbid Survival",
+    "hook": "Breathing hard before you swim underwater makes you feel stronger, but it can switch you off without any warning.",
+    "core_mechanism": "Shallow water blackout. Hyperventilation blows off CO₂, and low CO₂ is the trigger that creates the urge to breathe. The swimmer's oxygen can then drop to unconsciousness levels before the brain feels any air hunger. As the swimmer ascends and pressure drops, oxygen partial pressure falls further and causes a sudden blackout, often with no struggle or sign of distress. The safe rule is never to hyperventilate and never to swim breath-hold alone.",
+    "visual_hook_scene": "A cross-section of a swimmer's chest in a bright blue pool, with lungs, blood and brain visible. Blue oxygen particles and red CO₂ particles are shown on twin gauges. The swimmer takes rapid breaths and the CO₂ gauge crashes toward empty. Underwater, the oxygen gauge slides down silently while the 'urge to breathe' alarm stays dark, until the brain flickers out and the swimmer drifts motionless.",
+    "virality_score": 9.4,
+    "why_it_works": "It reveals a dangerous blind spot in a common pool habit, where the body's warning system is quietly disabled, and viewers want to warn people they know.",
+    "created_at": "Oct 09, 2026 - 20:54"
+  },
+  {
     "title": "Why a Bullet Can't Pop a Water Balloon Gently",
     "category": "Extreme Physics",
     "hook": "A water balloon hangs motionless in front of a high-speed camera, and when the pin touches it, the rubber doesn't pop at the point of contact but tears outward faster than the water can fall",

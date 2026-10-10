@@ -124,10 +124,20 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             centisecs = 99
         return f"{hours}:{minutes:02d}:{secs:02d}.{centisecs:02d}"
 
+    def _get_media_duration(self, file_path: str) -> float:
+        try:
+            out = subprocess.check_output([
+                "ffprobe", "-v", "error", "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1", file_path
+            ], stderr=subprocess.DEVNULL).decode().strip()
+            return float(out)
+        except Exception:
+            return 0.0
+
     def prepare_scene_clip(self, scene: Dict[str, Any], project_dir: Path, target_w: int = 768, target_h: int = 1344) -> Path:
         """
         Prepares a standardized 768x1344 30fps clip for a scene:
-        - If video exists, muxes narration audio and standardizes format.
+        - If video exists, muxes narration audio with elastic retiming/final-frame hold (NEVER loops).
         - If video does NOT exist, creates a smooth Ken-Burns pan/zoom clip from image + audio.
         """
         num = scene["scene_number"]
@@ -140,25 +150,40 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # Case A: Video exists and is accessible
         if video_file and os.path.exists(video_file) and os.path.getsize(video_file) > 1000:
             clean_v = str(Path(video_file).resolve()).replace("\\", "/")
+            v_dur = self._get_media_duration(clean_v)
+
             if audio_file and os.path.exists(audio_file):
                 clean_a = str(Path(audio_file).resolve()).replace("\\", "/")
+
+                # Temporal Flow Architecture: ZERO looping, seamless duration matching
+                # 1. Video meets or exceeds audio duration -> clean cut at audio duration
+                if v_dur >= duration or v_dur <= 0.0:
+                    vf_filter = f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},fps=30"
+                # 2. Minor shortfall (up to 25%) -> elastic cinematic slow-motion retiming
+                elif (duration / v_dur) <= 1.25:
+                    ratio = duration / v_dur
+                    vf_filter = f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setpts={ratio:.4f}*PTS,fps=30"
+                # 3. Larger shortfall -> mild 1.15x stretch + dramatic hold on final resolved frame (NEVER snap back to frame 0)
+                else:
+                    retimed_dur = v_dur * 1.15
+                    pad_dur = max(0.5, duration - retimed_dur + 0.5)
+                    vf_filter = f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},setpts=1.15*PTS,tpad=stop_mode=clone:stop_duration={pad_dur:.2f},fps=30"
+
                 cmd = [
                     "ffmpeg", "-y",
-                    "-stream_loop", "-1",
                     "-i", clean_v,
                     "-i", clean_a,
                     "-map", "0:v:0",
                     "-map", "1:a:0",
                     "-c:v", "libx264",
                     "-preset", "veryfast",
-                    "-vf", f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,crop={target_w}:{target_h},fps=30",
+                    "-vf", vf_filter,
                     "-pix_fmt", "yuv420p",
                     "-c:a", "aac",
                     "-b:a", "192k",
                     "-ar", "44100",
                     "-ac", "2",
                     "-t", str(duration),
-                    "-shortest",
                     str(out_clip).replace("\\", "/")
                 ]
             else:

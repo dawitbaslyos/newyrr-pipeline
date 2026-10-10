@@ -440,84 +440,32 @@ class ChannelManager:
 
     def get_latest_topics(self) -> List[Dict[str, Any]]:
         history = self._load_history()
-        if history and len(history) >= 3:
+        if history and len(history) >= 6:
             return history[:6]
-        return self.suggest_topics()
+        return self.suggest_topics(refresh=True)
 
-    def suggest_topics(self) -> List[Dict[str, str]]:
+    def suggest_topics(self, refresh: bool = False) -> List[Dict[str, Any]]:
+        """
+        Generates brand new, high-retention topics using TopicIntelligenceEngine (Claude 5.5 + JEV).
+        Enforces persistent exclusion of all past topics to guarantee 100% fresh concepts on every refresh.
+        """
         data = self._load_channels()
         active = data.get("active_channel") or {}
         handle = active.get("handle", "@Newyrr")
-        name = active.get("name", "Newyr")
-        niche = active.get("niche", "Shorts science. How and what if moments.")
-        handle_key = handle.lower().strip()
-
-        profile = CHANNEL_PROFILES.get(handle_key) or CHANNEL_PROFILES["@newyrr"]
-        fallback = profile.get("default_topics", CHANNEL_PROFILES["@newyrr"]["default_topics"])
-
-        if not Config.OPENROUTER_API_KEY:
-            self.save_topic_to_history(fallback)
-            return fallback
-
-        # Synthesize real data from both tracks
-        tracked_channels = self.get_data().get("tracked_channels", [])
-        competitor_context = competitor_tracker.get_competitor_context_for_llm(tracked_channels)
-        performance_context = youtube_analytics.get_prompt_context(handle)
-
-        prompt = f"""You are an elite viral YouTube Shorts director and narrative architect for {name} ({handle}).
-Channel Theme: '{niche}'.
-Style Benchmark: Zack D. Films, Veritasium, The Action Lab.
-
-{performance_context}
-
-{competitor_context}
-
-MANDATORY VIRAL TOPIC CRITERIA:
-Do NOT generate generic trivia, broad school science, or bland "did you know" facts.
-Every single topic MUST follow one of these 3 high-velocity conversion archetypes:
-1. **Visceral Human Anatomy & Medical Horrors**: Bizarre body reactions, accidental swallowing, cellular warfare, pain reflexes, physical body phenomena (e.g., 'What Happens If You Swallow a Fish Bone', 'Why Astronauts Lose Their Fingernails', 'Why Your Skin Peels After Severe Sunburn', 'What Happens When You Step On A Rusty Nail').
-2. **Extreme Institutional Rules & Strange Realities**: Bizarre, high-stakes real-world procedures (e.g., 'Why Alcatraz Only Gave Prisoners Hot Showers', 'Why Deep Sea Divers Cannot Fly For 24 Hours', 'Why Airplane Tires Don't Burst on Landing').
-3. **Counter-Intuitive Material & Mechanical Breakdown**: Extreme forces acting on everyday objects (e.g., 'Why Water at 60,000 PSI Cuts Through Titanium', 'Why Bulletproof Glass Shatters on The Inside', 'How Tattoos Stay Trapped In Skin Forever').
-
-TASK:
-Generate 6 brand new, high-velocity YouTube Short concepts that guarantee a 85%+ retention rate.
-Each topic MUST have an immediate 1.5-second scroll-stopping State 0 hook sentence.
-
-Return JSON ONLY matching:
-{{
-  "topics": [
-    {{
-      "title": "Punchy 5-7 word title",
-      "category": "Body Anatomy | Extreme Physics | Bizarre Rules",
-      "hook": "Visceral 1.5s immediate contradiction or shock opening sentence",
-      "archetype": "Visceral Anatomy | High-Stakes Rule | Material Breakdown"
-    }}
-  ]
-}}"""
-
-        headers = {
-            "Authorization": f"Bearer {Config.OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "model": Config.OPENROUTER_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.85,
-            "response_format": {"type": "json_object"}
-        }
+        niche = active.get("niche", "Tactile 3D anatomical, physical, and historical origins")
 
         try:
-            res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=20)
-            if res.status_code == 200:
-                data = res.json()
-                parsed = json.loads(data["choices"][0]["message"]["content"])
-                topics = parsed.get("topics", [])
-                if topics:
-                    self.save_topic_to_history(topics)
-                    return topics
-        except Exception:
-            pass
+            from topic_intelligence_engine import topic_engine
+            topics = topic_engine.generate_fresh_topics(channel_handle=handle, channel_niche=niche, count=6)
+            if topics:
+                return topics
+        except Exception as e:
+            print(f"[Channel Manager] Topic Engine error: {e}")
 
+        # Fallback profile defaults if offline
+        handle_key = handle.lower().strip()
+        profile = CHANNEL_PROFILES.get(handle_key) or CHANNEL_PROFILES["@newyrr"]
+        fallback = profile.get("default_topics", CHANNEL_PROFILES["@newyrr"]["default_topics"])
         self.save_topic_to_history(fallback)
         return fallback
 

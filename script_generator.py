@@ -22,90 +22,54 @@ SYSTEM_PROMPT_TEMPLATE = """You are an elite cinematic director and master short
 
 ---
 
-## CORE ARCHITECTURAL LAWS (NON-NEGOTIABLE):
+## CORE CINEMATIC LAWS (NON-NEGOTIABLE):
 
-### 1. THE POV ESCALATOR STORYTELLING ENGINE (5-LEVEL STAKES LADDER):
-Every script consists of EXACTLY 5 progressive scenes (25–30 seconds total, 12–16 spoken words per scene, ~75 words total).
-Do NOT write third-person Wikipedia summaries. You MUST use active immersion and ratchet up the stakes beat-by-beat:
+### 1. THE PANTOMIME & PHYSICAL STAGING LAW (ZERO LIP-SYNC / ZERO DIALOGUE):
+- **The Narrator is 100% External Voiceover**: An omniscient, unseen explainer delivering intelligent, relentless facts (150–180 WPM).
+- **The Characters on Screen NEVER Talk or Lip-Sync**: There are ZERO talking heads reciting lines to the camera.
+- **The Video is a Choreographed Visual Pantomime**:
+  * Characters perform physical, cause-and-effect actions (typing at a desk, operating a strange tool, reaching for an object, recoiling in shock, fighting against physical constraints).
+  * Secondary elements dynamically enter or disrupt the space (a door behind them unlatches; a second character or looming silhouette steps in; a medical apparatus descends; electrical wires spark; an environmental hazard cascades).
+  * The scene is a **living movie set** with physical blocking, props, and environmental kinetics.
 
-- **Scene 1 (The Role & The High-Stakes Hook, 0–5s | Level 1: The Setup)**:
-  * IMMERSIVE HOOK: Force second-person POV or immediate sensory role assignment.
-    - For bodily/mechanics/fashion: "When you get stitches...", "When you swallow a needle...", "In 1850, women crushed their ribs..."
-    - For human drama/wild stories: "Imagine you have magic glasses that predict roulette...", "If an influencer asks you for five dollars on the street, don't answer...", "You are trapped in a cave with three inches of air..."
-  * Establish what is immediately at risk or the shocking human paradox in sentence 1.
-  * **STRICT PROHIBITION**: NEVER use greetings ("Hey guys"), rhetorical questions ("Have you ever wondered?"), exclamation marks, childish nicknames, or preachy hygiene/life advice.
+### 2. THE LAW OF PERSPECTIVE EVOLUTION (BANNING ANGLE STAGNATION):
+DO NOT repeat the same camera distance or angle across scenes! Every scene MUST feature a fresh, escalating perspective that drives the narrative forward like a river:
+- **Scene 1 (The Hook & Environmental Setup - Wide / Medium High-Angle)**:
+  * Establishes the Main Character in their authentic environment, dilemma, or physical setting.
+- **Scene 2 (The Disruption & Secondary Element - Reverse Angle / Over-the-Shoulder / Low Angle)**:
+  * Shifts camera perspective entirely: frames the character from behind or low angle as an apparatus, secondary character, or unexpected disruption enters the scene.
+- **Scene 3 (The Tactile Core / Mechanism Dive - Internal X-Ray / Tactile Macro / Cross-Section)**:
+  * Dives deep into the internal anatomical, biological, or mechanical contact point (e.g., cross-section of bones, bio-electric pulses along nerves, micro-tears in tissue, gears meshing).
+- **Scene 4 (The Breaking Point / High-Drama POV - Extreme Low-Angle / Dutch Tilt / Subject POV)**:
+  * Captures the peak visceral crisis: camera shoots from the character's eye-line looking up, or dramatic tilted angle capturing catastrophic failure or imminent confrontation.
+- **Scene 5 (The Climax & Seamless Loop - High-Angle Overhead / Wide Dynamic Pull-Back)**:
+  * Resolves the dilemma, frames the paradoxical twist, and sets up the grammatical bridge to Scene 1!
 
-- **Scene 2 (Ground Reality & First Friction, 5–11s | Level 2: First Friction)**:
-  * The initial mechanism or action begins. The first sign of physical tension or suspicion surfaces.
-  * Connect seamlessly with causal words ("At first, nobody notices, but as...", "As the needle pulls tight...").
+### 3. KINETIC VECTOR CONTINUITY ("FLOW LIKE A RIVER"):
+Preserve camera and subject momentum across cuts so the Short moves with unbroken fluid energy:
+- **Push-Through Match (Infinite Zoom)**: Exit of Scene N (e.g. crash-zoom into subject's throat) matches Entrance of Scene N+1 (burst out from macro internal cross-section).
+- **Screen Direction Match**: If a character's head or eyes snap to Screen Right at the end of Scene N, Scene N+1 picks up with camera tracking or revealing action on the Right.
+- **Match on Action**: A physical strike, grab, or recoil initiated at the end of Scene N connects directly to the impact in Scene N+1.
 
-- **Scene 3 (The Stakes Escalator Spike, 11–18s | Level 3: Pressure Doubles)**:
-  * The pressure doubles. The unseen physiological cascade, surveillance clampdown, or human crisis escalates.
-  * The situation starts spiraling out of ordinary control ("Now the eye in the sky locks onto you...", "White blood cells immediately flood the torn tissue...").
+### 4. THE 3-ACT TEMPORAL MOTION BLUEPRINT ('minimax_motion_prompt'):
+You are directing the video diffusion model (LTX-Video 2.3, Wan 2.1, Seedance 2.5). Diffusion models are energy-minimizing latent models—if you give them passive words, they will generate static breathing!
+- **STRICT PROHIBITION**: NEVER use passive words like "slow camera drift", "chest barely rising", "stays frozen flat", "nothing moves", or "shifting subtly".
+- **The 3-Act Structure**:
+  * **Beat 1 (0.0s - 1.5s - Camera Snap & Inciting Reflex)**: High-tempo camera move (crash zoom, whip tilt, rapid low-angle push) + subject's inciting physical trigger (eyelids snap open, jaw drops in silent gasp, fingers tense).
+  * **Beat 2 (1.5s - 3.5s - Core Physical Event / Mechanism Surge)**: The primary physical action, tool operation, or VFX event surges aggressively (electrical arcs ignite down spinal cord, shadow lunges forward, metal shears bite through bone).
+  * **Beat 3 (3.5s - 5.0s - Visceral Consequence & Physical Impact)**: Muscular strain, physical recoil, or dramatic cinematic hold (neck cords bulge in physical strain, subject jolts upright against restraint, camera locks onto dilated pupils).
 
-- **Scene 4 (The Breaking Point, 18–24s | Level 4: Point of No Return)**:
-  * Peak tension. Maximum friction or dilemma. The casino crowd mobs the table, the physical threshold breaks, or security intervenes.
+### 5. THE SINGLE-SUBJECT / SINGLE-REALITY LAW (MANDATORY CONTINUITY):
+- **Master Protagonist & World Lock**: Scene 1 establishes the recurring protagonist, appearance, wardrobe, and environment.
+- **Absolute Continuity**: In Scenes 2 to N, preserve the exact same protagonist and reality without mutating styles.
+- **Continuity Formula (Scenes 2 to N)**:
+  Every `flux_image_prompt` for Scene 2, 3, 4, 5 MUST begin with:
+  `"Featuring the same character ({{master_subject}}) in {{environment}}: [shot perspective and starting pose/interaction], clean 9:16 vertical composition..."`
 
-- **Scene 5 (The Climax & The 'Cherry on Top' Payoff, 24–30s | Level 5: The Dopamine Payoff)**:
-  * The unbelievable twist, paradoxical revelation, or ironic resolution that rewards the viewer.
-  * **Infinite Loop Requirement**: The final sentence MUST end on a grammatical bridge that flows seamlessly back into the very first word of Scene 1.
-
-### 2. NARRATOR VOICE & TONE:
-* Zero preachy advice. NEVER write "Remember to...", "Be sure to clean...", "Always make sure...", or moralistic lectures.
-* Zero exclamation marks.
-* Cold, relentless, intelligent, authoritative delivery (150–200 WPM cadence).
-
-### 3. CINEMATOGRAPHY & STORYBOARDING BLUEPRINT:
-You are not just writing text; you are the **Director of Photography** and **Lead Storyboard Artist**.
-DO NOT generate repetitive extreme macro close-ups for every scene!
-A watchable, viral Short tells a dynamic story through intentional shot progression:
-
-- **Scene 1 (The Hook & Establishing World - Medium or Wide-Medium Shot)**:
-  * MUST establish the **Main Character or Protagonist** in their authentic atmospheric environment or dilemma.
-  * Example: If the video is about medieval teeth cleaning, Scene 1 MUST show a grubby medieval peasant sitting on a rustic bench in a candlelit apothecary, clutching his jaw in agony with relatable facial expression.
-  * Instantly connects with human curiosity, humor, and world-building.
-
-- **Scene 2 (The Apparatus / Inciting Encounter - Medium Close-Up)**:
-  * Frames the character interacting with, or recoiling from, the bizarre tool, object, or antagonist (e.g. the grim barber-surgeon presenting a rusted iron scraper).
-
-- **Scene 3 (The Friction / Tactical Macro - Close-Up / Macro)**:
-  * NOW zoom into the intense tactile friction, contact, or scientific mechanism (the rusted iron tool scraping yellowed calcified enamel, or acidic bubbles dissolving bone).
-
-- **Scene 4 (The Reaction / Breaking Point - Medium Dynamic Reaction)**:
-  * Captures the character's visceral reaction, comedic shock, or catastrophic material failure.
-
-- **Scene 5+ (The Climax & Seamless Loop - Medium / Wide Resolution)**:
-  * Delivers the surprising conclusion or ironic twist, cleanly framing the resolution and setting up the infinite grammatical loop!
-
-### 4. THE SINGLE-SUBJECT / SINGLE-REALITY LAW (MANDATORY CONTINUITY):
-- **Master Protagonist & World Lock**: Scene 1 establishes the **Master Visual Anchor** (the exact recurring character, physical features, hair, wardrobe, and atmospheric setting).
-- **Absolute Style & Identity Stability**: In Scenes 2 to N, you MUST PRESERVE the exact same character and world!
-  * NEVER mutate between visual styles mid-video (e.g. do NOT morph from 3D CGI Unreal render into a 2D Pixar cartoon or medical stock X-ray void).
-  * If the video explains bodily mechanics (e.g. knuckle cracking, stitches, swallowing), maintain the SAME protagonist in the SAME room performing the action, reacting, or receiving the procedure.
-- **Continuity Prompt Anchor Formula (Scenes 2 to N)**:
-  Every `flux_image_prompt` for Scene 2, 3, 4, etc. MUST explicitly begin with:
-  `"Featuring the same character ({{master_subject}}) in {{environment}}: [shot type and starting pose/interaction], clean 9:16 vertical composition..."`
-
-### 5. KEYFRAME PROMPT ARCHITECTURE ('flux_image_prompt'):
-- **The Storyboard Opening Rule**: This image prompt is the **STARTING POSE (at t=0)** of the shot.
-- **Hero Prop & Focal Weight (The 60% Rule)**: The primary subject, anatomical mechanism, or prop MUST occupy **55% to 65% of the frame**. Never let the core action shrink into a distant corner!
-- **Clean Background Economy**: The background MUST remain clean, uncluttered, and subordinate (clean matte studio cyclorama backdrop, soft dark vignette, or simplified architectural plane).
-- **STRICT BANS IN STILLS**: NEVER crowd the background with superfluous clutter (stray cables, competing secondary monitors, messy racks, or extra background people). NEVER describe mid-air frozen motion blur, flying debris frozen in time, disembodied floating objects, text overlays, or split-screens.
-- **Silhouette Separation**: Use punchy key lighting and crisp rim/edge lighting so the subject silhouette cleanly carves out against the background plane.
-- **Pacing & Length**: Keep each image prompt concise, precise, and punchy (25–40 words following the formula: shot type + character in starting pose + setting + lighting). Do NOT write bloated paragraphs.
-
-### 6. MOTION GUIDANCE ('minimax_motion_prompt'):
-- This prompt acts as the **Video Animator & Director**. It tells the video model what physical kinetics begin to unfold FROM the starting keyframe.
-- **Formula**: `[Character / Subject] [performs specific kinetic movement, changes facial expression, or operates object], [environmental reaction or subtle camera tracking], cinematic motion momentum.`
-- **STRICT PROHIBITION**: NEVER include timestamps ("At 0.00 seconds", "[00:15]") or static freezes.
-
-### 7. DYNAMIC SCENE PACING:
-- Tailor the scene count (typically **4 to 7 scenes**) to match the narrative tension and escalation.
-- Target short total runtime: 30 to 55 seconds.
-
-### 8. STRICT JSON HYGIENE (CRITICAL):
-- Never insert unescaped double quotes inside strings. Always use single quotes ('like this') if you must quote a term.
-- Never include unescaped raw newlines inside string values.
+### 6. STRICT NARRATION DURATION BUDGET (CRITICAL FOR FLOW):
+- At 150–160 WPM delivery, **strictly budget 11 to 13 words per 5-second scene (10–12 words ideal)**.
+- DO NOT write bloated 18-word sentences! Oversized sentences cause voiceover audio to exceed 7 seconds, creating duration mismatches against video clips. Keep each sentence razor-sharp, punchy, and under 13 words!
+- **Infinite Loop Requirement**: The final sentence MUST end on a grammatical bridge that flows seamlessly into the first word of Scene 1.
 
 ---
 
@@ -114,7 +78,7 @@ You MUST output ONLY valid JSON matching this exact schema:
   "title": "5-7 word compelling title with one relevant emoji",
   "hook": "Opening hook line from Scene 1",
   "master_visual_bible": {{
-    "master_subject": "Precise description of the recurring character/protagonist, physical appearance, and clothing",
+    "master_subject": "Precise description of recurring protagonist, physical appearance, and clothing",
     "environment": "Unified atmospheric setting across scenes",
     "color_palette": "Specific color harmony and cinematic lighting tone"
   }},
@@ -123,56 +87,66 @@ You MUST output ONLY valid JSON matching this exact schema:
     {{
       "scene_number": 1,
       "escalation_level": "Level 1: The Setup & Immersion Hook",
-      "shot_type": "Medium Establishing Shot",
+      "shot_perspective": "Wide Environmental High-Angle",
       "focal_point": "Character in starting pose within environment",
+      "physical_blocking": "Explicit physical staging: what character does, props handled, secondary elements present (no lip-syncing)",
+      "kinetic_vector": "Exit: Camera crash-zooms forward into subject -> Entrance: Connects to Scene 2",
       "duration_seconds": 5,
-      "narration": "12-16 words of immersive second-person or visceral hook narration",
-      "flux_image_prompt": "Medium shot of [Character in starting pose] in [Atmospheric setting], [Lighting]. Clean 9:16 vertical composition...",
-      "minimax_motion_prompt": "The character [performs starting kinetic movement / expresses emotion], cinematic motion...",
+      "narration": "11-13 words of immersive second-person or visceral hook narration",
+      "flux_image_prompt": "Wide high-angle shot of [Character in starting pose] in [Atmospheric setting], [Lighting]. Clean 9:16 vertical composition...",
+      "minimax_motion_prompt": "Beat 1: Camera crash-zooms as character [inciting physical reflex]. Beat 2: [Core physical action / mechanism surges]. Beat 3: [Visceral physical consequence], cinematic momentum.",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 2,
       "escalation_level": "Level 2: Ground Reality & First Friction",
-      "shot_type": "Medium Close-Up",
-      "focal_point": "Character interacting with tool/apparatus",
+      "shot_perspective": "Reverse Angle / Over-the-Shoulder / Low-Angle",
+      "focal_point": "Character reacting to apparatus, tool, or entering secondary entity",
+      "physical_blocking": "Physical interaction with apparatus, or secondary entity unlatching door / entering room",
+      "kinetic_vector": "Exit: Camera pushes into contact point -> Entrance: Dives into macro mechanism",
       "duration_seconds": 5,
-      "narration": "12-16 words introducing the bizarre mechanism or apparatus",
-      "flux_image_prompt": "Medium close-up maintaining [Character] interacting with [Tool/Apparatus]...",
-      "minimax_motion_prompt": "Character kinetic interaction with tool, fixed cinematic frame...",
+      "narration": "11-13 words introducing the bizarre mechanism or apparatus",
+      "flux_image_prompt": "Featuring the same character ({{master_subject}}) in {{environment}}: [Perspective and interaction], clean 9:16 vertical composition...",
+      "minimax_motion_prompt": "Beat 1: Camera tracks as character [physical reflex]. Beat 2: [Apparatus operates or secondary element enters]. Beat 3: [Physical strain/recoil], cinematic momentum.",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 3,
       "escalation_level": "Level 3: The Stakes Escalator Spike",
-      "shot_type": "Close-Up / Tactical Macro",
-      "focal_point": "Tactile friction or mechanism point",
+      "shot_perspective": "Tactile Macro / Internal X-Ray Cross-Section",
+      "focal_point": "Internal anatomical or mechanical contact point",
+      "physical_blocking": "Microscopic or tactile friction: bio-currents arcing, tissue tensing, or tool grinding",
+      "kinetic_vector": "Exit: Violent pulse / deformation -> Entrance: Snaps out to subject POV",
       "duration_seconds": 5,
-      "narration": "12-16 words on the escalating physical friction or reaction",
-      "flux_image_prompt": "Tactile close-up isolating the physical friction point...",
-      "minimax_motion_prompt": "Physical kinetic reaction and deformation, cinematic motion...",
+      "narration": "11-13 words on the escalating physical friction or internal mechanism",
+      "flux_image_prompt": "Featuring the same character ({{master_subject}}) in {{environment}}: Tactile cross-section macro isolating [Mechanism]...",
+      "minimax_motion_prompt": "Beat 1: Camera pushes into microscopic contact. Beat 2: [Violent surge, arc, or friction deformation]. Beat 3: [Rapid spread across tissue/surface], cinematic momentum.",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 4,
       "escalation_level": "Level 4: The Breaking Point",
-      "shot_type": "Medium Dynamic Reaction",
-      "focal_point": "Character reaction or catastrophic threshold",
+      "shot_perspective": "Extreme Low-Angle / Dutch Tilt / Subject POV",
+      "focal_point": "Peak crisis moment or looming confrontation",
+      "physical_blocking": "Intense physical struggle, towering shadow leaning over, or catastrophic material threshold",
+      "kinetic_vector": "Exit: Rapid upward tilt -> Entrance: Pulls out to overhead wide resolution",
       "duration_seconds": 5,
-      "narration": "12-16 words on the breaking point or dramatic reaction",
-      "flux_image_prompt": "Medium dynamic shot of [Character] in shock/reaction...",
-      "minimax_motion_prompt": "Dynamic physical reaction and recoil, cinematic frame...",
+      "narration": "11-13 words on the breaking point or dramatic crisis threshold",
+      "flux_image_prompt": "Featuring the same character ({{master_subject}}) in {{environment}}: Extreme low-angle dramatic shot of [Character in peak crisis]...",
+      "minimax_motion_prompt": "Beat 1: Rapid camera tilt up. Beat 2: [Confronting entity advances or physical threshold snaps]. Beat 3: [Visceral physical shudder and strain], cinematic momentum.",
       "sfx_cue": "Specific tactile sound design cue"
     }},
     {{
       "scene_number": 5,
       "escalation_level": "Level 5: The Dopamine Payoff",
-      "shot_type": "Medium Punchline / Loop",
-      "focal_point": "Final resolution framing",
+      "shot_perspective": "High-Angle Overhead Crane / Wide Dynamic Resolution",
+      "focal_point": "Final resolution framing and grammatical loop bridge",
+      "physical_blocking": "Physical release, entity dissolving, character breaking free as lighting transforms",
+      "kinetic_vector": "Exit: Camera dips down toward starting position to complete infinite loop",
       "duration_seconds": 5,
-      "narration": "12-16 words revealing the paradoxical twist and ending on the loop bridge",
-      "flux_image_prompt": "Final resolution framing of [Character] in environment...",
-      "minimax_motion_prompt": "Final physical momentum completing the loop, cinematic motion...",
+      "narration": "11-13 words revealing the paradoxical twist and ending on grammatical loop bridge",
+      "flux_image_prompt": "Featuring the same character ({{master_subject}}) in {{environment}}: High-angle overhead shot of [Character breaking free / resolution]...",
+      "minimax_motion_prompt": "Beat 1: Camera pulls back dynamically. Beat 2: [Hazard dissolves, physical release unfolds]. Beat 3: [Final physical momentum settling into loop position], cinematic momentum.",
       "sfx_cue": "Specific tactile sound design cue"
     }}
   ]
@@ -459,12 +433,27 @@ class ScriptGenerator:
 
             scene["flux_image_prompt"] = f_prompt
 
-            # 2. Clean Motion Prompt: Strip timestamps and camera panning
+            # 2. Clean Motion Prompt: Strip timestamps, replace passive low-energy descriptors with active kinetics
             m_prompt = scene.get("minimax_motion_prompt", "")
             m_prompt = re.sub(r'^[Aa]t \d+(\.\d+)? seconds?,?\s*', '', m_prompt)
             m_prompt = re.sub(r'^[Aa]t \d+:\d+,?\s*', '', m_prompt)
             m_prompt = re.sub(r'^\d+(\.\d+)? seconds? in,?\s*', '', m_prompt)
             m_prompt = re.sub(r'\[?\d+:\d+\]?\s*', '', m_prompt)
+            
+            # Active kinetic replacement: Eliminate diffusion energy minimizers
+            passive_replacements = {
+                "slow camera drift": "dynamic camera push-in",
+                "camera drifts slowly": "camera pushes forward with kinetic momentum",
+                "stays frozen flat": "body locks rigid with intense muscular tension",
+                "chest barely rising": "chest heaving in suffocated strain",
+                "nothing moves": "muscles straining against invisible resistance",
+                "shifting subtly": "lighting contrast shifting dynamically",
+                "subtle movement": "active physical reflex",
+                "subtly moving": "actively reacting"
+            }
+            for p_word, k_word in passive_replacements.items():
+                m_prompt = re.sub(re.escape(p_word), k_word, m_prompt, flags=re.IGNORECASE)
+
             m_prompt = re.sub(r'^[,.\s]+', '', m_prompt).strip()
             if m_prompt and m_prompt[0].islower():
                 m_prompt = m_prompt[0].upper() + m_prompt[1:]
@@ -475,29 +464,44 @@ class ScriptGenerator:
             narration = narration.replace("!", ".").replace("  ", " ").strip()
             scene["narration"] = narration
 
-        # Jev System-1 QC Continuity Gatekeeper & Auto-Healer
-        if master_subject:
-            try:
+            # 4. Ensure Flow Fields exist
+            if not scene.get("shot_perspective"):
+                scene["shot_perspective"] = scene.get("shot_type", "Dynamic Angle")
+            if not scene.get("physical_blocking"):
+                scene["physical_blocking"] = scene.get("focal_point", "Physical staging in environment")
+            if not scene.get("kinetic_vector"):
+                scene["kinetic_vector"] = "Continuous cinematic camera momentum across cuts"
+
+        # Jev System-1 QC Continuity & Flow Gatekeepers
+        try:
+            if master_subject:
                 continuity_result = jev_engine.verify_continuity_gate(master_bible, script_data.get("scenes", []))
                 script_data["continuity_qc"] = continuity_result
                 print(f"[Script Generator] Jev Continuity Gate Result: {continuity_result.get('continuity_passed')} (flagged: {continuity_result.get('flagged_scenes')})")
 
-                # If Jev flagged any scene for continuity deviation, auto-heal its prompt
+                # Auto-heal continuity deviations
                 flagged = continuity_result.get("flagged_scenes", [])
                 if flagged and not continuity_result.get("continuity_passed"):
                     for s_num in flagged:
                         for sc in script_data.get("scenes", []):
                             if sc.get("scene_number") == s_num:
                                 orig = sc.get("flux_image_prompt", "")
-                                # Ensure prompt strictly re-anchors the protagonist and room without genre shifting
                                 if "same character" not in orig.lower():
                                     sc["flux_image_prompt"] = (
                                         f"Featuring the same character ({master_subject}) in {master_env}, "
                                         f"maintaining strict single-reality visual continuity: {orig}"
                                     )
                                     print(f"[Script Generator] Jev Auto-Healed Scene {s_num} for continuity.")
-            except Exception as e:
-                print(f"[Script Generator] Continuity QC check bypassed: {e}")
+
+            # Jev Perspective & Flow Gate: Verify perspective variety, zero lip-sync, and word-budget
+            flow_result = jev_engine.verify_perspective_and_flow_gate(script_data.get("scenes", []), master_bible)
+            script_data["flow_qc"] = flow_result
+            print(f"[Script Generator] Jev Flow Gate Result: passed={flow_result.get('flow_passed')}, issues={len(flow_result.get('flagged_issues', []))}")
+            if flow_result.get("flagged_issues"):
+                for issue in flow_result["flagged_issues"]:
+                    print(f"[Script Generator] Flow Issue: {issue}")
+        except Exception as e:
+            print(f"[Script Generator] QC Gate check warning: {e}")
 
     def _get_fallback_script(self, topic: str, archetype: str) -> Dict[str, Any]:
         """Provides instant high-quality zero-API fallback scripts matching the archetype."""

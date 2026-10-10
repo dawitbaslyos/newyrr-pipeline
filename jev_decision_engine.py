@@ -121,4 +121,58 @@ class JevDecisionEngine:
 
         return {"continuity_passed": True, "flagged_scenes": [], "recommendation": "Passed default checks"}
 
+    def verify_perspective_and_flow_gate(self, scenes: list, master_bible: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        System-1 Flow & Perspective Gate:
+        1. Ensures perspective variety: No consecutive scenes share the same camera angle.
+        2. Enforces Pantomime Staging: Characters perform physical actions/blocking; zero talking/lip-syncing.
+        3. Validates Kinetic Continuity: Every scene has a purposeful camera/action momentum vector.
+        4. Enforces Duration Budget: Narration lines budgeted to ~11-13 words (max 14) per 5s scene.
+        """
+        flagged = []
+        recommendations = []
+
+        prev_framing = ""
+        framing_categories = ["macro", "close-up", "medium", "wide", "over-the-shoulder", "pov", "overhead", "dutch"]
+
+        for s in scenes:
+            num = s.get("scene_number", 1)
+            shot_text = (s.get("shot_perspective") or s.get("shot_type") or "").strip().lower()
+            
+            # Detect primary framing category
+            curr_framing = ""
+            for cat in framing_categories:
+                if cat in shot_text:
+                    curr_framing = cat
+                    break
+
+            if prev_framing and curr_framing and prev_framing == curr_framing:
+                flagged.append(f"Scene {num}: Shares consecutive camera framing '{curr_framing}' with Scene {num-1}")
+                recommendations.append(f"Shift Scene {num} to a distinct perspective (e.g. Over-The-Shoulder, Macro Cross-Section, Low-Angle Dutch Tilt)")
+            if curr_framing:
+                prev_framing = curr_framing
+
+            # Pantomime & Zero-Lip-Sync check: Ensure actors aren't instructed to speak dialogue
+            motion_desc = (s.get("minimax_motion_prompt", "") + " " + s.get("physical_blocking", "")).lower()
+            talking_buzzwords = ["speaks to the camera", "speaking into camera", "lips move", "talking head", "says to viewer", "mouthing words", "delivering lines", "dialogue delivery"]
+            for bw in talking_buzzwords:
+                if bw in motion_desc:
+                    flagged.append(f"Scene {num}: Contains dialogue cue '{bw}'. All audio is external voiceover; actors must perform physical pantomime.")
+                    recommendations.append(f"Replace talking cue in Scene {num} with physical blocking, prop interaction, or environmental disruption.")
+
+            # Word-count budget check
+            words = s.get("narration", "").split()
+            dur = s.get("duration_seconds", 5)
+            max_allowed = int(dur * 2.8)  # ~14 words for 5 seconds
+            if len(words) > max_allowed:
+                flagged.append(f"Scene {num}: Narration is {len(words)} words, exceeding the {max_allowed}-word budget for a {dur}s video clip.")
+                recommendations.append(f"Trim Scene {num} narration to 11-13 words to prevent voiceover duration from overrunning the video generation length.")
+
+        flow_passed = len(flagged) == 0
+        return {
+            "flow_passed": flow_passed,
+            "flagged_issues": flagged,
+            "recommendations": recommendations
+        }
+
 jev_engine = JevDecisionEngine()

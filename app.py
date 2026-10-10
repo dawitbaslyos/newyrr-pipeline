@@ -187,7 +187,7 @@ def get_status():
 @app.get("/api/topics/suggest")
 def get_topic_suggestions(refresh: bool = False):
     if refresh:
-        return channel_mgr.suggest_topics()
+        return channel_mgr.suggest_topics(refresh=True)
     return channel_mgr.get_latest_topics()
 
 @app.get("/api/topics/history")
@@ -561,13 +561,19 @@ def get_runpod_package(project_name: str):
     for s in manifest.get("scenes", []):
         num = s["scene_number"]
         img_name = Path(s["image_file"]).name if s.get("image_file") else f"scene_{num:02d}_flux.png"
+        target_dur = float(s.get("actual_audio_duration", s.get("duration_seconds", 5.0)))
         pkg["scenes"].append({
             "scene_number": num,
             "filename": f"scene_{num:02d}_video.mp4",
             "image_filename": img_name,
             "image_url": f"/static_projects/{project_name}/{img_name}",
             "motion_prompt": s.get("minimax_motion_prompt", ""),
-            "duration": s.get("duration_seconds", 5),
+            "duration": round(target_dur, 2),
+            "frames_25fps": int(round(target_dur * 25)),
+            "frames_24fps": int(round(target_dur * 24)),
+            "shot_perspective": s.get("shot_perspective", s.get("shot_type", "Dynamic Angle")),
+            "physical_blocking": s.get("physical_blocking", s.get("focal_point", "")),
+            "kinetic_vector": s.get("kinetic_vector", "Continuous motion momentum"),
             "narration": s.get("narration", "")
         })
     return pkg
@@ -577,6 +583,7 @@ def download_runpod_package_zip(project_name: str):
     """
     Generates a downloadable ZIP file containing all keyframe still images
     and a motion_prompts.txt file for easy batch execution on RunPod.
+    Includes exact audio duration and frame count calculations for LTX / Wan / Seedance.
     """
     project_dir = Config.PROJECTS_DIR / project_name
     manifest_path = project_dir / "manifest.json"
@@ -587,15 +594,31 @@ def download_runpod_package_zip(project_name: str):
 
     zip_path = project_dir / f"{project_name}_runpod_batch.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-        txt_lines = [f"RUNPOD BATCH PACKAGE FOR: {manifest.get('title', project_name)}\n" + "="*50 + "\n"]
+        txt_lines = [
+            f"RUNPOD BATCH PACKAGE FOR: {manifest.get('title', project_name)}\n"
+            + "="*60 + "\n"
+            + "DIRECTOR DIRECTIVE: Pure Visual Pantomime (Zero Lip-Sync / Dialogue).\n"
+            + "Characters perform physical actions, handle props, or react viscerally.\n"
+            + "="*60 + "\n"
+        ]
         for s in manifest.get("scenes", []):
             num = s["scene_number"]
             prompt = s.get("minimax_motion_prompt", "")
             img_file = s.get("image_file")
+            target_dur = float(s.get("actual_audio_duration", s.get("duration_seconds", 5.0)))
+            f25 = int(round(target_dur * 25))
+            f24 = int(round(target_dur * 24))
+
             txt_lines.append(f"--- SCENE {num:02d} ---")
             txt_lines.append(f"Video Output: scene_{num:02d}_video.mp4")
-            txt_lines.append(f"Duration: {s.get('duration_seconds', 5)}s")
-            txt_lines.append(f"Narration: {s.get('narration', '')}")
+            txt_lines.append(f"Target Duration: {target_dur:.2f}s")
+            txt_lines.append(f"Recommended Frames: {f25} frames @ 25fps (LTX-Video) | {f24} frames @ 24fps (Wan2.1 / Kling)")
+            txt_lines.append(f"Perspective: {s.get('shot_perspective', s.get('shot_type', 'Dynamic Angle'))}")
+            if s.get("physical_blocking"):
+                txt_lines.append(f"Physical Blocking: {s.get('physical_blocking')}")
+            if s.get("kinetic_vector"):
+                txt_lines.append(f"Kinetic Vector: {s.get('kinetic_vector')}")
+            txt_lines.append(f"Narration Voiceover: {s.get('narration', '')}")
             txt_lines.append(f"Motion Prompt: {prompt}\n")
 
             if img_file and Path(img_file).exists():
